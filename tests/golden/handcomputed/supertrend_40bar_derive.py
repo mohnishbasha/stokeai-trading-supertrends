@@ -84,6 +84,12 @@ def derive() -> dict[str, object]:
 if __name__ == "__main__":
     out = derive()
     if "--write" in sys.argv:
-        Path(__file__).with_name("supertrend_40bar.json").write_text(json.dumps(out, indent=1) + "\n")
+        Path(__file__).with_name("supertrend_40bar.json").write_text(
+            json.dumps(out, indent=1) + "\n"
+        )
     for t in range(len(CLOSES)):
-        print(t, CLOSES[t], *(out[k][t] for k in ("atr", "final_upper", "final_lower", "line", "direction")))  # type: ignore[index]
+        print(  # noqa: T201
+            t,
+            CLOSES[t],
+            *(out[k][t] for k in ("atr", "final_upper", "final_lower", "line", "direction")),
+        )

@@ -20,7 +20,7 @@ FloatArray = NDArray[np.float64]
 
 
 def tv_direction_to_internal(tv_dir: float) -> float:
-    """Convert a TradingView `ta.supertrend` direction to ours: negative (up) to +1, positive to -1."""
+    """Convert TradingView `ta.supertrend` direction (negative = up) to ours (+1 up, -1 down)."""
     if math.isnan(tv_dir) or tv_dir == 0:
         msg = f"TradingView direction must be non-zero and not NaN, got {tv_dir}"
         raise ValueError(msg)

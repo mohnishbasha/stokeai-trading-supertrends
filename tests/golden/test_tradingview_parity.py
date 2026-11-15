@@ -52,4 +52,6 @@ def test_golden_supertrend_tradingview_parity_direction_matches_every_bar_after_
     assert len(export.close) > WARMUP, "export must hold more than 100 bars"
     res = supertrend(export.high, export.low, export.close, 10, 3.0)
     mismatches = np.flatnonzero(res.direction[WARMUP:] != export.direction[WARMUP:])
-    assert mismatches.size == 0, f"direction differs at bars {(mismatches + WARMUP)[:10]} in {path.name}"
+    assert mismatches.size == 0, (
+        f"direction differs at bars {(mismatches + WARMUP)[:10]} in {path.name}"
+    )

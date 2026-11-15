@@ -7,6 +7,7 @@ Expected values come from tests/golden/handcomputed/supertrend_40bar.json, deriv
 independent plain-Python script next to it, or are checked by hand in comments here.
 """
 
+import itertools
 import json
 import math
 from pathlib import Path
@@ -42,7 +43,9 @@ def load_fixture() -> dict[str, Any]:
 
 def run_fixture() -> tuple[dict[str, Any], m.SupertrendResult]:
     fx = load_fixture()
-    res = supertrend(arr(fx["high"]), arr(fx["low"]), arr(fx["close"]), fx["atr_length"], fx["factor"])
+    res = supertrend(
+        arr(fx["high"]), arr(fx["low"]), arr(fx["close"]), fx["atr_length"], fx["factor"]
+    )
     return fx, res
 
 
@@ -86,15 +89,15 @@ def test_golden_supertrend_fixture_covers_flips_and_ratchets() -> None:
     """TS-IND-020: the fixture really contains both flips and ratcheting of both bands."""
     fx = load_fixture()
     d = [x for x in fx["direction"] if x is not None]
-    flips = [(a, b) for a, b in zip(d, d[1:], strict=False) if a != b]
+    flips = [(a, b) for a, b in itertools.pairwise(d) if a != b]
     assert (-1, 1) in flips
     assert (1, -1) in flips
     fu = [x for x in fx["final_upper"] if x is not None]
     fl = [x for x in fx["final_lower"] if x is not None]
-    assert any(b == a for a, b in zip(fu, fu[1:], strict=False))
-    assert any(b < a for a, b in zip(fu, fu[1:], strict=False))
-    assert any(b == a for a, b in zip(fl, fl[1:], strict=False))
-    assert any(b > a for a, b in zip(fl, fl[1:], strict=False))
+    assert any(b == a for a, b in itertools.pairwise(fu))
+    assert any(b < a for a, b in itertools.pairwise(fu))
+    assert any(b == a for a, b in itertools.pairwise(fl))
+    assert any(b > a for a, b in itertools.pairwise(fl))
 
 
 # --- TS-IND-023 / 024 -----------------------------------------------------------------------
@@ -106,7 +109,9 @@ def test_unit_supertrend_tv_boundary_conversion_negative_tv_direction_maps_to_pl
     assert tv_direction_to_internal(-1) == 1.0
 
 
-def test_unit_supertrend_tv_boundary_conversion_positive_tv_direction_maps_to_minus_1_down() -> None:
+def test_unit_supertrend_tv_boundary_conversion_positive_tv_direction_maps_to_minus_1_down() -> (
+    None
+):
     """TS-IND-024: TradingView +1 (down) converts to internal -1; zero and NaN are rejected."""
     assert tv_direction_to_internal(1.0) == -1.0
     with pytest.raises(ValueError, match="non-zero"):
@@ -302,7 +307,9 @@ def test_unit_supertrend_derived_distance_atr_signed_close_minus_st_over_atr() -
     close = np.array([10.0, 8.0, 10.0, 10.0, 10.0])
     line = np.array([9.0, 9.0, 9.0, NAN, 9.0])
     atr = np.array([2.0, 2.0, NAN, 2.0, 0.0])
-    np.testing.assert_allclose(m.distance_atr(close, line, atr), [0.5, -0.5, NAN, NAN, NAN], atol=TOL)
+    np.testing.assert_allclose(
+        m.distance_atr(close, line, atr), [0.5, -0.5, NAN, NAN, NAN], atol=TOL
+    )
     fx, res = run_fixture()
     got = m.distance_atr(arr(fx["close"]), res.line, res.atr)
     # Bar 29: close 121, line 117.8824, atr 2.0784 gives 1.5 (the 1.5 factor: line = hl2 - 1.5 atr).
@@ -325,10 +332,15 @@ def test_unit_supertrend_derived_st_line_equals_invalidation_level() -> None:
 
 def weekly_inputs(weeks: int = 16) -> tuple[Any, F64, F64, F64, F64, F64]:
     days = np.array(
-        [np.datetime64("2024-01-01") + np.timedelta64(7 * w + d, "D") for w in range(weeks) for d in range(5)]
+        [
+            np.datetime64("2024-01-01") + np.timedelta64(7 * w + d, "D")
+            for w in range(weeks)
+            for d in range(5)
+        ]
     )
     rng = np.random.default_rng(7)
-    close = 100 * np.exp(np.cumsum(rng.normal(0, 0.02, len(days))))
+    drift = 0.012 * np.sin(np.arange(len(days)) / 9.0)
+    close = 100 * np.exp(np.cumsum(rng.normal(drift, 0.008)))
     high = close * (1 + rng.uniform(0, 0.015, len(days)))
     low = close * (1 - rng.uniform(0, 0.015, len(days)))
     return days, close, high, low, close, np.full(len(days), 1000.0)
@@ -344,7 +356,9 @@ def test_unit_supertrend_derived_weekly_direction_uses_resampled_weekly_bars() -
     days, open_, high, low, close, vol = weekly_inputs()
     got = m.supertrend_weekly_direction(days, open_, high, low, close, vol, 3, 1.5)
     for t in range(len(days)):
-        wb = p.resample_weekly(days[: t + 1], open_[: t + 1], high[: t + 1], low[: t + 1], close[: t + 1], vol[: t + 1])
+        wb = p.resample_weekly(
+            days[: t + 1], open_[: t + 1], high[: t + 1], low[: t + 1], close[: t + 1], vol[: t + 1]
+        )
         want = supertrend(wb.high, wb.low, wb.close, 3, 1.5).direction[-1]
         assert (math.isnan(want) and math.isnan(got[t])) or got[t] == want, t
     wb = p.resample_weekly(days, open_, high, low, close, vol)
@@ -357,7 +371,7 @@ def test_unit_supertrend_derived_weekly_direction_uses_resampled_weekly_bars() -
 
 
 def test_unit_supertrend_derived_weekly_direction_truncation_invariant_and_defaults() -> None:
-    """TS-IND-034: truncating the input never changes earlier days (no look-ahead); defaults 10/3."""
+    """TS-IND-034: truncation never changes earlier days (no look-ahead); defaults 10 and 3."""
     days, open_, high, low, close, vol = weekly_inputs(30)
     full = m.supertrend_weekly_direction(days, open_, high, low, close, vol)
     for cut in (37, 80, 101, 149):
