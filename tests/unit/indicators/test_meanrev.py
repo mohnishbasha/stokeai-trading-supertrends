@@ -96,7 +96,13 @@ def test_short_input_all_nan_and_same_length() -> None:
     """TS-IND-211: input shorter than the window returns all NaN of the same length."""
     close = closes(10)
     bands = meanrev.bollinger(close)
-    for arr in (bands.middle, bands.upper, bands.lower, meanrev.pct_b(close), meanrev.zscore(close)):
+    for arr in (
+        bands.middle,
+        bands.upper,
+        bands.lower,
+        meanrev.pct_b(close),
+        meanrev.zscore(close),
+    ):
         assert len(arr) == 10
         assert np.isnan(arr).all()
 

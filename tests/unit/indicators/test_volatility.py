@@ -151,7 +151,7 @@ def test_squeeze_true_when_bbw_rank_below_15() -> None:
 
 
 def test_expansion_requires_rank_above_85_and_bbw_rising_3_bars() -> None:
-    """TS-IND-087: expansion needs rank > 85 (strict) and bbw[t] > bbw[t-1] > bbw[t-2] > bbw[t-3]."""
+    """TS-IND-087: expansion needs rank > 85 and bbw rising 3 consecutive bars."""
     bbw = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 5.0, 6.0, 7.0, 6.0])
     rank = np.full(9, 90.0)
     out = v.expansion(rank, bbw)

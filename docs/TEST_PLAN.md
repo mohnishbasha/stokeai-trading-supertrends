@@ -587,13 +587,21 @@ Golden and property tests apply to every indicator. Tolerances are in section 5.
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-081 | `golden_bollinger_compute_20_2_bands_pct_b_bandwidth_match_1e6` | Bands, %B, bandwidth | FR-2xx, S2-T05 | Deferred |
-| TS-IND-082 | `unit_zscore_compute_uses_population_stdev20_and_sma20` | `z = (close - SMA20) / stdev20` | FR-2xx | Deferred |
-| TS-IND-083 | `unit_atr_pct_rank_compute_252_bar_trailing_window` | ATR% rank window | FR-2xx, S2-T05 | Deferred |
-| TS-IND-084 | `unit_bbw_rank_compute_126_bar_trailing_window` | Bandwidth rank window | FR-2xx, S2-T05 | Deferred |
-| TS-IND-085 | `golden_hv20_compute_log_returns_annualized_sqrt_252_matches_1e6` | Historical volatility | FR-2xx | Deferred |
-| TS-IND-086 | `unit_volatility_flags_squeeze_true_when_bbw_rank_below_15` | Squeeze boundary at 15 | FR-2xx | Deferred |
-| TS-IND-087 | `unit_volatility_flags_expansion_requires_rank_above_85_and_bbw_rising_3_bars` | Expansion needs both conditions | FR-2xx | Deferred |
+| TS-IND-081 | `golden_bollinger_compute_20_2_bands_pct_b_bandwidth_match_1e6` | Bands, %B, bandwidth | FR-2xx, S2-T05 | Automated |
+| TS-IND-082 | `unit_zscore_compute_uses_population_stdev20_and_sma20` | `z = (close - SMA20) / stdev20` | FR-2xx | Automated |
+| TS-IND-083 | `unit_atr_pct_rank_compute_252_bar_trailing_window` | ATR% rank window | FR-2xx, S2-T05 | Automated |
+| TS-IND-084 | `unit_bbw_rank_compute_126_bar_trailing_window` | Bandwidth rank window | FR-2xx, S2-T05 | Automated |
+| TS-IND-085 | `golden_hv20_compute_log_returns_annualized_sqrt_252_matches_1e6` | Historical volatility | FR-2xx | Automated |
+| TS-IND-086 | `unit_volatility_flags_squeeze_true_when_bbw_rank_below_15` | Squeeze boundary at 15 | FR-2xx | Automated |
+| TS-IND-087 | `unit_volatility_flags_expansion_requires_rank_above_85_and_bbw_rising_3_bars` | Expansion needs both conditions | FR-2xx | Automated |
+| TS-IND-210 | `unit_bollinger_flat_window_pct_b_and_zscore_nan` | Zero-width bands give NaN, no inf | S2-T05 | Automated |
+| TS-IND-211 | `unit_meanrev_short_input_all_nan_same_length` | Input shorter than window | S2-T05 | Automated |
+| TS-IND-212 | `unit_meanrev_exports_in_all_and_package_aggregate` | `__all__` aggregation | S2-T05 | Automated |
+| TS-IND-213 | `unit_ranks_and_hv20_unchanged_when_future_bars_appended` | No look-ahead for trailing ranks | S2-T05 | Automated |
+| TS-IND-214 | `unit_hv20_constant_series_zero_and_nonpositive_close_nan` | HV20 edge cases | S2-T05 | Automated |
+| TS-IND-215 | `unit_expansion_nan_propagation_and_length_mismatch_raises` | NaN warm-up and validation | S2-T05 | Automated |
+| TS-IND-216 | `unit_bandwidth_flat_zero_and_atr_pct_zero_close_nan` | Flat prices and zero close | S2-T05 | Automated |
+| TS-IND-217 | `unit_volatility_exports_in_all_and_package_aggregate` | `__all__` aggregation | S2-T05 | Automated |
 
 #### 10.3.8 Fibonacci
 

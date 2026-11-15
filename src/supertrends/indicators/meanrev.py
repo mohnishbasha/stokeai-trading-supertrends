@@ -33,7 +33,9 @@ def bollinger(close: FloatArray, n: int = 20, k: float = 2.0) -> Bollinger:
     Warm-up: NaN for the first n-1 bars. Lag follows the SMA, (n-1)/2 bars. NaN in the input
     makes every window containing it NaN.
     """
-    raise NotImplementedError
+    mid = sma(close, n)
+    dev = k * stdev(close, n)
+    return Bollinger(middle=mid, upper=mid + dev, lower=mid - dev)
 
 
 def pct_b(close: FloatArray, n: int = 20, k: float = 2.0) -> FloatArray:
@@ -41,7 +43,11 @@ def pct_b(close: FloatArray, n: int = 20, k: float = 2.0) -> FloatArray:
 
     Warm-up: NaN for the first n-1 bars. NaN where the bands have zero width (flat window).
     """
-    raise NotImplementedError
+    bands = bollinger(close, n, k)
+    width = bands.upper - bands.lower
+    with np.errstate(divide="ignore", invalid="ignore"):
+        out = np.where(width > 0.0, (close - bands.lower) / width, np.nan)
+    return np.asarray(out, dtype=np.float64)
 
 
 def zscore(close: FloatArray, n: int = 20) -> FloatArray:
@@ -49,4 +55,7 @@ def zscore(close: FloatArray, n: int = 20) -> FloatArray:
 
     Warm-up: NaN for the first n-1 bars. NaN where the stdev is zero (flat window).
     """
-    raise NotImplementedError
+    sd = stdev(close, n)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        out = np.where(sd > 0.0, (close - sma(close, n)) / sd, np.nan)
+    return np.asarray(out, dtype=np.float64)
