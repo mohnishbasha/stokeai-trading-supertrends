@@ -1,0 +1,8 @@
+# Synthetic test credentials on Sprint 1 branches; none is a real secret.
+# CI scans every fetched branch, so these must be known on develop for any PR to pass.
+# S1-T04 (#121): synthetic Massive key committed before it was renamed.
+e96c5108b418b6c0673ddf52f159726c772880c7:tests/contract/massive_support.py:generic-api-key:17
+# S1-T08 (#122): fake credentials in the scrubber tests (commit dd2d327); later lines carry gitleaks:allow.
+dd2d3271211fe5c1f08f2078de0e562fc04c96e8:tests/unit/test_logging_scrubber.py:generic-api-key:17
+dd2d3271211fe5c1f08f2078de0e562fc04c96e8:tests/unit/test_logging_scrubber.py:generic-api-key:18
+dd2d3271211fe5c1f08f2078de0e562fc04c96e8:tests/unit/test_api_observability.py:generic-api-key:21
