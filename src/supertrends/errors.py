@@ -41,3 +41,11 @@ class ProviderDataError(ProviderError):
 
 class CapabilityNotSupported(ProviderError):  # noqa: N818 (name fixed by ARCHITECTURE 7.3)
     """The method needs a capability the provider or plan lacks. Raised without network I/O."""
+
+
+class IngestError(SuperTrendsError):
+    """Ingestion cannot continue, for example a provider outage affecting every ticker."""
+
+    def __init__(self, message: str, *, code: str = "ingest_failed") -> None:
+        super().__init__(message)
+        self.code = code

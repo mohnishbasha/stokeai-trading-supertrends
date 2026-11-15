@@ -26,6 +26,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Unit tests run with outbound network blocked via `pytest-socket` (loopback only).
 - API skeleton: `/readyz` checks database reachability and migrations at head (RFC 9457 503), `/metrics` Prometheus HTTP metrics, structlog JSON logs with request IDs and a secret scrubber, problem+json errors, Host allowlist with probe exemptions, and `require_write_token` (S1-T08).
 - Local Compose runs a one-shot `migrate` service (`supertrends db migrate`) before the app starts, so `/readyz` reports ready after `make up` (S1-T08).
+- Ingestion service and `supertrends ingest [--date] [--symbols] [--full]`: idempotent incremental daily, 5-minute, and fundamentals ingest, split-triggered full refetch, data quality classification, and `provider_calls` recording (S1-T06).
 
 ### Scoring
 
