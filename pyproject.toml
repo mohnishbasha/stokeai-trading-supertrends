@@ -29,6 +29,9 @@ dependencies = [
     "httpx>=0.27",
     "structlog>=24.4",
     "exchange-calendars>=4.13.3",
+    "sqlalchemy>=2",
+    "alembic>=1.14",
+    "psycopg[binary]>=3.2",
 ]
 
 [project.urls]
@@ -72,7 +75,7 @@ select = ["E", "W", "F", "I", "B", "UP", "S", "C4", "SIM", "RUF", "PL", "PT", "T
 ignore = ["PLR2004", "TD003"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "S603", "S607", "PLR0913"]
+"tests/**" = ["S101", "S603", "S607", "S608", "PLR0913"]
 "scripts/**" = ["S603", "S607"]
 
 [tool.mypy]
