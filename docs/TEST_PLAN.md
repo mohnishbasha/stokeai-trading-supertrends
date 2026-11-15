@@ -388,58 +388,58 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-WL-001 | `unit_watchlist_seed_load_14_groups_200_symbols_succeeds` | Loading `config/watchlist.seed.yaml` yields 14 groups and 200 unique symbols | FR-0xx, S1-T07 | Deferred |
-| TS-WL-002 | `unit_watchlist_seed_multi_group_symbol_stored_once_three_memberships` | A symbol listed in three groups is one ticker row with three memberships | FR-0xx, A§5 | Deferred |
-| TS-WL-003 | `it_watchlist_seed_unresolvable_symbol_marked_unresolved_with_reason` | An unresolvable seed symbol is recorded `unresolved` with a reason, excluded, never substituted | FR-0xx, S1-T07 | Deferred |
-| TS-WL-004 | `unit_watchlist_seed_needs_review_symbol_flagged_not_scored` | A `needs_review` symbol is listed but not scored | FR-0xx | Deferred |
-| TS-WL-005 | `unit_watchlist_seed_vix_not_scored_crypto_not_ingested` | VIX is kept but not scored; the crypto file is kept but not ingested | FR-0xx | Deferred |
-| TS-WL-006 | `contract_api_watchlist_add_ticker_301_returns_422` | The 300-ticker hard cap rejects the 301st ticker | FR-0xx, A§6.1 | Deferred |
-| TS-WL-007 | `unit_watchlist_symbol_regex_rejects_lowercase_and_overlong_returns_422` | Symbols must match `^[A-Z][A-Z0-9.\-]{0,9}$` | FR-0xx, A§9 | Deferred |
-| TS-WL-008 | `it_watchlist_benchmarks_spy_qqq_ingested_even_if_removed` | Removing SPY or QQQ from the watchlist still ingests them as benchmarks | FR-0xx, FR-1xx | Deferred |
-| TS-WL-009 | `contract_api_watchlist_write_without_token_returns_401` | POST, PUT, DELETE on the watchlist need the bearer token | FR-0xx, A§9 | Deferred |
-| TS-WL-010 | `contract_api_watchlist_read_without_token_returns_200` | GET watchlist endpoints need no token | FR-0xx | Deferred |
-| TS-WL-011 | `it_watchlist_add_unknown_symbol_provider_validation_returns_422_with_message` | A symbol the provider does not know is rejected with an inline message | FR-0xx, US-004 | Deferred |
-| TS-WL-012 | `unit_watchlist_group_crud_create_rename_delete_group_keeps_tickers` | Deleting a named group removes memberships, not tickers | FR-0xx | Deferred |
-| TS-WL-013 | `unit_watchlist_add_duplicate_symbol_returns_409_no_second_row` | Adding an existing symbol returns 409 `already-exists` (A§6.1) and writes no second row | FR-0xx | Deferred |
-| TS-WL-014 | `unit_watchlist_validation_fixture_provider_permissive_regex_accepts_synthetic` | The fixture provider uses the permissive regex path | FR-0xx, S1-T07 | Deferred |
-| TS-WL-015 | `it_watchlist_seed_second_start_does_not_reseed_or_duplicate` | Seeding runs on first start only and is idempotent | FR-0xx | Deferred |
+| TS-WL-001 | `unit_watchlist_seed_load_14_groups_200_symbols_succeeds` | Loading `config/watchlist.seed.yaml` yields 14 groups and 200 unique symbols | FR-0xx, S1-T07 | Automated |
+| TS-WL-002 | `unit_watchlist_seed_multi_group_symbol_stored_once_three_memberships` | A symbol listed in three groups is one ticker row with three memberships | FR-0xx, A§5 | Automated |
+| TS-WL-003 | `it_watchlist_seed_unresolvable_symbol_marked_unresolved_with_reason` | An unresolvable seed symbol is recorded `unresolved` with a reason, excluded, never substituted | FR-0xx, S1-T07 | Automated |
+| TS-WL-004 | `unit_watchlist_seed_needs_review_symbol_flagged_not_scored` | A `needs_review` symbol is listed but not scored | FR-0xx | Automated |
+| TS-WL-005 | `unit_watchlist_seed_vix_not_scored_crypto_not_ingested` | VIX is kept but not scored; the crypto file is kept but not ingested | FR-0xx | Automated |
+| TS-WL-006 | `contract_api_watchlist_add_ticker_301_returns_422` | The 300-ticker hard cap rejects the 301st ticker | FR-0xx, A§6.1 | Automated |
+| TS-WL-007 | `unit_watchlist_symbol_regex_rejects_lowercase_and_overlong_returns_422` | Symbols must match `^[A-Z][A-Z0-9.\-]{0,9}$` | FR-0xx, A§9 | Automated |
+| TS-WL-008 | `it_watchlist_benchmarks_spy_qqq_ingested_even_if_removed` | Removing SPY or QQQ from the watchlist still ingests them as benchmarks | FR-0xx, FR-1xx | Automated |
+| TS-WL-009 | `contract_api_watchlist_write_without_token_returns_401` | POST, PUT, DELETE on the watchlist need the bearer token | FR-0xx, A§9 | Automated |
+| TS-WL-010 | `contract_api_watchlist_read_without_token_returns_200` | GET watchlist endpoints need no token | FR-0xx | Automated |
+| TS-WL-011 | `it_watchlist_add_unknown_symbol_provider_validation_returns_422_with_message` | A symbol the provider does not know is rejected with an inline message | FR-0xx, US-004 | Automated |
+| TS-WL-012 | `unit_watchlist_group_crud_create_rename_delete_group_keeps_tickers` | Deleting a named group removes memberships, not tickers | FR-0xx | Automated |
+| TS-WL-013 | `unit_watchlist_add_duplicate_symbol_returns_409_no_second_row` | Adding an existing symbol returns 409 `already-exists` (A§6.1) and writes no second row | FR-0xx | Automated |
+| TS-WL-014 | `unit_watchlist_validation_fixture_provider_permissive_regex_accepts_synthetic` | The fixture provider uses the permissive regex path | FR-0xx, S1-T07 | Automated |
+| TS-WL-015 | `it_watchlist_seed_second_start_does_not_reseed_or_duplicate` | Seeding runs on first start only and is idempotent | FR-0xx | Automated |
 
 ### 10.2 Ingestion and data (TS-ING)
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-ING-001 | `unit_fixture_provider_generate_same_seed_identical_bars` | Same seed gives byte-identical bars | FR-1xx, S1-T03 | Deferred |
-| TS-ING-002 | `unit_fixture_provider_dataset_has_trending_ranging_reversing_tickers` | By construction the dataset includes one trending, one ranging, one reversing ticker (asserted via ADX and flips) | FR-1xx, S1-T03 | Deferred |
+| TS-ING-001 | `unit_fixture_provider_generate_same_seed_identical_bars` | Same seed gives byte-identical bars | FR-1xx, S1-T03 | Automated |
+| TS-ING-002 | `unit_fixture_provider_dataset_has_trending_ranging_reversing_tickers` | By construction the dataset includes one trending, one ranging, one reversing ticker (asserted via ADX and flips) | FR-1xx, S1-T03 | Automated |
 | TS-ING-003 | `golden_fixture_provider_dataset_hash_matches_committed_hash` | Synthetic dataset hash equals `tests/golden/synthetic_dataset.sha256` | FR-1xx, A§12 | Deferred |
-| TS-ING-004 | `contract_provider_fixture_passes_shared_contract_suite` | Fixture provider passes the provider contract suite | FR-1xx, A§7 | Deferred |
-| TS-ING-005 | `contract_provider_massive_recorded_passes_shared_contract_suite` | Massive adapter passes the contract suite on recorded scrubbed responses | FR-1xx, A§7 | Deferred |
-| TS-ING-006 | `contract_provider_alternate_recorded_passes_shared_contract_suite` | Alternate provider adapter passes the contract suite | FR-1xx, S1-T05 | Deferred |
-| TS-ING-007 | `unit_provider_registry_unknown_name_fails_startup_with_clear_message` | An unknown provider name fails at startup | FR-1xx, A§7 | Deferred |
-| TS-ING-008 | `unit_provider_registry_env_switch_changes_active_provider_without_code_change` | `SUPERTRENDS_MARKET_PROVIDER` selects the provider | FR-1xx, S1-T05 | Deferred |
-| TS-ING-009 | `it_provider_massive_429_sequence_retried_then_succeeds` | A 429 sequence backs off with jitter and succeeds | FR-1xx, S1-T04 | Deferred |
-| TS-ING-010 | `unit_provider_rate_limiter_token_bucket_respects_calls_per_minute` | The token bucket never exceeds the configured calls per minute (fake clock) | FR-1xx, S1-T04 | Deferred |
-| TS-ING-011 | `it_provider_massive_5xx_exponential_backoff_with_jitter_bounded` | 5xx retries are bounded in count and backoff | FR-1xx | Deferred |
-| TS-ING-012 | `it_provider_massive_response_cache_same_endpoint_params_one_call` | Responses are cached by (endpoint, params) | FR-1xx | Deferred |
-| TS-ING-013 | `it_provider_calls_recorded_without_api_key_in_path_or_params` | Every call is stored in `provider_calls` with no secret | FR-1xx, NFR-009 | Deferred |
-| TS-ING-014 | `unit_provider_massive_no_key_reports_unconfigured_app_starts_on_fixture` | No key means `unconfigured` and fixture fallback | FR-1xx, S1-T04 | Deferred |
-| TS-ING-015 | `unit_provider_massive_base_url_configurable_legacy_host_accepted` | Base URL setting accepts `api.massive.com` and `api.polygon.io` | FR-1xx | Deferred |
-| TS-ING-016 | `it_ingest_second_run_is_idempotent_no_row_changes` | Re-running ingestion changes nothing | FR-1xx, S1-T06 | Deferred |
-| TS-ING-017 | `it_ingest_incremental_fetch_starts_from_last_stored_bar` | Only bars after the last stored bar are requested | FR-1xx | Deferred |
-| TS-ING-018 | `it_ingest_split_detected_triggers_full_adjusted_history_refetch` | A new split refetches the full history for that ticker | FR-1xx, S1-T06 | Deferred |
-| TS-ING-019 | `unit_ingest_holiday_does_not_mark_tickers_stale` | A market holiday never produces `stale` | FR-1xx | Deferred |
-| TS-ING-020 | `unit_ingest_half_day_session_treated_as_complete_session` | Half days (for example the day after Thanksgiving) are valid sessions | FR-1xx, S9-T02 | Deferred |
-| TS-ING-021 | `unit_quality_gap_more_than_3_sessions_marks_degraded` | A gap above 3 sessions is `degraded` | FR-1xx | Deferred |
-| TS-ING-022 | `unit_quality_latest_bar_older_than_last_session_marks_stale` | Latest daily bar older than the last completed session is `stale` | FR-1xx, US-020 | Deferred |
-| TS-ING-023 | `unit_quality_fewer_than_250_bars_marks_insufficient_history` | Below 250 daily bars the ticker is excluded | FR-1xx | Deferred |
-| TS-ING-024 | `unit_quality_exactly_250_bars_is_scoreable` | Boundary: 250 bars scores | FR-1xx | Deferred |
-| TS-ING-025 | `unit_resample_weekly_week_ending_friday_ohlcv_correct` | Weekly bars: open first, high max, low min, close last, volume sum | FR-1xx, FR-2xx | Deferred |
-| TS-ING-026 | `unit_resample_weekly_holiday_friday_uses_last_session_of_week` | A holiday Friday closes the week on Thursday | FR-1xx | Deferred |
+| TS-ING-004 | `contract_provider_fixture_passes_shared_contract_suite` | Fixture provider passes the provider contract suite | FR-1xx, A§7 | Automated |
+| TS-ING-005 | `contract_provider_massive_recorded_passes_shared_contract_suite` | Massive adapter passes the contract suite on recorded scrubbed responses | FR-1xx, A§7 | Automated |
+| TS-ING-006 | `contract_provider_alternate_recorded_passes_shared_contract_suite` | Alternate provider adapter passes the contract suite | FR-1xx, S1-T05 | Automated |
+| TS-ING-007 | `unit_provider_registry_unknown_name_fails_startup_with_clear_message` | An unknown provider name fails at startup | FR-1xx, A§7 | Automated |
+| TS-ING-008 | `unit_provider_registry_env_switch_changes_active_provider_without_code_change` | `SUPERTRENDS_MARKET_PROVIDER` selects the provider | FR-1xx, S1-T05 | Automated |
+| TS-ING-009 | `it_provider_massive_429_sequence_retried_then_succeeds` | A 429 sequence backs off with jitter and succeeds | FR-1xx, S1-T04 | Automated |
+| TS-ING-010 | `unit_provider_rate_limiter_token_bucket_respects_calls_per_minute` | The token bucket never exceeds the configured calls per minute (fake clock) | FR-1xx, S1-T04 | Automated |
+| TS-ING-011 | `it_provider_massive_5xx_exponential_backoff_with_jitter_bounded` | 5xx retries are bounded in count and backoff | FR-1xx | Automated |
+| TS-ING-012 | `it_provider_massive_response_cache_same_endpoint_params_one_call` | Responses are cached by (endpoint, params) | FR-1xx | Automated |
+| TS-ING-013 | `it_provider_calls_recorded_without_api_key_in_path_or_params` | Every call is stored in `provider_calls` with no secret | FR-1xx, NFR-009 | Automated |
+| TS-ING-014 | `unit_provider_massive_no_key_reports_unconfigured_app_starts_on_fixture` | No key means `unconfigured` and fixture fallback | FR-1xx, S1-T04 | Automated |
+| TS-ING-015 | `unit_provider_massive_base_url_configurable_legacy_host_accepted` | Base URL setting accepts `api.massive.com` and `api.polygon.io` | FR-1xx | Automated |
+| TS-ING-016 | `it_ingest_second_run_is_idempotent_no_row_changes` | Re-running ingestion changes nothing | FR-1xx, S1-T06 | Automated |
+| TS-ING-017 | `it_ingest_incremental_fetch_starts_from_last_stored_bar` | Only bars after the last stored bar are requested | FR-1xx | Automated |
+| TS-ING-018 | `it_ingest_split_detected_triggers_full_adjusted_history_refetch` | A new split refetches the full history for that ticker | FR-1xx, S1-T06 | Automated |
+| TS-ING-019 | `unit_ingest_holiday_does_not_mark_tickers_stale` | A market holiday never produces `stale` | FR-1xx | Automated |
+| TS-ING-020 | `unit_ingest_half_day_session_treated_as_complete_session` | Half days (for example the day after Thanksgiving) are valid sessions | FR-1xx, S9-T02 | Automated |
+| TS-ING-021 | `unit_quality_gap_more_than_3_sessions_marks_degraded` | A gap above 3 sessions is `degraded` | FR-1xx | Automated |
+| TS-ING-022 | `unit_quality_latest_bar_older_than_last_session_marks_stale` | Latest daily bar older than the last completed session is `stale` | FR-1xx, US-020 | Automated |
+| TS-ING-023 | `unit_quality_fewer_than_250_bars_marks_insufficient_history` | Below 250 daily bars the ticker is excluded | FR-1xx | Automated |
+| TS-ING-024 | `unit_quality_exactly_250_bars_is_scoreable` | Boundary: 250 bars scores | FR-1xx | Automated |
+| TS-ING-025 | `unit_resample_weekly_week_ending_friday_ohlcv_correct` | Weekly bars: open first, high max, low min, close last, volume sum | FR-1xx, FR-2xx | Automated |
+| TS-ING-026 | `unit_resample_weekly_holiday_friday_uses_last_session_of_week` | A holiday Friday closes the week on Thursday | FR-1xx | Automated |
 | TS-ING-027 | `unit_calendar_xnys_session_times_dst_boundaries_correct` | Exchange time handling across DST in America/New_York | FR-1xx | Deferred |
-| TS-ING-028 | `it_ingest_grouped_daily_one_call_per_date_for_whole_watchlist` | Daily updates use the grouped endpoint, per-ticker calls only for backfill | FR-1xx, S1-T04 | Deferred |
-| TS-ING-029 | `it_schema_migrations_upgrade_head_and_downgrade_base_succeed` | Alembic up and down on an empty database | A§5, S1-T01 | Deferred |
-| TS-ING-030 | `it_schema_recommendations_update_rejected_by_append_only_trigger` | UPDATE on `recommendations` is rejected | A§5, NFR-006 | Deferred |
-| TS-ING-031 | `it_schema_factor_scores_delete_rejected_by_append_only_trigger` | DELETE on `factor_scores` is rejected | A§5 | Deferred |
-| TS-ING-032 | `it_schema_bars_composite_primary_key_rejects_duplicate_ticker_ts` | Bars have a (ticker, ts) primary key | A§5 | Deferred |
+| TS-ING-028 | `it_ingest_grouped_daily_one_call_per_date_for_whole_watchlist` | Daily updates use the grouped endpoint, per-ticker calls only for backfill | FR-1xx, S1-T04 | Automated |
+| TS-ING-029 | `it_schema_migrations_upgrade_head_and_downgrade_base_succeed` | Alembic up and down on an empty database | A§5, S1-T01 | Automated |
+| TS-ING-030 | `it_schema_recommendations_update_rejected_by_append_only_trigger` | UPDATE on `recommendations` is rejected | A§5, NFR-006 | Automated |
+| TS-ING-031 | `it_schema_factor_scores_delete_rejected_by_append_only_trigger` | DELETE on `factor_scores` is rejected | A§5 | Automated |
+| TS-ING-032 | `it_schema_bars_composite_primary_key_rejects_duplicate_ticker_ts` | Bars have a (ticker, ts) primary key | A§5 | Automated |
 | TS-ING-033 | `it_retention_intraday_older_than_90_days_deleted_daily_kept` | Retention deletes old intraday, never daily bars | FR-9xx, S6-T06 | Deferred |
 | TS-ING-034 | `it_retention_never_deletes_rows_in_a_recommendation_evidence_window` | Evidence-window rows are protected | FR-9xx, S6-T06 | Deferred |
 | TS-ING-035 | `it_backup_pg_dump_restore_roundtrip_preserves_recommendations` | `supertrends db backup` then restore round-trips | FR-9xx, S6-T06 | Deferred |
@@ -448,6 +448,48 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 | TS-ING-038 | `contract_provider_fundamentals_recorded_passes_shared_contract_suite` | `FundamentalsProvider` contract on recorded fixtures | FR-1xx, A§7 | Deferred |
 | TS-ING-039 | `it_provider_capability_flags_intraday_trades_adjusted_reported_correctly` | Capability flags are exposed and respected | FR-1xx, A§7 | Deferred |
 | TS-ING-040 | `unit_fixtures_validate_script_recorded_responses_match_provider_models` | `scripts/validate-fixtures.sh` fails on a stale recorded response | A§12, Appendix G | Deferred |
+| TS-ING-041 | `contract_provider_fake_passes_shared_contract_suite` | A fake provider (full and reduced capabilities) passes the shared market and fundamentals contract suite in `tests/contract/provider_contract.py` | FR-1xx, A§7, S1-T02 | Automated |
+| TS-ING-042 | `unit_provider_contract_suite_violating_provider_detected_assertion_fails` | The suite fails a provider with unsorted bars, out-of-range bars, or a missing `CapabilityNotSupported` | A§7, S1-T02 | Automated |
+| TS-ING-043 | `unit_provider_registry_mixed_vendors_market_and_fundamentals_selected_independently` | Market and fundamentals providers from different vendors can be combined; a registered name with no implementation fails with a clear `ConfigError` | A§7.4, S1-T02 | Automated |
+| TS-ING-044 | `unit_provider_errors_derive_from_provider_error_and_validate_bar_rejects_invalid_rows` | Error hierarchy (A§7.3) and OHLC validation raising `ProviderDataError` | A§7.2, A§7.3, S1-T02 | Automated |
+| TS-ING-045 | `it_schema_recommendations_delete_rejected_by_append_only_trigger` | DELETE on `recommendations` is rejected; `entry_price` may be set once from NULL | A§5.3, S1-T01 | Automated |
+| TS-ING-046 | `it_schema_factor_scores_update_rejected_by_append_only_trigger` | UPDATE on `factor_scores` is rejected with SQLSTATE `P0001` naming the table | A§5.3, S1-T01 | Automated |
+| TS-ING-047 | `it_schema_every_append_only_table_has_the_reject_trigger` | The seven append-only tables, `recommendations`, and `runs` carry their triggers | A§5.3, S1-T01 | Automated |
+| TS-ING-048 | `it_schema_runs_forward_transition_allowed_and_backward_rejected` | The `runs` trigger allows only section 8 edges; terminal runs are immutable except `superseded_by` once; DELETE rejected; one active run | A§5.1, A§8, S1-T01 | Automated |
+| TS-ING-049 | `it_schema_watchlist_cap_rejects_301st_item_at_commit` | The 300-item cap trigger; a symbol in three groups is stored once | A§5.1, ADR-019, S1-T01 | Automated |
+| TS-ING-050 | `it_schema_models_match_migrated_database` | Model metadata equals the migrated schema (no drift), including the `backtests` schema | A§5.4, S1-T01 | Automated |
+| TS-ING-051 | `it_schema_migrations_at_head_false_when_behind_and_true_after_migrate` | `migrations_at_head` for `/readyz`; `migrate` is idempotent | A§5.4, S1-T01 | Automated |
+| TS-ING-052 | `unit_models_define_every_live_and_backtest_table` | Table set, primary keys, partial unique indexes, ULID checks, named constraints | A§5.1, A§5.2, S1-T01 | Automated |
+| TS-ING-053 | `unit_db_session_scope_rolls_back_on_error` | Engine from settings, URL normalization, session commit and rollback, advisory-locked `migrate` | A§5.4, S1-T01 | Automated |
+| TS-ING-100 | `unit_alternate_capabilities_intraday_on_grouped_and_trades_off` | Capability flags are correct and unsupported methods raise `CapabilityNotSupported` with no request | A§7.2, A§7.7, S1-T05 | Automated |
+| TS-ING-101 | `unit_alternate_daily_request_is_adjusted_header_authed_and_paginated` | Adjusted daily bars, header auth only, `page_token` pagination, intraday regular-session filter, corporate-action ratios and merged dividends | A§7.7, S1-T05 | Automated |
+| TS-ING-102 | `unit_alternate_retries_429_then_succeeds_honoring_retry_after` | Retry with injectable sleep on 429, 5xx, and transport errors; exhausted budget maps to `ProviderRateLimited` or `ProviderUnavailable`; 401/403 map to `ProviderUnconfigured`; malformed or invalid payloads map to `ProviderDataError` | A§7.3, S1-T05 | Automated |
+| TS-ING-103 | `unit_alternate_key_never_leaks_into_repr_status_errors_or_logs` | The API key appears in no URL, repr, status, error message, or log record; a missing or malformed key reports `unconfigured` without network | A§7.3, S1-T05 | Automated |
+| TS-ING-104 | `unit_alternate_registry_env_switch_selects_adapter_with_no_code_change` | `SUPERTRENDS_MARKET_PROVIDER=alternate` (env plus `load_settings`) returns the alternate adapter and `fixture` returns the fixture path; alternate bars mix with another fundamentals vendor | A§7.4, S1-T05 | Automated |
+| TS-ING-105 | `unit_fixture_provider_different_seed_different_bars` | A different seed gives different bars; values depend on the seed and session index only, not the end date | FR-1xx, ADR-028, S1-T03 | Automated |
+| TS-ING-106 | `unit_fixture_provider_split_reported_as_corporate_action` | Exactly one 4:1 split exists, is reported by `corporate_actions`, and bars are split adjusted | FR-1xx, A§7.5, S1-T03 | Automated |
+| TS-ING-107 | `unit_fixture_provider_history_sizes` | About 3 years of daily bars and 30 sessions of 5-minute bars (aggregating exactly to the daily bars) for 12 tickers plus `SPY` and `QQQ` | FR-1xx, A§7.5, S1-T03 | Automated |
+| TS-ING-108 | `unit_fixture_provider_unknown_symbol_none_unless_permissive` | Unknown symbols resolve to `None`; permissive mode generates bars from a hash of the symbol | FR-1xx, A§7.5, S1-T03 | Automated |
+| TS-ING-109 | `unit_fixture_provider_etf_has_no_financials_and_stocks_do` | Stocks have quarterly financials with `known_at` 30 days after period end; ETFs have none; earnings dates include one 3 sessions out | FR-1xx, A§7.5, S1-T03 | Automated |
+| TS-ING-110 | `unit_calendar_half_day_closes_early` | XNYS sessions skip holidays, half days close early, last completed session is computed from the clock | ADR-028, S1-T03 | Automated |
+| TS-ING-111 | `unit_provider_database_call_recorder_returns_db_call_recorder` | `database_call_recorder()` writes sanitized `provider_calls` rows through `DbCallRecorder`, and the shared Massive client uses it | FR-112, NFR-009, S1-T04, S1-T06 | Automated |
+| TS-ING-060 | `unit_ingest_daily_window_backfill_when_no_bars_or_full` | Empty store or `--full` requests the 1130-day backfill window | FR-1xx, S1-T06 | Automated |
+| TS-ING-061 | `unit_ingest_window_skipped_when_only_weekend_or_holiday_follows` | No fetch when no session lies after the last stored bar | FR-1xx, S1-T06 | Automated |
+| TS-ING-062 | `unit_ingest_regular_session_only_drops_pre_and_after_hours` | Intraday bars outside 09:30 to the close (early close aware) are dropped | FR-1xx, S1-T06 | Automated |
+| TS-ING-063 | `unit_ingest_new_splits_ignores_known_and_dividends` | Only unseen split actions trigger a refetch | FR-1xx, S1-T06 | Automated |
+| TS-ING-064 | `unit_ingest_fundamentals_due_policy` | Refresh when empty, first session of ISO week, after earnings, or `--full` | FR-1xx, S1-T06 | Automated |
+| TS-ING-065 | `unit_ingest_resolve_as_of` | A date resolves to the latest session not after it and never past the last completed session | FR-1xx, S1-T06 | Automated |
+| TS-ING-066 | `unit_provider_calls_sanitize_strips_query_string_and_credential_params` | Endpoint query string and credential params never reach a row | FR-1xx, S1-T06 | Automated |
+| TS-ING-067 | `unit_cli_ingest_prints_per_ticker_summary_and_quality_counts` | `supertrends ingest` summary output and argument passing | FR-1xx, S1-T06 | Automated |
+| TS-ING-068 | `unit_cli_ingest_provider_outage_exits_1` | `IngestError` exits 1 | FR-1xx, S1-T06 | Automated |
+| TS-ING-069 | `unit_cli_ingest_unreachable_database_exits_3` | Database error exits 3 without leaking the password | FR-1xx, S1-T06 | Automated |
+| TS-ING-070 | `unit_cli_ingest_invalid_date_exits_2` | Invalid `--date` or `--symbols` exits 2 | FR-1xx, S1-T06 | Automated |
+| TS-ING-071 | `it_ingest_provider_error_isolated_per_ticker_and_marks_stale` | One ticker failing does not abort the others | FR-1xx, S1-T06 | Automated |
+| TS-ING-072 | `it_ingest_all_tickers_failing_raises_provider_unavailable` | Every ticker failing raises `IngestError(provider_unavailable)` | FR-1xx, S1-T06 | Automated |
+| TS-ING-073 | `it_ingest_unresolved_symbol_is_reported_not_stored` | Unknown symbol is reported `unresolved` and writes nothing | FR-1xx, S1-T06 | Automated |
+| TS-ING-074 | `it_ingest_intraday_keeps_regular_session_bars_only` | Stored 5-minute bars are regular session only | FR-1xx, S1-T06 | Automated |
+| TS-ING-075 | `it_ingest_default_symbols_exclude_unresolved_and_crypto_and_add_benchmarks` | Default universe is the resolved equity watchlist plus SPY and QQQ | FR-1xx, S1-T06 | Automated |
+| TS-ING-076 | `it_cli_ingest_fills_database_and_second_run_changes_nothing` | CLI end to end on the fixture provider: fill, idempotent rerun, `--full` | FR-1xx, S1-T06 | Automated |
 
 ### 10.3 Indicators (TS-IND)
 
@@ -1015,10 +1057,10 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-API-001 | `contract_api_healthz_returns_200_status_ok` | `{"status":"ok"}` | FR-8xx, A§6.1 | Deferred |
-| TS-API-002 | `contract_api_readyz_database_down_returns_503` | Readiness | FR-8xx, S1-T08 | Deferred |
-| TS-API-003 | `contract_api_readyz_migrations_behind_head_returns_503` | Migration check | FR-8xx | Deferred |
-| TS-API-004 | `contract_api_metrics_returns_prometheus_text` | `/metrics` | FR-8xx, A§11 | Deferred |
+| TS-API-001 | `contract_api_healthz_returns_200_status_ok` | `{"status":"ok"}` | FR-8xx, A§6.1 | Automated |
+| TS-API-002 | `contract_api_readyz_database_down_returns_503` | Readiness | FR-8xx, S1-T08 | Automated |
+| TS-API-003 | `contract_api_readyz_migrations_behind_head_returns_503` | Migration check | FR-8xx | Automated |
+| TS-API-004 | `contract_api_metrics_returns_prometheus_text` | `/metrics` | FR-8xx, A§11 | Automated |
 | TS-API-005 | `contract_api_recommendations_latest_shape_matches_openapi` | Schema | FR-8xx | Deferred |
 | TS-API-006 | `contract_api_recommendations_latest_includes_disclaimer_string` | Disclaimer | FR-8xx, A§9 | Deferred |
 | TS-API-007 | `contract_api_recommendations_by_date_returns_that_days_published_run` | Date browse | FR-8xx, US-012 | Deferred |
@@ -1037,12 +1079,12 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-API-020 | `contract_api_post_runs_while_running_returns_409_already_running` | Concurrency | FR-8xx, S3-T07 | Deferred |
 | TS-API-021 | `contract_api_config_scoring_returns_active_config_and_hash` | Config view | FR-8xx | Deferred |
 | TS-API-022 | `contract_api_status_returns_version_commit_and_license_notice` | License notice | FR-8xx, A§9 | Deferred |
-| TS-API-023 | `contract_api_errors_use_rfc_9457_problem_json` | Error format | FR-8xx, S1-T08 | Deferred |
+| TS-API-023 | `contract_api_errors_use_rfc_9457_problem_json` | Error format | FR-8xx, S1-T08 | Automated |
 | TS-API-024 | `contract_api_openapi_document_matches_committed_docs_openapi_json` | Drift check | FR-8xx, S3-T09 | Deferred |
 | TS-API-025 | `contract_api_write_endpoints_rate_limited_returns_429` | Rate limit | FR-8xx, A§9 | Deferred |
-| TS-API-026 | `contract_api_unknown_host_header_rejected` | `SUPERTRENDS_ALLOWED_HOSTS` | FR-8xx, A§9 | Deferred |
-| TS-API-027 | `contract_api_json_logs_valid_json_lines_with_request_id` | Log format | A§9, A§11 | Deferred |
-| TS-API-028 | `unit_logging_scrubber_secret_values_never_appear_in_log_output` | Log-scrubbing test | NFR-009, S1-T08 | Deferred |
+| TS-API-026 | `contract_api_unknown_host_header_rejected` | `SUPERTRENDS_ALLOWED_HOSTS` | FR-8xx, A§9 | Automated |
+| TS-API-027 | `contract_api_json_logs_valid_json_lines_with_request_id` | Log format | A§9, A§11 | Automated |
+| TS-API-028 | `unit_logging_scrubber_secret_values_never_appear_in_log_output` | Log-scrubbing test | NFR-009, S1-T08 | Automated |
 | TS-API-029 | `unit_perf_api_read_endpoints_p95_under_200ms_200_tickers_1_year_runs` | NFR-004 benchmark | NFR-004 | Deferred |
 | TS-API-030 | `contract_api_watchlist_endpoints_cover_every_documented_error` | Per-endpoint errors | FR-8xx, A§6.1 | Deferred |
 | TS-API-031 | `it_api_serves_ui_dist_with_hashed_assets_immutable_index_no_cache` | Cache headers | FR-8xx, S4-T07 | Deferred |
@@ -1050,6 +1092,13 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-API-033 | `contract_api_csp_header_present_no_inline_script_connect_src_self` | CSP | FR-8xx, A§9 | Deferred |
 | TS-API-034 | `contract_api_security_headers_nosniff_referrer_no_referrer_frame_ancestors_none` | Headers | A§9 | Deferred |
 | TS-API-035 | `contract_api_every_pick_payload_carries_disclaimer_on_all_endpoints` | Disclaimer on rankings, analysis, latest, by date | A§9 | Deferred |
+| TS-API-036 | `contract_api_request_id_echoed_when_safe_else_generated` | `X-Request-ID` accepted if safe, else replaced; always in the response header | A§6.0, S1-T08 | Automated |
+| TS-API-037 | `contract_api_host_allowlist_exempts_healthz_readyz_metrics_only` | 421 problem for foreign Host except the three probe paths | A§9, ADR-024, S1-T08 | Automated |
+| TS-API-038 | `contract_api_unhandled_error_returns_500_problem_without_stack_or_secret` | `internal` problem, request ID in body | A§6.1, S1-T08 | Automated |
+| TS-API-039 | `contract_api_validation_error_returns_422_problem_with_errors_member` | `validation-error` problem | A§6.1, S1-T08 | Automated |
+| TS-API-040 | `contract_api_metrics_http_series_use_route_template_not_raw_path` | No high-cardinality labels | A§11.1, S1-T08 | Automated |
+| TS-API-041 | `it_api_readyz_200_at_head_503_when_unmigrated_against_real_postgres` | Real database | A§6.1, S1-T08 | Automated |
+| TS-API-042 | `unit_api_write_token_dependency_401_with_www_authenticate_on_missing_or_wrong_token` | `require_write_token` | A§6.1, A§9, S1-T08 | Automated |
 
 ### 10.12 UI (TS-UI)
 
@@ -1133,9 +1182,10 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-CLI-018 | `unit_cli_remote_mode_api_url_and_token_env_used` | `--api-url`, `SUPERTRENDS_API_TOKEN` | FR-8xx | Deferred |
 | TS-CLI-019 | `unit_cli_remote_mode_write_without_token_exits_1_with_message` | Auth failure | FR-8xx | Deferred |
 | TS-CLI-020 | `unit_cli_config_show_and_validate_unknown_key_fails_naming_key` | Config commands | FR-8xx, S0-T09 | Automated |
-| TS-CLI-021 | `unit_cli_db_migrate_and_backup_invoke_expected_operations` | DB commands | FR-8xx | Deferred |
+| TS-CLI-021 | `unit_cli_db_migrate_and_backup_invoke_expected_operations` | DB commands | FR-8xx | Deferred: `db migrate` automated by TS-CLI-024, `db backup` in S6-T06 |
 | TS-CLI-022 | `unit_cli_output_never_prints_secrets_token_redacted_in_errors` | Secret hygiene | NFR-009 | Deferred |
 | TS-CLI-023 | `it_cli_serve_binds_address_and_healthcheck_passes` | `serve` | FR-8xx | Deferred |
+| TS-CLI-024 | `unit_cli_db_migrate_prints_applied_revision_and_exits_3_when_unreachable` | `supertrends db migrate [--revision]` | A§6.2, S1-T01 | Automated |
 
 ### 10.14 MCP and harnesses (TS-MCP)
 
@@ -1255,10 +1305,10 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-SEC-001 | `it_security_no_outbound_connection_except_configured_provider_and_llm_mocks` | App run with egress blocked except mocks; any other connection attempt fails the test | NFR-008, A§9 | Deferred |
 | TS-SEC-002 | `it_security_no_third_party_telemetry_in_ui_bundle_or_api` | Scan built UI for external hosts; CSP `connect-src 'self'` | NFR-008 | Deferred |
 | TS-SEC-003 | `unit_security_api_key_never_in_logs_errors_or_provider_calls` | Key redaction | NFR-009, S1-T04 | Deferred |
-| TS-SEC-004 | `unit_security_structlog_processor_redacts_known_secret_fields` | Redaction processor | NFR-009 | Deferred |
+| TS-SEC-004 | `unit_security_structlog_processor_redacts_known_secret_fields` | Redaction processor | NFR-009 | Automated |
 | TS-SEC-005 | `contract_security_no_api_response_contains_secret_value` | Walk all endpoint responses with seeded secrets in the environment | NFR-009 | Deferred |
-| TS-SEC-006 | `it_security_metrics_output_contains_no_secret_value` | `/metrics` scan | NFR-009 | Deferred |
-| TS-SEC-007 | `unit_security_token_compare_uses_constant_time_function` | `hmac.compare_digest` | A§9 | Deferred |
+| TS-SEC-006 | `it_security_metrics_output_contains_no_secret_value` | `/metrics` scan | NFR-009 | Automated |
+| TS-SEC-007 | `unit_security_token_compare_uses_constant_time_function` | `hmac.compare_digest` | A§9 | Automated |
 | TS-SEC-008 | `unit_security_input_validation_symbol_regex_dates_pagination_bounds` | Parameter validation | A§9 | Deferred |
 | TS-SEC-009 | `unit_security_llm_and_provider_base_urls_from_config_only` | SSRF | A§9 | Deferred |
 | TS-SEC-010 | `unit_security_disclaimer_text_identical_to_disclaimer_md_everywhere` | Single source of truth | A§9 | Deferred |
@@ -1288,6 +1338,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-SEC-034 | `it_security_llm_prompt_and_provider_strings_excluded_from_prompt_no_injection_path` | Duplicate coverage at integration level | A§9 | Deferred |
 | TS-SEC-035 | `unit_security_license_notice_shown_in_footer_version_output_and_status_endpoint` | Required notice | A§9 | Deferred |
 | TS-SEC-036 | `it_security_review_document_records_evidence_for_every_guideline_item` | `docs/SECURITY_REVIEW.md` completeness check | A§9, S9-T01 | Skipped: requires human judgment on evidence quality; manual: reviewer walks Security Guidelines line by line against `docs/SECURITY_REVIEW.md` |
+| TS-SEC-037 | `unit_network_outbound_connection_attempt_fails_blocked` | Unit tests run with sockets disabled (`pytest-socket`: `--disable-socket --allow-unix-socket --allow-hosts=127.0.0.1,localhost,::1`); an outbound connection raises `SocketConnectBlockedError`, loopback still works | A§7, Sprint 1 checklist, S1-T02 | Automated |
 
 ### 10.18 Accessibility (TS-A11Y)
 
@@ -1312,7 +1363,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | Area | Prefix | Scenarios |
 |---|---|---|
 | Watchlist | TS-WL | 15 |
-| Ingestion and data | TS-ING | 40 |
+| Ingestion and data | TS-ING | 44 |
 | Indicators | TS-IND | 96 |
 | Scoring (11 factors plus framework) | TS-SCR | 140 |
 | Regime and weights | TS-REG | 30 |
@@ -1327,7 +1378,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | MCP and harnesses | TS-MCP | 20 |
 | Operations and run state machine | TS-OPS | 30 |
 | Deployment and packaging | TS-DEP | 46 |
-| Security | TS-SEC | 36 |
+| Security | TS-SEC | 37 |
 | Accessibility | TS-A11Y | 13 |
 
 The counts are maintained by `scripts/count-scenarios.sh`, which parses this file and fails CI if the number of rows, the status vocabulary, or the id sequence is inconsistent with the table above, or if any `Automated` row has no matching test function.
