@@ -347,7 +347,7 @@ REST adapter for daily aggregates, 5-minute aggregates, splits, dividends, and f
 **Acceptance criteria:**
 - [x] contract tests pass (#121)
 - [x] a 429 sequence is retried and succeeds (#121)
-- [x] the API key never appears in logs, errors, or `provider_calls` (#121; the key is never part of a `CallRecord`, but no provider writes `provider_calls` rows yet, see GD-007)
+- [x] the API key never appears in logs, errors, or `provider_calls` (#121; the key is never part of a `CallRecord`, and `sanitize` drops credential-named parameters before #128's `DbCallRecorder` writes `provider_calls`)
 - [x] with no key configured the provider reports `unconfigured` and the app still starts on the fixture provider (#121)
 
 ### S1-T05: Second provider adapter
@@ -415,17 +415,17 @@ FastAPI app with `/healthz` (process up), `/readyz` (database reachable, migrati
 
 ### Sprint 1 checklist (non-blocking; unmet items go to docs/GATE_DEBT.md)
 
-All eight Sprint 1 tasks are implemented in open PRs #117 to #124 and are waiting on owner merges (docs/OWNER_CHECKLIST.md #21). The criteria ticked above are met on each PR's branch. "Integrated tree" below means a local merge of all eight branches on top of `develop`, made 2026-11-15 to check them together.
+All eight Sprint 1 tasks are merged to `develop` (#117 to #124, plus #127 for CI and #128 for provider-call recording) and promoted to `staging` (#129).
 
-- [x] `supertrends ingest` on the fixture provider fills the database; a second run changes nothing (integrated tree: 5,292 daily, 16,380 intraday, and 1 corporate-action row for 7 symbols; the second run wrote 0 rows. Not on `develop` until #124 merges, GD-002)
-- [x] Provider contract tests pass for fixture, Massive, and the alternate provider (#120, #121, #119, and the integrated tree)
-- [x] Watchlist API works end to end against Postgres in CI (`integration-tests` job green on #123; its red `lint-and-typecheck` comes from the cross-branch gitleaks finding, GD-011)
+- [x] `supertrends ingest` on the fixture provider fills the database; a second run changes nothing (`develop` f9ffd93 on local Postgres 17, 2026-11-15: `db migrate`, `watchlist seed`, then `ingest --symbols` for the 10 fixture symbols plus SPY and QQQ, run twice. Both runs left the same row counts, 9,072 daily, 28,080 intraday, 128 fundamentals, and 20 earnings, and the same `bars_daily` checksum. Also automated as `it_cli_ingest_fills_database_and_second_run_changes_nothing`)
+- [x] Provider contract tests pass for fixture, Massive, and the alternate provider (#120, #121, #119; green on `develop`)
+- [x] Watchlist API works end to end against Postgres in CI (`integration-tests` job green on `develop` and on the `staging` promotion #129)
 - [ ] No test touches the network (CI runs with outbound network blocked for the test step). Partly met: pytest-socket blocks every non-localhost socket in all test runs (#117), but the CI test step has no OS-level outbound block (GD-003)
-- [ ] `make up && make smoke` pass. On the integrated tree they pass (3 smoke tests) only with the Compose `migrate` service pushed to #122 (7819b0f). Not run on `develop` or `staging` (GD-004)
-- [x] Coverage thresholds met; spec docs audited (integrated tree: 91% line and branch, every per-directory threshold met; audit notes in docs/RETROSPECTIVES.md)
-- [ ] Retrospective written; tag `sprint-1-complete` pushed. The retrospective is written; the tag waits on the merges and the `staging` promotion (GD-002)
+- [x] `make up && make smoke` pass (3 of 3 on `develop` 0304bd8 and on `staging` a6bc05d, 2026-11-15)
+- [x] Coverage thresholds met; spec docs audited (`staging` a6bc05d: Python 96% line and branch, 3,146 statements, every per-directory threshold met; audit notes in docs/RETROSPECTIVES.md)
+- [x] Retrospective written; tag `sprint-1-complete` pushed (on the `staging` promotion of this checklist)
 
-Checklist run 2026-11-15. Four of seven items pass. One task criterion is unmet (S1-T07 unresolved seed symbols). Each unmet item has an entry in `docs/GATE_DEBT.md`, GD-002 to GD-012.
+Checklist run 2026-11-15. Six of seven items pass. One task criterion is unmet (S1-T07 unresolved seed symbols, GD-005). Unmet and process items are in `docs/GATE_DEBT.md`: GD-003, GD-005, GD-006, GD-008, and GD-012 to GD-014 are open; GD-002, GD-004, GD-007, and GD-009 to GD-011 are resolved.
 
 ---
 
