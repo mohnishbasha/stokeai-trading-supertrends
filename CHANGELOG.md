@@ -16,6 +16,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - CI pipeline (lint and type-check, unit, coverage, integration, e2e placeholder, multi-arch image build, changelog rule) and Dependabot (S0-T05).
 - Agent harness files: `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, and the `run-tests` and `check-types` skills (S0-T07).
 - License and community files, SPDX header check, dependency license check, and the CLA check (S0-T08).
+- SQLAlchemy 2 models and Alembic migrations for the complete live schema and the `backtests` schema, append-only triggers, run state guard, `supertrends db migrate`, and `supertrends.data.db` helpers (S1-T01).
 - `scripts/stoke-inventory.sh`, a read-only Stoke cluster inventory written to git-ignored `private/` (S0-T10).
 
 ### Scoring
