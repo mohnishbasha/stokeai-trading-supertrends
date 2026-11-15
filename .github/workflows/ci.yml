@@ -46,6 +46,7 @@ jobs:
       - run: npm --prefix ui run build
       - run: npm --prefix ui run lint
       - run: npm --prefix ui run type-check
+      - run: ./scripts/check-versions.sh
 
   unit-tests:
     name: ci / unit-tests

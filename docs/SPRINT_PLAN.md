@@ -176,8 +176,8 @@ Create the root `Makefile` exactly as specified in Build and Deployment, with `m
 Root `VERSION` file containing `0.1.0`. `scripts/check-versions.sh`, `scripts/extract-changelog.sh`, `CHANGELOG.md` with an `[Unreleased]` section. See Versioning.
 
 **Acceptance criteria:**
-- [ ] `scripts/check-versions.sh` exits 0
-- [ ] changing `ui/package.json` version alone makes it exit 1 naming that file
+- [x] `scripts/check-versions.sh` exits 0
+- [x] changing `ui/package.json` version alone makes it exit 1 naming that file
 
 ### S0-T05: CI pipeline
 
