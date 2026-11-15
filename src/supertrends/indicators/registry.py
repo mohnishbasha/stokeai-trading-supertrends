@@ -97,8 +97,10 @@ __all__ = [
     "REGISTRY",
     "Bundle",
     "Entry",
+    "SIGNIFICANT_DIGITS",
     "canonical",
     "compute_all",
+    "round_significant",
     "unregistered",
 ]
 
@@ -242,6 +244,24 @@ def canonical(obj: Any) -> object:  # noqa: PLR0911
         return [canonical(v) for v in obj]
     msg = f"cannot canonicalize {type(obj).__name__}"
     raise TypeError(msg)
+
+
+SIGNIFICANT_DIGITS = 10  # indicator floats are stored and hashed to 10 digits (ADR-056)
+
+
+def round_significant(obj: Any) -> Any:
+    """Round every float in a canonical structure to `SIGNIFICANT_DIGITS` significant digits.
+
+    libm and BLAS differ by a few ulps across platforms, so the last bits of a double are not
+    reproducible; ten digits are (ADR-056). Dicts and lists are rebuilt, other values pass through.
+    """
+    if isinstance(obj, float):
+        return float(f"{obj:.{SIGNIFICANT_DIGITS - 1}e}")
+    if isinstance(obj, dict):
+        return {k: round_significant(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [round_significant(v) for v in obj]
+    return obj
 
 
 # --- adapters -------------------------------------------------------------------------------
