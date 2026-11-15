@@ -49,7 +49,11 @@ jobs:
       - name: shellcheck
         run: shellcheck scripts/*.sh
       - name: pip-audit
-        run: uv run --locked pip-audit --strict --progress-spinner off
+        # Audits the locked dependencies; the project itself is not on PyPI.
+        run: |
+          uv export --locked --no-emit-project --quiet -o "$RUNNER_TEMP/requirements.txt"
+          uv run --locked pip-audit --strict --disable-pip --progress-spinner off \
+            -r "$RUNNER_TEMP/requirements.txt"
       - name: npm audit
         run: npm --prefix ui audit --audit-level=high
       - name: gitleaks
