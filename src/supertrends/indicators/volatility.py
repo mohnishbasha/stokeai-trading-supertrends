@@ -69,7 +69,7 @@ def atr_pct_rank(
 def hv20(close: FloatArray, n: int = 20, trading_days: int = 252) -> FloatArray:
     """Historical volatility: population stdev of n daily log returns * sqrt(trading_days).
 
-    Population (ddof=0) for consistency with the z-score and Bollinger (PRD A-17). Warm-up: NaN
+    Population (ddof=0) for consistency with the z-score and Bollinger (PRD A-20). Warm-up: NaN
     for the first n bars (the first log return needs two closes). Non-positive closes give NaN.
     """
     ret = np.full(len(close), np.nan, dtype=np.float64)
@@ -91,7 +91,7 @@ def expansion(
     """Expansion flag: bbw_rank > threshold and bandwidth rising for `bars` bars.
 
     "Rising 3 bars" is read literally as 3 consecutive increases: bbw[t] > bbw[t-1] > bbw[t-2]
-    > bbw[t-3] (PRD A-18). 1.0 or 0.0; NaN where rank or any needed bandwidth value is NaN.
+    > bbw[t-3] (PRD A-21). 1.0 or 0.0; NaN where rank or any needed bandwidth value is NaN.
     """
     if len(rank) != len(bbw):
         msg = "input arrays must have the same length"

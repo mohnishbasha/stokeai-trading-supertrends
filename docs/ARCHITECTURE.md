@@ -513,6 +513,13 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** The number may need renumbering at merge. A new indicator module needs a one-line change here.
 - **Status:** Accepted.
 
+### ADR-054: Trend and momentum indicator definitions
+- **Context:** Factor 2, Factor 3, and the regime ADX leave several details open (S2-T03).
+- **Decision:** ADX uses Wilder: `+DM = up if up > down and up > 0 else 0`, `-DM = down if down > up and down > 0 else 0` (`up = high[t] - high[t-1]`, `down = low[t-1] - low[t]`), TR, +DM, and -DM smoothed with the Wilder RMA over bars 1..14, `+DI = 100 * RMA(+DM) / RMA(TR)`, `DX = 100 * |+DI - -DI| / (+DI + -DI)`, `ADX = RMA(DX, 14)`; any zero denominator yields 0, so a flat series gives DI = DX = ADX = 0. A cross at t needs the prior bar on the other side or equal (`a[t-1] <= b[t-1]` and `a[t] > b[t]` for golden); `last_cross` looks at the last N bars including the latest. Slope is `sma[t] - sma[t-5]`. Weekly MACD is evaluated as of each day from the completed weekly EMA state plus the in-progress week closed at that day's close, so it equals the finished weekly bar's MACD on the last session of a week and never uses later bars. A histogram run is 3 consecutive strict changes.
+- **Alternatives rejected:** Forward-filling the last completed weekly MACD (stale by up to 4 days); recomputing the whole weekly series per day (O(n^2)).
+- **Consequences:** The number may need renumbering at merge.
+- **Status:** Accepted.
+
 ---
 
 ## 4. Data Flows
