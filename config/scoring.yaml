@@ -1,0 +1,111 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright 2026 Serverless Ventures LLC
+#
+# Scoring config: every period, weight, and threshold of the Signal Engine Specification.
+# Seed: BUILD_PROMPT.md Appendix E, verbatim (docs/ARCHITECTURE.md section 13.1).
+# Any change to a weight, threshold, or formula bumps scoring.version (Spec Change Protocol, option B).
+
+scoring:
+  version: 1
+min_history_bars: 250
+liquidity:
+  min_avg_dollar_volume_20d: 20000000
+supertrend:
+  atr_length: 10
+  factor: 3.0
+  fresh_flip_bars: 5
+  stretch_atr: 4.0
+sma:
+  periods: [20, 50, 200]
+  slope_bars: 5
+  cross_lookback: 10
+macd:
+  fast: 12
+  slow: 26
+  signal: 9
+  cross_lookback: 3
+  weekly_disagree_multiplier: 0.75
+divergence:
+  pivot_width_daily: 5
+  pivot_width_weekly: 3
+  window_bars: 60
+  recency_bars: 15
+  points: { rsi: 40, macd_hist: 35, obv: 25 }
+  hidden_multiplier: 0.5
+  weekly_confirm_multiplier: 1.25
+mean_reversion:
+  window: 20
+  z_cap: 2.5
+  rsi_length: 14
+  rsi_low: 30
+  rsi_high: 70
+fibonacci:
+  lookback_bars: 120
+  min_reversal_pct: 0.08
+  min_reversal_atr: 3.0
+  near_atr: 0.5
+levels:
+  lookback_bars: 250
+  pivot_width: 5
+  cluster_atr: 0.5
+  breakout_rel_volume: 1.5
+volatility:
+  atr_length: 14
+  bb_length: 20
+  bb_mult: 2.0
+  squeeze_rank: 15
+  expansion_rank: 85
+  extreme_atr_rank: 90
+volume:
+  osc_short: 5
+  osc_long: 10
+  obv_slope_bars: 20
+flow:
+  intraday_timeframe: 5m
+  window_sessions: 10
+  min_sessions_for_intraday: 8
+  cmf_length: 20
+  daily_estimate_weight_multiplier: 0.6
+fundamentals:
+  stale_days: 120
+  stale_weight_multiplier: 0.5
+weights:
+  supertrend: 20
+  sma: 10
+  macd: 10
+  divergence: 10
+  mean_reversion: 8
+  fibonacci: 6
+  levels: 8
+  volatility: 5
+  volume_osc: 6
+  flow: 9
+  fundamentals: 8
+regime:
+  adx_length: 14
+  trending_min: 25
+  ranging_max: 20
+  multipliers:
+    trending:     { supertrend: 1.25, sma: 1.20, macd: 1.10, divergence: 0.90, mean_reversion: 0.50, fibonacci: 1.00, levels: 0.90 }
+    ranging:      { supertrend: 0.70, sma: 0.70, macd: 0.90, divergence: 1.20, mean_reversion: 1.60, fibonacci: 1.10, levels: 1.40 }
+    transitional: {}
+events:
+  earnings_window_days: 5
+  earnings_fundamentals_multiplier: 1.5
+thresholds:
+  buy_display_min: 65
+  sell_display_max: 35
+  min_confidence: 50
+  weak_fundamentals_score: -40
+  strong_fundamentals_score: 40
+  fundamentals_threshold_shift: 5
+  market_regime_threshold_shift: 5
+selection:
+  max_buys: 3
+  max_sells: 2
+  correlation_window: 60
+  correlation_max: 0.9
+benchmarks: [SPY, QQQ]
+track_record:
+  horizons_days: [1, 5, 10, 20]
+  small_sample: 20

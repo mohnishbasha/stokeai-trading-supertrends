@@ -252,9 +252,9 @@ Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent
 `config/scoring.yaml` with every default from the Signal Engine Specification, a pydantic settings model, a JSON schema export, and a `config_hash` function (sha256 of the canonical JSON).
 
 **Acceptance criteria:**
-- [ ] loading the default file succeeds
-- [ ] an unknown key or out-of-range weight fails with a message naming the key
-- [ ] the hash is stable across key order
+- [x] loading the default file succeeds
+- [x] an unknown key or out-of-range weight fails with a message naming the key
+- [x] the hash is stable across key order
 
 ### S0-T10: Stoke inventory script
 

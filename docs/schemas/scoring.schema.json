@@ -1,0 +1,804 @@
+{
+  "$defs": {
+    "Divergence": {
+      "additionalProperties": false,
+      "properties": {
+        "hidden_multiplier": {
+          "exclusiveMinimum": 0,
+          "title": "Hidden Multiplier",
+          "type": "number"
+        },
+        "pivot_width_daily": {
+          "exclusiveMinimum": 0,
+          "title": "Pivot Width Daily",
+          "type": "integer"
+        },
+        "pivot_width_weekly": {
+          "exclusiveMinimum": 0,
+          "title": "Pivot Width Weekly",
+          "type": "integer"
+        },
+        "points": {
+          "$ref": "#/$defs/DivergencePoints"
+        },
+        "recency_bars": {
+          "exclusiveMinimum": 0,
+          "title": "Recency Bars",
+          "type": "integer"
+        },
+        "weekly_confirm_multiplier": {
+          "exclusiveMinimum": 0,
+          "title": "Weekly Confirm Multiplier",
+          "type": "number"
+        },
+        "window_bars": {
+          "exclusiveMinimum": 0,
+          "title": "Window Bars",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pivot_width_daily",
+        "pivot_width_weekly",
+        "window_bars",
+        "recency_bars",
+        "points",
+        "hidden_multiplier",
+        "weekly_confirm_multiplier"
+      ],
+      "title": "Divergence",
+      "type": "object"
+    },
+    "DivergencePoints": {
+      "additionalProperties": false,
+      "properties": {
+        "macd_hist": {
+          "minimum": 0,
+          "title": "Macd Hist",
+          "type": "number"
+        },
+        "obv": {
+          "minimum": 0,
+          "title": "Obv",
+          "type": "number"
+        },
+        "rsi": {
+          "minimum": 0,
+          "title": "Rsi",
+          "type": "number"
+        }
+      },
+      "required": [
+        "rsi",
+        "macd_hist",
+        "obv"
+      ],
+      "title": "DivergencePoints",
+      "type": "object"
+    },
+    "Events": {
+      "additionalProperties": false,
+      "properties": {
+        "earnings_fundamentals_multiplier": {
+          "exclusiveMinimum": 0,
+          "title": "Earnings Fundamentals Multiplier",
+          "type": "number"
+        },
+        "earnings_window_days": {
+          "exclusiveMinimum": 0,
+          "title": "Earnings Window Days",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "earnings_window_days",
+        "earnings_fundamentals_multiplier"
+      ],
+      "title": "Events",
+      "type": "object"
+    },
+    "Fibonacci": {
+      "additionalProperties": false,
+      "properties": {
+        "lookback_bars": {
+          "exclusiveMinimum": 0,
+          "title": "Lookback Bars",
+          "type": "integer"
+        },
+        "min_reversal_atr": {
+          "exclusiveMinimum": 0,
+          "title": "Min Reversal Atr",
+          "type": "number"
+        },
+        "min_reversal_pct": {
+          "exclusiveMinimum": 0,
+          "title": "Min Reversal Pct",
+          "type": "number"
+        },
+        "near_atr": {
+          "exclusiveMinimum": 0,
+          "title": "Near Atr",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lookback_bars",
+        "min_reversal_pct",
+        "min_reversal_atr",
+        "near_atr"
+      ],
+      "title": "Fibonacci",
+      "type": "object"
+    },
+    "Flow": {
+      "additionalProperties": false,
+      "properties": {
+        "cmf_length": {
+          "exclusiveMinimum": 0,
+          "title": "Cmf Length",
+          "type": "integer"
+        },
+        "daily_estimate_weight_multiplier": {
+          "exclusiveMinimum": 0,
+          "title": "Daily Estimate Weight Multiplier",
+          "type": "number"
+        },
+        "intraday_timeframe": {
+          "pattern": "^[1-9][0-9]*m$",
+          "title": "Intraday Timeframe",
+          "type": "string"
+        },
+        "min_sessions_for_intraday": {
+          "exclusiveMinimum": 0,
+          "title": "Min Sessions For Intraday",
+          "type": "integer"
+        },
+        "window_sessions": {
+          "exclusiveMinimum": 0,
+          "title": "Window Sessions",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "intraday_timeframe",
+        "window_sessions",
+        "min_sessions_for_intraday",
+        "cmf_length",
+        "daily_estimate_weight_multiplier"
+      ],
+      "title": "Flow",
+      "type": "object"
+    },
+    "Fundamentals": {
+      "additionalProperties": false,
+      "properties": {
+        "stale_days": {
+          "exclusiveMinimum": 0,
+          "title": "Stale Days",
+          "type": "integer"
+        },
+        "stale_weight_multiplier": {
+          "exclusiveMinimum": 0,
+          "title": "Stale Weight Multiplier",
+          "type": "number"
+        }
+      },
+      "required": [
+        "stale_days",
+        "stale_weight_multiplier"
+      ],
+      "title": "Fundamentals",
+      "type": "object"
+    },
+    "Levels": {
+      "additionalProperties": false,
+      "properties": {
+        "breakout_rel_volume": {
+          "exclusiveMinimum": 0,
+          "title": "Breakout Rel Volume",
+          "type": "number"
+        },
+        "cluster_atr": {
+          "exclusiveMinimum": 0,
+          "title": "Cluster Atr",
+          "type": "number"
+        },
+        "lookback_bars": {
+          "exclusiveMinimum": 0,
+          "title": "Lookback Bars",
+          "type": "integer"
+        },
+        "pivot_width": {
+          "exclusiveMinimum": 0,
+          "title": "Pivot Width",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "lookback_bars",
+        "pivot_width",
+        "cluster_atr",
+        "breakout_rel_volume"
+      ],
+      "title": "Levels",
+      "type": "object"
+    },
+    "Liquidity": {
+      "additionalProperties": false,
+      "properties": {
+        "min_avg_dollar_volume_20d": {
+          "exclusiveMinimum": 0,
+          "title": "Min Avg Dollar Volume 20D",
+          "type": "number"
+        }
+      },
+      "required": [
+        "min_avg_dollar_volume_20d"
+      ],
+      "title": "Liquidity",
+      "type": "object"
+    },
+    "Macd": {
+      "additionalProperties": false,
+      "properties": {
+        "cross_lookback": {
+          "exclusiveMinimum": 0,
+          "title": "Cross Lookback",
+          "type": "integer"
+        },
+        "fast": {
+          "exclusiveMinimum": 0,
+          "title": "Fast",
+          "type": "integer"
+        },
+        "signal": {
+          "exclusiveMinimum": 0,
+          "title": "Signal",
+          "type": "integer"
+        },
+        "slow": {
+          "exclusiveMinimum": 0,
+          "title": "Slow",
+          "type": "integer"
+        },
+        "weekly_disagree_multiplier": {
+          "exclusiveMinimum": 0,
+          "title": "Weekly Disagree Multiplier",
+          "type": "number"
+        }
+      },
+      "required": [
+        "fast",
+        "slow",
+        "signal",
+        "cross_lookback",
+        "weekly_disagree_multiplier"
+      ],
+      "title": "Macd",
+      "type": "object"
+    },
+    "MeanReversion": {
+      "additionalProperties": false,
+      "properties": {
+        "rsi_high": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Rsi High",
+          "type": "number"
+        },
+        "rsi_length": {
+          "exclusiveMinimum": 0,
+          "title": "Rsi Length",
+          "type": "integer"
+        },
+        "rsi_low": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Rsi Low",
+          "type": "number"
+        },
+        "window": {
+          "exclusiveMinimum": 0,
+          "title": "Window",
+          "type": "integer"
+        },
+        "z_cap": {
+          "exclusiveMinimum": 0,
+          "title": "Z Cap",
+          "type": "number"
+        }
+      },
+      "required": [
+        "window",
+        "z_cap",
+        "rsi_length",
+        "rsi_low",
+        "rsi_high"
+      ],
+      "title": "MeanReversion",
+      "type": "object"
+    },
+    "Regime": {
+      "additionalProperties": false,
+      "properties": {
+        "adx_length": {
+          "exclusiveMinimum": 0,
+          "title": "Adx Length",
+          "type": "integer"
+        },
+        "multipliers": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            "type": "object"
+          },
+          "title": "Multipliers",
+          "type": "object"
+        },
+        "ranging_max": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Ranging Max",
+          "type": "number"
+        },
+        "trending_min": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Trending Min",
+          "type": "number"
+        }
+      },
+      "required": [
+        "adx_length",
+        "trending_min",
+        "ranging_max",
+        "multipliers"
+      ],
+      "title": "Regime",
+      "type": "object"
+    },
+    "ScoringMeta": {
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version"
+      ],
+      "title": "ScoringMeta",
+      "type": "object"
+    },
+    "Selection": {
+      "additionalProperties": false,
+      "properties": {
+        "correlation_max": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Correlation Max",
+          "type": "number"
+        },
+        "correlation_window": {
+          "exclusiveMinimum": 0,
+          "title": "Correlation Window",
+          "type": "integer"
+        },
+        "max_buys": {
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Max Buys",
+          "type": "integer"
+        },
+        "max_sells": {
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Max Sells",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "max_buys",
+        "max_sells",
+        "correlation_window",
+        "correlation_max"
+      ],
+      "title": "Selection",
+      "type": "object"
+    },
+    "Sma": {
+      "additionalProperties": false,
+      "properties": {
+        "cross_lookback": {
+          "exclusiveMinimum": 0,
+          "title": "Cross Lookback",
+          "type": "integer"
+        },
+        "periods": {
+          "items": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Periods",
+          "type": "array"
+        },
+        "slope_bars": {
+          "exclusiveMinimum": 0,
+          "title": "Slope Bars",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "periods",
+        "slope_bars",
+        "cross_lookback"
+      ],
+      "title": "Sma",
+      "type": "object"
+    },
+    "Supertrend": {
+      "additionalProperties": false,
+      "properties": {
+        "atr_length": {
+          "exclusiveMinimum": 0,
+          "title": "Atr Length",
+          "type": "integer"
+        },
+        "factor": {
+          "exclusiveMinimum": 0,
+          "title": "Factor",
+          "type": "number"
+        },
+        "fresh_flip_bars": {
+          "exclusiveMinimum": 0,
+          "title": "Fresh Flip Bars",
+          "type": "integer"
+        },
+        "stretch_atr": {
+          "exclusiveMinimum": 0,
+          "title": "Stretch Atr",
+          "type": "number"
+        }
+      },
+      "required": [
+        "atr_length",
+        "factor",
+        "fresh_flip_bars",
+        "stretch_atr"
+      ],
+      "title": "Supertrend",
+      "type": "object"
+    },
+    "Thresholds": {
+      "additionalProperties": false,
+      "properties": {
+        "buy_display_min": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Buy Display Min",
+          "type": "number"
+        },
+        "fundamentals_threshold_shift": {
+          "minimum": 0,
+          "title": "Fundamentals Threshold Shift",
+          "type": "number"
+        },
+        "market_regime_threshold_shift": {
+          "minimum": 0,
+          "title": "Market Regime Threshold Shift",
+          "type": "number"
+        },
+        "min_confidence": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Min Confidence",
+          "type": "number"
+        },
+        "sell_display_max": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Sell Display Max",
+          "type": "number"
+        },
+        "strong_fundamentals_score": {
+          "title": "Strong Fundamentals Score",
+          "type": "number"
+        },
+        "weak_fundamentals_score": {
+          "title": "Weak Fundamentals Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "buy_display_min",
+        "sell_display_max",
+        "min_confidence",
+        "weak_fundamentals_score",
+        "strong_fundamentals_score",
+        "fundamentals_threshold_shift",
+        "market_regime_threshold_shift"
+      ],
+      "title": "Thresholds",
+      "type": "object"
+    },
+    "TrackRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "horizons_days": {
+          "items": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Horizons Days",
+          "type": "array"
+        },
+        "small_sample": {
+          "exclusiveMinimum": 0,
+          "title": "Small Sample",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "horizons_days",
+        "small_sample"
+      ],
+      "title": "TrackRecord",
+      "type": "object"
+    },
+    "Volatility": {
+      "additionalProperties": false,
+      "properties": {
+        "atr_length": {
+          "exclusiveMinimum": 0,
+          "title": "Atr Length",
+          "type": "integer"
+        },
+        "bb_length": {
+          "exclusiveMinimum": 0,
+          "title": "Bb Length",
+          "type": "integer"
+        },
+        "bb_mult": {
+          "exclusiveMinimum": 0,
+          "title": "Bb Mult",
+          "type": "number"
+        },
+        "expansion_rank": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Expansion Rank",
+          "type": "number"
+        },
+        "extreme_atr_rank": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Extreme Atr Rank",
+          "type": "number"
+        },
+        "squeeze_rank": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Squeeze Rank",
+          "type": "number"
+        }
+      },
+      "required": [
+        "atr_length",
+        "bb_length",
+        "bb_mult",
+        "squeeze_rank",
+        "expansion_rank",
+        "extreme_atr_rank"
+      ],
+      "title": "Volatility",
+      "type": "object"
+    },
+    "Volume": {
+      "additionalProperties": false,
+      "properties": {
+        "obv_slope_bars": {
+          "exclusiveMinimum": 0,
+          "title": "Obv Slope Bars",
+          "type": "integer"
+        },
+        "osc_long": {
+          "exclusiveMinimum": 0,
+          "title": "Osc Long",
+          "type": "integer"
+        },
+        "osc_short": {
+          "exclusiveMinimum": 0,
+          "title": "Osc Short",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "osc_short",
+        "osc_long",
+        "obv_slope_bars"
+      ],
+      "title": "Volume",
+      "type": "object"
+    },
+    "Weights": {
+      "additionalProperties": false,
+      "properties": {
+        "divergence": {
+          "minimum": 0,
+          "title": "Divergence",
+          "type": "number"
+        },
+        "fibonacci": {
+          "minimum": 0,
+          "title": "Fibonacci",
+          "type": "number"
+        },
+        "flow": {
+          "minimum": 0,
+          "title": "Flow",
+          "type": "number"
+        },
+        "fundamentals": {
+          "minimum": 0,
+          "title": "Fundamentals",
+          "type": "number"
+        },
+        "levels": {
+          "minimum": 0,
+          "title": "Levels",
+          "type": "number"
+        },
+        "macd": {
+          "minimum": 0,
+          "title": "Macd",
+          "type": "number"
+        },
+        "mean_reversion": {
+          "minimum": 0,
+          "title": "Mean Reversion",
+          "type": "number"
+        },
+        "sma": {
+          "minimum": 0,
+          "title": "Sma",
+          "type": "number"
+        },
+        "supertrend": {
+          "minimum": 0,
+          "title": "Supertrend",
+          "type": "number"
+        },
+        "volatility": {
+          "minimum": 0,
+          "title": "Volatility",
+          "type": "number"
+        },
+        "volume_osc": {
+          "minimum": 0,
+          "title": "Volume Osc",
+          "type": "number"
+        }
+      },
+      "required": [
+        "supertrend",
+        "sma",
+        "macd",
+        "divergence",
+        "mean_reversion",
+        "fibonacci",
+        "levels",
+        "volatility",
+        "volume_osc",
+        "flow",
+        "fundamentals"
+      ],
+      "title": "Weights",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The validated scoring config document.",
+  "properties": {
+    "benchmarks": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Benchmarks",
+      "type": "array"
+    },
+    "divergence": {
+      "$ref": "#/$defs/Divergence"
+    },
+    "events": {
+      "$ref": "#/$defs/Events"
+    },
+    "fibonacci": {
+      "$ref": "#/$defs/Fibonacci"
+    },
+    "flow": {
+      "$ref": "#/$defs/Flow"
+    },
+    "fundamentals": {
+      "$ref": "#/$defs/Fundamentals"
+    },
+    "levels": {
+      "$ref": "#/$defs/Levels"
+    },
+    "liquidity": {
+      "$ref": "#/$defs/Liquidity"
+    },
+    "macd": {
+      "$ref": "#/$defs/Macd"
+    },
+    "mean_reversion": {
+      "$ref": "#/$defs/MeanReversion"
+    },
+    "min_history_bars": {
+      "exclusiveMinimum": 0,
+      "title": "Min History Bars",
+      "type": "integer"
+    },
+    "regime": {
+      "$ref": "#/$defs/Regime"
+    },
+    "scoring": {
+      "$ref": "#/$defs/ScoringMeta"
+    },
+    "selection": {
+      "$ref": "#/$defs/Selection"
+    },
+    "sma": {
+      "$ref": "#/$defs/Sma"
+    },
+    "supertrend": {
+      "$ref": "#/$defs/Supertrend"
+    },
+    "thresholds": {
+      "$ref": "#/$defs/Thresholds"
+    },
+    "track_record": {
+      "$ref": "#/$defs/TrackRecord"
+    },
+    "volatility": {
+      "$ref": "#/$defs/Volatility"
+    },
+    "volume": {
+      "$ref": "#/$defs/Volume"
+    },
+    "weights": {
+      "$ref": "#/$defs/Weights"
+    }
+  },
+  "required": [
+    "scoring",
+    "min_history_bars",
+    "liquidity",
+    "supertrend",
+    "sma",
+    "macd",
+    "divergence",
+    "mean_reversion",
+    "fibonacci",
+    "levels",
+    "volatility",
+    "volume",
+    "flow",
+    "fundamentals",
+    "weights",
+    "regime",
+    "events",
+    "thresholds",
+    "selection",
+    "benchmarks",
+    "track_record"
+  ],
+  "title": "ScoringConfig",
+  "type": "object"
+}
