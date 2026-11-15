@@ -7,3 +7,4 @@ dd2d3271211fe5c1f08f2078de0e562fc04c96e8:tests/unit/test_logging_scrubber.py:gen
 dd2d3271211fe5c1f08f2078de0e562fc04c96e8:tests/unit/test_logging_scrubber.py:generic-api-key:18
 dd2d3271211fe5c1f08f2078de0e562fc04c96e8:tests/unit/test_api_observability.py:generic-api-key:21
 # Synthetic test credential committed before it was renamed (S1-T04); not a real secret.
+# Test-only fake credentials in the S1-T08 scrubber tests (commit dd2d327); later lines carry gitleaks:allow

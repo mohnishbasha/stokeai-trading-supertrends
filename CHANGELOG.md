@@ -23,6 +23,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Alternate market data provider: Alpaca Market Data adapter behind the `alternate` registry name, with daily and 5-minute bars, splits, dividends, header auth, and retry (S1-T05, ADR-032).
 - Massive (formerly Polygon.io) market data and fundamentals adapter with header auth, a token-bucket rate limiter, retries with jittered backoff, response caching, and call recording (S1-T04).
 - Unit tests run with outbound network blocked via `pytest-socket` (loopback only).
+- API skeleton: `/readyz` checks database reachability and migrations at head (RFC 9457 503), `/metrics` Prometheus HTTP metrics, structlog JSON logs with request IDs and a secret scrubber, problem+json errors, Host allowlist with probe exemptions, and `require_write_token` (S1-T08).
+- Local Compose runs a one-shot `migrate` service (`supertrends db migrate`) before the app starts, so `/readyz` reports ready after `make up` (S1-T08).
 
 ### Scoring
 

@@ -1039,10 +1039,10 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-API-001 | `contract_api_healthz_returns_200_status_ok` | `{"status":"ok"}` | FR-8xx, A§6.1 | Deferred |
-| TS-API-002 | `contract_api_readyz_database_down_returns_503` | Readiness | FR-8xx, S1-T08 | Deferred |
-| TS-API-003 | `contract_api_readyz_migrations_behind_head_returns_503` | Migration check | FR-8xx | Deferred |
-| TS-API-004 | `contract_api_metrics_returns_prometheus_text` | `/metrics` | FR-8xx, A§11 | Deferred |
+| TS-API-001 | `contract_api_healthz_returns_200_status_ok` | `{"status":"ok"}` | FR-8xx, A§6.1 | Automated |
+| TS-API-002 | `contract_api_readyz_database_down_returns_503` | Readiness | FR-8xx, S1-T08 | Automated |
+| TS-API-003 | `contract_api_readyz_migrations_behind_head_returns_503` | Migration check | FR-8xx | Automated |
+| TS-API-004 | `contract_api_metrics_returns_prometheus_text` | `/metrics` | FR-8xx, A§11 | Automated |
 | TS-API-005 | `contract_api_recommendations_latest_shape_matches_openapi` | Schema | FR-8xx | Deferred |
 | TS-API-006 | `contract_api_recommendations_latest_includes_disclaimer_string` | Disclaimer | FR-8xx, A§9 | Deferred |
 | TS-API-007 | `contract_api_recommendations_by_date_returns_that_days_published_run` | Date browse | FR-8xx, US-012 | Deferred |
@@ -1061,12 +1061,12 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-API-020 | `contract_api_post_runs_while_running_returns_409_already_running` | Concurrency | FR-8xx, S3-T07 | Deferred |
 | TS-API-021 | `contract_api_config_scoring_returns_active_config_and_hash` | Config view | FR-8xx | Deferred |
 | TS-API-022 | `contract_api_status_returns_version_commit_and_license_notice` | License notice | FR-8xx, A§9 | Deferred |
-| TS-API-023 | `contract_api_errors_use_rfc_9457_problem_json` | Error format | FR-8xx, S1-T08 | Deferred |
+| TS-API-023 | `contract_api_errors_use_rfc_9457_problem_json` | Error format | FR-8xx, S1-T08 | Automated |
 | TS-API-024 | `contract_api_openapi_document_matches_committed_docs_openapi_json` | Drift check | FR-8xx, S3-T09 | Deferred |
 | TS-API-025 | `contract_api_write_endpoints_rate_limited_returns_429` | Rate limit | FR-8xx, A§9 | Deferred |
-| TS-API-026 | `contract_api_unknown_host_header_rejected` | `SUPERTRENDS_ALLOWED_HOSTS` | FR-8xx, A§9 | Deferred |
-| TS-API-027 | `contract_api_json_logs_valid_json_lines_with_request_id` | Log format | A§9, A§11 | Deferred |
-| TS-API-028 | `unit_logging_scrubber_secret_values_never_appear_in_log_output` | Log-scrubbing test | NFR-009, S1-T08 | Deferred |
+| TS-API-026 | `contract_api_unknown_host_header_rejected` | `SUPERTRENDS_ALLOWED_HOSTS` | FR-8xx, A§9 | Automated |
+| TS-API-027 | `contract_api_json_logs_valid_json_lines_with_request_id` | Log format | A§9, A§11 | Automated |
+| TS-API-028 | `unit_logging_scrubber_secret_values_never_appear_in_log_output` | Log-scrubbing test | NFR-009, S1-T08 | Automated |
 | TS-API-029 | `unit_perf_api_read_endpoints_p95_under_200ms_200_tickers_1_year_runs` | NFR-004 benchmark | NFR-004 | Deferred |
 | TS-API-030 | `contract_api_watchlist_endpoints_cover_every_documented_error` | Per-endpoint errors | FR-8xx, A§6.1 | Deferred |
 | TS-API-031 | `it_api_serves_ui_dist_with_hashed_assets_immutable_index_no_cache` | Cache headers | FR-8xx, S4-T07 | Deferred |
@@ -1074,6 +1074,13 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-API-033 | `contract_api_csp_header_present_no_inline_script_connect_src_self` | CSP | FR-8xx, A§9 | Deferred |
 | TS-API-034 | `contract_api_security_headers_nosniff_referrer_no_referrer_frame_ancestors_none` | Headers | A§9 | Deferred |
 | TS-API-035 | `contract_api_every_pick_payload_carries_disclaimer_on_all_endpoints` | Disclaimer on rankings, analysis, latest, by date | A§9 | Deferred |
+| TS-API-036 | `contract_api_request_id_echoed_when_safe_else_generated` | `X-Request-ID` accepted if safe, else replaced; always in the response header | A§6.0, S1-T08 | Automated |
+| TS-API-037 | `contract_api_host_allowlist_exempts_healthz_readyz_metrics_only` | 421 problem for foreign Host except the three probe paths | A§9, ADR-024, S1-T08 | Automated |
+| TS-API-038 | `contract_api_unhandled_error_returns_500_problem_without_stack_or_secret` | `internal` problem, request ID in body | A§6.1, S1-T08 | Automated |
+| TS-API-039 | `contract_api_validation_error_returns_422_problem_with_errors_member` | `validation-error` problem | A§6.1, S1-T08 | Automated |
+| TS-API-040 | `contract_api_metrics_http_series_use_route_template_not_raw_path` | No high-cardinality labels | A§11.1, S1-T08 | Automated |
+| TS-API-041 | `it_api_readyz_200_at_head_503_when_unmigrated_against_real_postgres` | Real database | A§6.1, S1-T08 | Automated |
+| TS-API-042 | `unit_api_write_token_dependency_401_with_www_authenticate_on_missing_or_wrong_token` | `require_write_token` | A§6.1, A§9, S1-T08 | Automated |
 
 ### 10.12 UI (TS-UI)
 
@@ -1280,10 +1287,10 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-SEC-001 | `it_security_no_outbound_connection_except_configured_provider_and_llm_mocks` | App run with egress blocked except mocks; any other connection attempt fails the test | NFR-008, A§9 | Deferred |
 | TS-SEC-002 | `it_security_no_third_party_telemetry_in_ui_bundle_or_api` | Scan built UI for external hosts; CSP `connect-src 'self'` | NFR-008 | Deferred |
 | TS-SEC-003 | `unit_security_api_key_never_in_logs_errors_or_provider_calls` | Key redaction | NFR-009, S1-T04 | Deferred |
-| TS-SEC-004 | `unit_security_structlog_processor_redacts_known_secret_fields` | Redaction processor | NFR-009 | Deferred |
+| TS-SEC-004 | `unit_security_structlog_processor_redacts_known_secret_fields` | Redaction processor | NFR-009 | Automated |
 | TS-SEC-005 | `contract_security_no_api_response_contains_secret_value` | Walk all endpoint responses with seeded secrets in the environment | NFR-009 | Deferred |
-| TS-SEC-006 | `it_security_metrics_output_contains_no_secret_value` | `/metrics` scan | NFR-009 | Deferred |
-| TS-SEC-007 | `unit_security_token_compare_uses_constant_time_function` | `hmac.compare_digest` | A§9 | Deferred |
+| TS-SEC-006 | `it_security_metrics_output_contains_no_secret_value` | `/metrics` scan | NFR-009 | Automated |
+| TS-SEC-007 | `unit_security_token_compare_uses_constant_time_function` | `hmac.compare_digest` | A§9 | Automated |
 | TS-SEC-008 | `unit_security_input_validation_symbol_regex_dates_pagination_bounds` | Parameter validation | A§9 | Deferred |
 | TS-SEC-009 | `unit_security_llm_and_provider_base_urls_from_config_only` | SSRF | A§9 | Deferred |
 | TS-SEC-010 | `unit_security_disclaimer_text_identical_to_disclaimer_md_everywhere` | Single source of truth | A§9 | Deferred |
