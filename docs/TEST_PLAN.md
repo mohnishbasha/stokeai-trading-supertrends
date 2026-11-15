@@ -522,50 +522,50 @@ Golden and property tests apply to every indicator. Tolerances are in section 5.
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-020 | `golden_supertrend_compute_handcomputed_40_bar_both_flips_and_ratcheting_matches` | Hand-computed 40-bar case: up flip, down flip, band ratcheting | FR-2xx, S2-T02 | Deferred |
+| TS-IND-020 | `golden_supertrend_compute_handcomputed_40_bar_both_flips_and_ratcheting_matches` | Hand-computed 40-bar case: up flip, down flip, band ratcheting | FR-2xx, S2-T02 | Automated |
 | TS-IND-021 | `golden_supertrend_tradingview_parity_line_within_0_01_after_100_bar_warmup` | Line within 0.01 per bar versus TradingView export, two tickers | FR-2xx, S2-T02 | Skipped: TradingView CSV exports not yet provided by the owner (owner checklist item); manual: export built-in Supertrend (10, 3) with OHLCV for two tickers on the daily chart to `tests/golden/tradingview/` and run `pytest tests/golden -k tradingview`. Release blocker at S9-T04 |
 | TS-IND-022 | `golden_supertrend_tradingview_parity_direction_matches_every_bar_after_warmup` | Direction identical on every bar after the first 100 | FR-2xx, S2-T02 | Skipped: same owner files as TS-IND-021; manual: same step |
-| TS-IND-023 | `unit_supertrend_tv_boundary_conversion_negative_tv_direction_maps_to_plus_1_up` | TradingView -1 (up) converts to internal +1 only at the import boundary | FR-2xx, Conventions | Deferred |
-| TS-IND-024 | `unit_supertrend_tv_boundary_conversion_positive_tv_direction_maps_to_minus_1_down` | TradingView +1 (down) converts to internal -1 | FR-2xx, Conventions | Deferred |
-| TS-IND-025 | `unit_supertrend_compute_atr_undefined_prior_bar_direction_minus_1` | Warm-up rule: `atr[t-1]` undefined gives direction -1 | FR-2xx | Deferred |
-| TS-IND-026 | `unit_supertrend_compute_final_up_ratchets_down_only_while_close_stays_below` | `final_up` lowers or resets after a close above it | FR-2xx | Deferred |
-| TS-IND-027 | `unit_supertrend_compute_final_lo_ratchets_up_only_while_close_stays_above` | `final_lo` rises or resets after a close below it | FR-2xx | Deferred |
-| TS-IND-028 | `unit_supertrend_compute_flip_up_when_close_exceeds_final_up` | Direction flips to +1 | FR-2xx | Deferred |
-| TS-IND-029 | `unit_supertrend_compute_flip_down_when_close_below_final_lo` | Direction flips to -1 | FR-2xx | Deferred |
-| TS-IND-030 | `prop_supertrend_compute_direction_always_plus_or_minus_1_after_warmup` | Direction domain | FR-2xx, S2-T02 | Deferred |
-| TS-IND-031 | `prop_supertrend_compute_line_below_close_when_up_above_close_when_down` | Line side invariant | FR-2xx, S2-T02 | Deferred |
-| TS-IND-032 | `unit_supertrend_derived_bars_since_flip_counts_from_last_flip` | `bars_since_flip` is 0 on the flip bar | FR-2xx | Deferred |
-| TS-IND-033 | `unit_supertrend_derived_distance_atr_signed_close_minus_st_over_atr` | `st_distance_atr` sign and value | FR-2xx | Deferred |
-| TS-IND-034 | `unit_supertrend_derived_weekly_direction_uses_resampled_weekly_bars` | `st_dir_w` computed on weekly bars | FR-2xx | Deferred |
-| TS-IND-035 | `unit_supertrend_derived_st_line_equals_invalidation_level` | `st_line` is exposed as the invalidation level | FR-2xx, FR-5xx | Deferred |
-| TS-IND-036 | `unit_supertrend_params_non_default_length_and_factor_from_config` | Length and factor come from `config/scoring.yaml` | FR-2xx, A§13 | Deferred |
+| TS-IND-023 | `unit_supertrend_tv_boundary_conversion_negative_tv_direction_maps_to_plus_1_up` | TradingView -1 (up) converts to internal +1 only at the import boundary | FR-2xx, Conventions | Automated |
+| TS-IND-024 | `unit_supertrend_tv_boundary_conversion_positive_tv_direction_maps_to_minus_1_down` | TradingView +1 (down) converts to internal -1 | FR-2xx, Conventions | Automated |
+| TS-IND-025 | `unit_supertrend_compute_atr_undefined_prior_bar_direction_minus_1` | Warm-up rule: `atr[t-1]` undefined gives direction -1 | FR-2xx | Automated |
+| TS-IND-026 | `unit_supertrend_compute_final_up_ratchets_down_only_while_close_stays_below` | `final_up` lowers or resets after a close above it | FR-2xx | Automated |
+| TS-IND-027 | `unit_supertrend_compute_final_lo_ratchets_up_only_while_close_stays_above` | `final_lo` rises or resets after a close below it | FR-2xx | Automated |
+| TS-IND-028 | `unit_supertrend_compute_flip_up_when_close_exceeds_final_up` | Direction flips to +1 | FR-2xx | Automated |
+| TS-IND-029 | `unit_supertrend_compute_flip_down_when_close_below_final_lo` | Direction flips to -1 | FR-2xx | Automated |
+| TS-IND-030 | `prop_supertrend_compute_direction_always_plus_or_minus_1_after_warmup` | Direction domain | FR-2xx, S2-T02 | Automated |
+| TS-IND-031 | `prop_supertrend_compute_line_below_close_when_up_above_close_when_down` | Line side invariant | FR-2xx, S2-T02 | Automated |
+| TS-IND-032 | `unit_supertrend_derived_bars_since_flip_counts_from_last_flip` | `bars_since_flip` is 0 on the flip bar | FR-2xx | Automated |
+| TS-IND-033 | `unit_supertrend_derived_distance_atr_signed_close_minus_st_over_atr` | `st_distance_atr` sign and value | FR-2xx | Automated |
+| TS-IND-034 | `unit_supertrend_derived_weekly_direction_uses_resampled_weekly_bars` | `st_dir_w` computed on weekly bars | FR-2xx | Automated |
+| TS-IND-035 | `unit_supertrend_derived_st_line_equals_invalidation_level` | `st_line` is exposed as the invalidation level | FR-2xx, FR-5xx | Automated |
+| TS-IND-036 | `unit_supertrend_params_non_default_length_and_factor_from_config` | Length and factor come from `config/scoring.yaml` | FR-2xx, A§13 | Automated |
 
 #### 10.3.3 SMA 20 / 50 / 200 with slope and cross
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-040 | `golden_sma_stack_compute_20_50_200_matches_1e6` | Three SMAs on the synthetic dataset | FR-2xx, S2-T03 | Deferred |
-| TS-IND-041 | `unit_sma_slope_compute_5_bar_slope_sign_positive_negative_flat` | SMA20 slope over 5 bars | FR-2xx | Deferred |
-| TS-IND-042 | `unit_sma_cross_detect_golden_cross_reports_bar_index` | Golden cross bar index | FR-2xx, S2-T03 | Deferred |
-| TS-IND-043 | `unit_sma_cross_detect_death_cross_reports_bar_index` | Death cross bar index | FR-2xx, S2-T03 | Deferred |
-| TS-IND-044 | `unit_sma_cross_detect_no_cross_in_series_returns_none` | No cross reports none | FR-2xx | Deferred |
+| TS-IND-040 | `golden_sma_stack_compute_20_50_200_matches_1e6` | Three SMAs on the synthetic dataset | FR-2xx, S2-T03 | Automated |
+| TS-IND-041 | `unit_sma_slope_compute_5_bar_slope_sign_positive_negative_flat` | SMA20 slope over 5 bars | FR-2xx | Automated |
+| TS-IND-042 | `unit_sma_cross_detect_golden_cross_reports_bar_index` | Golden cross bar index | FR-2xx, S2-T03 | Automated |
+| TS-IND-043 | `unit_sma_cross_detect_death_cross_reports_bar_index` | Death cross bar index | FR-2xx, S2-T03 | Automated |
+| TS-IND-044 | `unit_sma_cross_detect_no_cross_in_series_returns_none` | No cross reports none | FR-2xx | Automated |
 
 #### 10.3.4 MACD
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-050 | `golden_macd_compute_12_26_9_daily_matches_1e6` | line, signal, hist | FR-2xx, S2-T03 | Deferred |
-| TS-IND-051 | `golden_macd_compute_weekly_matches_1e6` | Weekly MACD on resampled bars | FR-2xx, S2-T03 | Deferred |
-| TS-IND-052 | `unit_macd_signal_cross_detect_bullish_and_bearish_within_3_bars` | Cross detection with bar index | FR-2xx | Deferred |
-| TS-IND-053 | `unit_macd_hist_run_detect_three_rising_and_three_falling_bars` | Histogram run helper used by the factor | FR-2xx | Deferred |
+| TS-IND-050 | `golden_macd_compute_12_26_9_daily_matches_1e6` | line, signal, hist | FR-2xx, S2-T03 | Automated |
+| TS-IND-051 | `golden_macd_compute_weekly_matches_1e6` | Weekly MACD on resampled bars | FR-2xx, S2-T03 | Automated |
+| TS-IND-052 | `unit_macd_signal_cross_detect_bullish_and_bearish_within_3_bars` | Cross detection with bar index | FR-2xx | Automated |
+| TS-IND-053 | `unit_macd_hist_run_detect_three_rising_and_three_falling_bars` | Histogram run helper used by the factor | FR-2xx | Automated |
 
 #### 10.3.5 ADX(14), +DI, -DI
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-060 | `golden_adx_compute_14_matches_1e6` | ADX with Wilder smoothing on a hand series | FR-2xx, S2-T03 | Deferred |
-| TS-IND-061 | `unit_adx_compute_plus_di_minus_di_nonnegative_and_bounded_0_100` | DI and ADX range | FR-2xx | Deferred |
-| TS-IND-062 | `unit_adx_compute_flat_series_returns_zero_without_division_error` | Zero-range input does not divide by zero | FR-2xx | Deferred |
+| TS-IND-060 | `golden_adx_compute_14_matches_1e6` | ADX with Wilder smoothing on a hand series | FR-2xx, S2-T03 | Automated |
+| TS-IND-061 | `unit_adx_compute_plus_di_minus_di_nonnegative_and_bounded_0_100` | DI and ADX range | FR-2xx | Automated |
+| TS-IND-062 | `unit_adx_compute_flat_series_returns_zero_without_division_error` | Zero-range input does not divide by zero | FR-2xx | Automated |
 
 #### 10.3.6 Divergences
 
