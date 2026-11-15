@@ -46,8 +46,12 @@ jobs:
         run: make build
       - name: make check
         run: make check
+      - name: SPDX headers
+        run: ./scripts/check-spdx.sh
       - name: shellcheck
         run: shellcheck scripts/*.sh .agent/skills/*/run.sh
+      - name: Dependency licenses
+        run: ./scripts/gen-third-party-licenses.sh
       - name: pip-audit
         # Audits the locked dependencies; the project itself is not on PyPI.
         run: |

@@ -118,6 +118,20 @@ def test_shell_scripts_use_strict_mode() -> None:
         assert os.access(path, os.X_OK), path
 
 
+def test_security_spdx_header_check_passes_on_repo() -> None:
+    result = _run([str(SCRIPTS / "check-spdx.sh")], REPO)
+    assert result.returncode == 0, result.stdout
+
+
+def test_security_spdx_header_check_fails_on_source_file_without_header(tmp_path: Path) -> None:
+    """TS-SEC-018."""
+    bad = tmp_path / "bad.py"
+    bad.write_text("print('hi')\n")
+    result = _run([str(SCRIPTS / "check-spdx.sh"), str(bad)], REPO)
+    assert result.returncode == 1
+    assert "bad.py" in result.stdout
+
+
 def test_env_example_is_committed_not_ignored() -> None:
     assert _run(["git", "check-ignore", "-q", ".env.example"], REPO).returncode == 1
 
