@@ -197,6 +197,7 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Alternatives rejected:** Unofficial scraping libraries (unreliable, terms risk).
 - **Consequences:** Adding a vendor is one module and one registry line. Market data and fundamentals may come from different vendors.
 - **Status:** Accepted.
+- **Vendor verification (verified 2026-11-15, S1-T04):** Massive docs (massive.com/docs/rest) confirm aggregates `GET /v2/aggs/ticker/{ticker}/range/{mult}/{timespan}/{from}/{to}` (fields `t,o,h,l,c,v,vw,n`, `limit` max 50000), grouped daily `GET /v2/aggs/grouped/locale/us/market/stocks/{date}` (fields `T,t,o,h,l,c,v,vw`; all Stocks plans), and `GET /v3/reference/tickers/{ticker}`. Differences from section 7.6: splits and dividends are now `GET /stocks/v1/splits` (`execution_date`, `split_from`, `split_to`) and `GET /stocks/v1/dividends` (`ex_dividend_date`, `cash_amount`) with `ticker` and date-comparator filters; financials are `GET /stocks/financials/v1/income-statements` (`tickers`, `timeframe=quarterly`, `period_end`, `filing_date`; Stocks Advanced or Financials expansion plans only), so `fcf` and `net_debt` are `None` until balance-sheet and cash-flow endpoints are added; the docs list no earnings calendar endpoint, so `earnings_dates` raises `CapabilityNotSupported`. The docs state no free-tier rate limit; the default of 5 calls per minute is kept and configurable. Both 401 and 403 map to `ProviderUnconfigured` (the vendor also uses 403 for plan gating, which the adapter cannot distinguish). Retries are hand-rolled (full jitter, base 1 s, cap 30 s, 5 attempts, `Retry-After` honored) rather than `tenacity`, which is not a dependency. Grouped daily bars take the requested session as the bar date; the vendor `t` is ignored for them.
 
 ### ADR-010: Estimated order flow from 5-minute bars
 - **Context:** True order flow needs L2 and tick data that v1 does not buy.
@@ -384,7 +385,7 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Decision:** The adapter sends the key only in the `Authorization` header. `provider_calls.endpoint` stores the path template and `params` stores non-secret parameters. Logged URLs are built without the key.
 - **Alternatives rejected:** Query parameter (`apiKey=`) with a scrubber (one missed path leaks the key).
 - **Consequences:** If the vendor stops accepting the header, the adapter fails with `ProviderUnconfigured` rather than silently switching to the query parameter; the fix requires a reviewed change.
-- **Status:** Accepted (verify vendor support at implementation time).
+- **Status:** Accepted. Verified 2026-11-15 (S1-T04): the Massive quickstart documents both `?apiKey=` and `Authorization: Bearer <key>`; the adapter uses only the header, strips any `apiKey` from vendor `next_url` values, scrubs the key from vendor text it quotes, and discards transport exception text (which can echo the URL).
 
 ### ADR-036: Forward-return horizon definition
 - **Context:** The track record measures forward returns "at 1, 5, 10, and 20 trading days" from an entry at the next session's open; the exit point is not defined.
@@ -1669,6 +1670,7 @@ This section mirrors the Build and Deployment, Versioning, Environment Model, an
 | The required jobs carry the display names `ci / lint-and-typecheck` and `ci / unit-tests`, which are the check contexts branch protection requires. | `ci.yml` | none (alignment) |
 | Ruff excludes `*.md`: ruff 0.17 formats Python code blocks inside Markdown, and the spec documents are not reformatted by tools. | `pyproject.toml` | none (tooling) |
 | CLA check and signer workflows. | `cla.yml`, `cla-sign.yml` | ADR-051 |
+| Massive adapter endpoint paths follow the 2026-11-15 vendor docs where they differ from section 7.6 (`/stocks/v1/splits`, `/stocks/v1/dividends`, `/stocks/financials/v1/income-statements`); no earnings endpoint, so `earnings_dates` is `CapabilityNotSupported`; retries are hand-rolled instead of `tenacity`. | `data/providers/massive.py` (`ENDPOINTS`) | ADR-009 |
 | Network is blocked for tests: `pytest-socket` (MIT) with `--disable-socket --allow-unix-socket --allow-hosts=127.0.0.1,localhost,::1` in pytest `addopts`, so unit and integration tests reach only loopback (local Postgres) and a stray outbound call fails the test. | `pyproject.toml` | none (Sprint 1 checklist) |
 | Dev-only npm license exceptions in the license script. | `scripts/gen_third_party_licenses.py` | ADR-052 |
 
