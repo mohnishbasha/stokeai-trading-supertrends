@@ -50,11 +50,11 @@ check: ## Lint, format check, type-check (Python and TypeScript)
 	./scripts/check-versions.sh
 
 test: ## Unit tests
-	uv run pytest tests/unit -q
+	uv run pytest tests/unit tests/golden -q
 	npm --prefix ui run test -- --run
 
 coverage: ## Coverage with thresholds
-	uv run pytest tests/unit tests/integration --cov=src/supertrends --cov-report=term --cov-report=xml
+	uv run pytest tests/unit tests/golden tests/integration --cov=src/supertrends --cov-report=term --cov-report=xml
 	npm --prefix ui run test -- --run --coverage
 	uv run python scripts/check_coverage.py .coverage-thresholds.toml
 

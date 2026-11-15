@@ -14,7 +14,7 @@ dates as `datetime64[D]`. Only bars starting in [09:30, 16:00) count (regular se
 Previous close for the zero-range rule: the close of the previous regular-session bar in the
 input (the prior session's last bar for a session's first bar); the very first bar has no
 previous close and is treated as `close >= prev_close` (all buy). The daily path uses the prior
-daily close and the same first-bar rule (PRD A-07, A-17).
+daily close and the same first-bar rule (PRD A-07, A-23).
 
 Quality, in order: `trades` (a plug-in classifier with at least `min_intraday_sessions` of the
 last `window` sessions), `intraday` (5-minute bars on at least that many), else

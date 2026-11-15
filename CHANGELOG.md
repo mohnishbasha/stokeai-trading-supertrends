@@ -8,6 +8,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Added
 
 - Volume indicators (`volume_oscillator`, `relative_volume`, `obv_slope_sign`, `cmf`, `accumulation_distribution_days`) and estimated order flow (`split_volume`, `estimate_order_flow` with `intraday`, `daily_estimate`, and `trades` quality) (S2-T07).
+- Mean reversion and volatility indicators: Bollinger (20, 2), %B, z-score, bandwidth and rank, ATR% and rank, HV20, squeeze and expansion flags (S2-T05).
+- Divergence detector: regular and hidden, bullish and bearish divergences for RSI, MACD histogram, and OBV on confirmed pivots (daily width 5, weekly width 3), with typed records and a per-bar series form (S2-T04).
+- Trend and momentum indicators: SMA 20/50/200 with slope and cross detection, MACD (12, 26, 9) daily and weekly (as-of, no look-ahead), histogram run and signal cross helpers, and ADX(14) with +DI/-DI (S2-T03).
+- Supertrend with TradingView semantics (`supertrend`, `bars_since_flip`, `distance_atr`, `supertrend_weekly_direction`), a hand-computed 40-bar fixture, and the TradingView parity harness (skipped until the owner provides exports) (S2-T02).
+- Fibonacci legs, retracements and extensions, and support/resistance level clustering with breakout and breakdown flags (S2-T06).
 - Indicator primitives (`sma`, `ema`, `rma`, `stdev`, `true_range`, `atr`, `rsi`, `obv`, `percentile_rank`, `linreg_slope`, confirmed `pivots`, `zigzag`, array `resample_weekly`), the `supertrends.indicators` package skeleton with an aggregated `__all__`, and the `numpy` dependency (S2-T01).
 - `database_call_recorder()` returns the Postgres-backed `DbCallRecorder`, and the shared Massive client uses it, so every Massive call writes a sanitized `provider_calls` row; `call_recorder` reuses the adapters' `CallRecord` type (S1-T04, S1-T06 follow-up).
 - Deterministic fixture provider (synthetic bars, fundamentals, split) and XNYS calendar helpers (S1-T03).
