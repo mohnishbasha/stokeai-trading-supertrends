@@ -24,6 +24,10 @@ updates:
     directory: /
     target-branch: develop
     schedule: { interval: weekly }
+    # ADR-002 pins Python 3.12 (requires-python >=3.12,<3.13); only patch and digest updates.
+    ignore:
+      - dependency-name: python
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     labels: ["type:chore", "area:deploy"]
     commit-message: { prefix: "chore(deps)" }
   - package-ecosystem: docker-compose
