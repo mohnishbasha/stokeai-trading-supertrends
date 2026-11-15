@@ -1202,9 +1202,9 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
 | TS-DEP-001 | `it_build_clean_clone_setup_build_check_succeed` | `make setup && make build && make check` | A§10, S0-T03 | Deferred |
-| TS-DEP-002 | `unit_version_check_script_passes_when_all_files_agree` | `scripts/check-versions.sh` | A§10, S0-T04 | Deferred |
-| TS-DEP-003 | `unit_version_check_script_fails_naming_ui_package_json_on_mismatch` | Negative | A§10, S0-T04 | Deferred |
-| TS-DEP-004 | `unit_changelog_extract_script_returns_section_for_version` | `scripts/extract-changelog.sh` | A§10, S0-T04 | Deferred |
+| TS-DEP-002 | `unit_version_check_script_passes_when_all_files_agree` | `scripts/check-versions.sh` | A§10, S0-T04 | Automated |
+| TS-DEP-003 | `unit_version_check_script_fails_naming_ui_package_json_on_mismatch` | Negative | A§10, S0-T04 | Automated |
+| TS-DEP-004 | `unit_changelog_extract_script_returns_section_for_version` | `scripts/extract-changelog.sh` | A§10, S0-T04 | Automated |
 | TS-DEP-005 | `it_image_runs_as_non_root_uid_10001_read_only_root_fs` | Container hardening | A§9, S0-T06 | Deferred |
 | TS-DEP-006 | `it_image_compose_up_healthz_returns_ok_then_down_cleans_volumes` | Compose loop | A§10, S0-T06 | Deferred |
 | TS-DEP-007 | `it_image_builds_for_linux_amd64_and_linux_arm64_in_ci` | NFR-005 | NFR-005, S0-T05 | Deferred |
