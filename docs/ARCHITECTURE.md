@@ -1643,6 +1643,7 @@ This section mirrors the Build and Deployment, Versioning, Environment Model, an
 | Make target `narrative-eval` (S5-T03): `uv run python scripts/narrative_eval.py --report docs/NARRATIVE_EVAL.md`, needs `SUPERTRENDS_LLM_BASE_URL`. | Makefile | none (named by S5-T03) |
 | Retention runs after each daily run (no extra CronJob). | none | ADR-031 |
 | Metrics from the CronJob and worker are persisted to Postgres and exposed by the API, so ServiceMonitor targets only the API Service. | `servicemonitor.yaml` | ADR-023 |
+| Ruff excludes `*.md`: ruff 0.17 formats Python code blocks inside Markdown, and the spec documents are not reformatted by tools. | `pyproject.toml` | none (tooling) |
 
 Additional values (merged into the seed `values.yaml` in 10.6):
 
