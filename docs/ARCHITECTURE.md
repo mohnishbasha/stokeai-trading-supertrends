@@ -1124,7 +1124,7 @@ Response 200:
 {
   "id": 1, "name": "default", "count": 200, "max": 300,
   "groups": [{"slug": "ai-infra", "name": "AI Infra", "position": 0, "symbols": ["NVDA", "ORCL"]}],
-  "items": [{"symbol": "ORCL", "name": "Oracle Corp", "type": "stock", "scored": true, "resolution": "resolved", "added_at": "2026-11-01T12:00:00Z", "groups": ["ai-infra"]}],
+  "items": [{"symbol": "ORCL", "name": "Oracle Corp", "type": "stock", "scored": true, "resolution": "resolved", "resolution_reason": null, "added_at": "2026-11-01T12:00:00Z", "groups": ["ai-infra"]}],
   "benchmarks": ["SPY", "QQQ"]
 }
 ```
@@ -1664,6 +1664,7 @@ This section mirrors the Build and Deployment, Versioning, Environment Model, an
 | Ruff excludes `*.md`: ruff 0.17 formats Python code blocks inside Markdown, and the spec documents are not reformatted by tools. | `pyproject.toml` | none (tooling) |
 | CLA check and signer workflows. | `cla.yml`, `cla-sign.yml` | ADR-051 |
 | Dev-only npm license exceptions in the license script. | `scripts/gen_third_party_licenses.py` | ADR-052 |
+| Watchlist item objects add a nullable `resolution_reason` (PRD FR-007 requires the reason on the Watchlist screen). The seed symbol `000660` fails the `tickers.symbol` format CHECK, so it is reported by the seed loader but cannot be stored; it stays in `docs/OWNER_CHECKLIST.md` row 13. Watchlist routes render problem+json through a route class until S1-T08 adds app-wide handlers. | `api/routes/watchlist.py`, `data/watchlist.py` | none (S1-T07) |
 
 Additional values (merged into the seed `values.yaml` in 10.6):
 

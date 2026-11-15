@@ -388,21 +388,21 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-WL-001 | `unit_watchlist_seed_load_14_groups_200_symbols_succeeds` | Loading `config/watchlist.seed.yaml` yields 14 groups and 200 unique symbols | FR-0xx, S1-T07 | Deferred |
-| TS-WL-002 | `unit_watchlist_seed_multi_group_symbol_stored_once_three_memberships` | A symbol listed in three groups is one ticker row with three memberships | FR-0xx, A§5 | Deferred |
-| TS-WL-003 | `it_watchlist_seed_unresolvable_symbol_marked_unresolved_with_reason` | An unresolvable seed symbol is recorded `unresolved` with a reason, excluded, never substituted | FR-0xx, S1-T07 | Deferred |
-| TS-WL-004 | `unit_watchlist_seed_needs_review_symbol_flagged_not_scored` | A `needs_review` symbol is listed but not scored | FR-0xx | Deferred |
-| TS-WL-005 | `unit_watchlist_seed_vix_not_scored_crypto_not_ingested` | VIX is kept but not scored; the crypto file is kept but not ingested | FR-0xx | Deferred |
-| TS-WL-006 | `contract_api_watchlist_add_ticker_301_returns_422` | The 300-ticker hard cap rejects the 301st ticker | FR-0xx, A§6.1 | Deferred |
-| TS-WL-007 | `unit_watchlist_symbol_regex_rejects_lowercase_and_overlong_returns_422` | Symbols must match `^[A-Z][A-Z0-9.\-]{0,9}$` | FR-0xx, A§9 | Deferred |
-| TS-WL-008 | `it_watchlist_benchmarks_spy_qqq_ingested_even_if_removed` | Removing SPY or QQQ from the watchlist still ingests them as benchmarks | FR-0xx, FR-1xx | Deferred |
-| TS-WL-009 | `contract_api_watchlist_write_without_token_returns_401` | POST, PUT, DELETE on the watchlist need the bearer token | FR-0xx, A§9 | Deferred |
-| TS-WL-010 | `contract_api_watchlist_read_without_token_returns_200` | GET watchlist endpoints need no token | FR-0xx | Deferred |
-| TS-WL-011 | `it_watchlist_add_unknown_symbol_provider_validation_returns_422_with_message` | A symbol the provider does not know is rejected with an inline message | FR-0xx, US-004 | Deferred |
-| TS-WL-012 | `unit_watchlist_group_crud_create_rename_delete_group_keeps_tickers` | Deleting a named group removes memberships, not tickers | FR-0xx | Deferred |
-| TS-WL-013 | `unit_watchlist_add_duplicate_symbol_returns_409_no_second_row` | Adding an existing symbol returns 409 `already-exists` (A§6.1) and writes no second row | FR-0xx | Deferred |
-| TS-WL-014 | `unit_watchlist_validation_fixture_provider_permissive_regex_accepts_synthetic` | The fixture provider uses the permissive regex path | FR-0xx, S1-T07 | Deferred |
-| TS-WL-015 | `it_watchlist_seed_second_start_does_not_reseed_or_duplicate` | Seeding runs on first start only and is idempotent | FR-0xx | Deferred |
+| TS-WL-001 | `unit_watchlist_seed_load_14_groups_200_symbols_succeeds` | Loading `config/watchlist.seed.yaml` yields 14 groups and 200 unique symbols | FR-0xx, S1-T07 | Automated |
+| TS-WL-002 | `unit_watchlist_seed_multi_group_symbol_stored_once_three_memberships` | A symbol listed in three groups is one ticker row with three memberships | FR-0xx, A§5 | Automated |
+| TS-WL-003 | `it_watchlist_seed_unresolvable_symbol_marked_unresolved_with_reason` | An unresolvable seed symbol is recorded `unresolved` with a reason, excluded, never substituted | FR-0xx, S1-T07 | Automated |
+| TS-WL-004 | `unit_watchlist_seed_needs_review_symbol_flagged_not_scored` | A `needs_review` symbol is listed but not scored | FR-0xx | Automated |
+| TS-WL-005 | `unit_watchlist_seed_vix_not_scored_crypto_not_ingested` | VIX is kept but not scored; the crypto file is kept but not ingested | FR-0xx | Automated |
+| TS-WL-006 | `contract_api_watchlist_add_ticker_301_returns_422` | The 300-ticker hard cap rejects the 301st ticker | FR-0xx, A§6.1 | Automated |
+| TS-WL-007 | `unit_watchlist_symbol_regex_rejects_lowercase_and_overlong_returns_422` | Symbols must match `^[A-Z][A-Z0-9.\-]{0,9}$` | FR-0xx, A§9 | Automated |
+| TS-WL-008 | `it_watchlist_benchmarks_spy_qqq_ingested_even_if_removed` | Removing SPY or QQQ from the watchlist still ingests them as benchmarks | FR-0xx, FR-1xx | Automated |
+| TS-WL-009 | `contract_api_watchlist_write_without_token_returns_401` | POST, PUT, DELETE on the watchlist need the bearer token | FR-0xx, A§9 | Automated |
+| TS-WL-010 | `contract_api_watchlist_read_without_token_returns_200` | GET watchlist endpoints need no token | FR-0xx | Automated |
+| TS-WL-011 | `it_watchlist_add_unknown_symbol_provider_validation_returns_422_with_message` | A symbol the provider does not know is rejected with an inline message | FR-0xx, US-004 | Automated |
+| TS-WL-012 | `unit_watchlist_group_crud_create_rename_delete_group_keeps_tickers` | Deleting a named group removes memberships, not tickers | FR-0xx | Automated |
+| TS-WL-013 | `unit_watchlist_add_duplicate_symbol_returns_409_no_second_row` | Adding an existing symbol returns 409 `already-exists` (A§6.1) and writes no second row | FR-0xx | Automated |
+| TS-WL-014 | `unit_watchlist_validation_fixture_provider_permissive_regex_accepts_synthetic` | The fixture provider uses the permissive regex path | FR-0xx, S1-T07 | Automated |
+| TS-WL-015 | `it_watchlist_seed_second_start_does_not_reseed_or_duplicate` | Seeding runs on first start only and is idempotent | FR-0xx | Automated |
 
 ### 10.2 Ingestion and data (TS-ING)
 

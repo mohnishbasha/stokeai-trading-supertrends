@@ -12,6 +12,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from supertrends.api.routes.watchlist import router as watchlist_router
 from supertrends.version import get_commit, get_version
 
 DEFAULT_UI_DIR = "ui/dist"
@@ -33,6 +34,8 @@ def create_app(ui_dir: Path | None = None) -> FastAPI:
     def readyz() -> dict[str, str]:
         """Readiness. TODO(#18): check the database and migrations."""
         return {"status": "ready"}
+
+    app.include_router(watchlist_router)
 
     static = ui_dir or Path(os.environ.get("SUPERTRENDS_UI_DIR", DEFAULT_UI_DIR))
     if static.is_dir():

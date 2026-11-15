@@ -1,0 +1,80 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright 2026 Serverless Ventures LLC
+version: 1
+benchmarks: [SPY, QQQ]
+groups:
+  datacenters:
+    tradingview_name: Datacenters
+    source: https://www.tradingview.com/watchlists/346453847/
+    symbols: [DELL, NBIS, CRWV]
+  adam-khoo-megatrends:
+    tradingview_name: AdamKhoo-2026-6MegaTrend-Rest5
+    source: https://www.tradingview.com/watchlists/319539679/
+    symbols: [NVO, LLY, TMO, IDXX, EW, VEEV, IQV, UNH, HCA, XLV, VHT, IHI, V, MA, AXP]
+  adam-khoo-ai-robotics:
+    tradingview_name: AdamKhoo-2026-6MegaTrends-AIRobotics
+    source: https://www.tradingview.com/watchlists/319537378/
+    symbols: [TSLA, XPEV, XIACF, NVDA, PTC, KRKNF, ISRG, SYK, MDT, ARAY, PRCT, ROK, CGNX, AMZN, SYM, MBLY,
+      OUST, INVZ, SERV, HON, TER, LECO, AVAV, KTOS, RCAT, RR, AIQ, ARTY, ROBO, BOTZ, SHLD]
+  whatsapp-group:
+    tradingview_name: AustinMarathiGappa
+    source: https://www.tradingview.com/watchlists/173086630/
+    symbols: [TSLA, APLD, BBAI, CLSK, HUT, COUR, CRNT, SOUN, CLS, SPYG, NBIS, IREN, CBRS]
+  bnpl:
+    tradingview_name: BNPL
+    source: https://www.tradingview.com/watchlists/167402637/
+    symbols: [AFRM, PYPL, SQ]
+  cnbc:
+    tradingview_name: CNBC
+    source: https://www.tradingview.com/watchlists/167396731/
+    symbols: [APO, BKR, BLK, CG, CIBR, CWEN, JPM, KBE, LYFT, TOST, UBER, WAB]
+  from-crypto-lists:
+    tradingview_name: CoinMarket50
+    source: https://www.tradingview.com/watchlists/167959926/
+    symbols: [CFLT]
+  country-etfs:
+    tradingview_name: CountryETF
+    source: https://www.tradingview.com/watchlists/330331417/
+    symbols: [SPY, EWZ, EEM, EWY, FXI, IEMG, VEA, VXUS, EWJ, VOO, EWT, INDA, MCHI, VTI, IVV, EWH, ILF,
+      EWC, EWG, EWU, EWW, EIDO, ECH, EWS, XIC, EWP, EWL, EPOL, EWQ, INDY, EPHE, EWI, EWD, EWN, TUR, EZA,
+      EIS, THD, AFK, ENOR, EWO, EDEN, EWK, EFNL, VNM]
+  fab-7:
+    tradingview_name: FAB7
+    source: https://www.tradingview.com/watchlists/167396259/
+    symbols: [META, GOOG, AAPL, AMZN, TSLA, NVDA, MSFT, PLTR]
+  index-etf:
+    tradingview_name: INDICES
+    source: https://www.tradingview.com/watchlists/167396650/
+    symbols: [VIX, SPY, SPLG, QQQ, IWR, IWN, IWM, DIA, XLB, XLC, XLE, XLF, XLI, XLK, XLP, XLRE, XLU, XLY,
+      XLV, VCX]
+  sector-etf:
+    tradingview_name: SECTOR
+    source: https://www.tradingview.com/watchlists/167399513/
+    symbols: [COPX, GLD, IBIT, SLV, SMH, TIP, TLT, UUP, XLB, XLC, XLF, XLI, XLK, XLP, XLRE, XLU, XLV,
+      XLY]
+  semis:
+    tradingview_name: SEMI
+    source: https://www.tradingview.com/watchlists/167403824/
+    symbols: [AMD, NVDA, REMX, SNDK, QCOM, ARM, INTC, '000660', GFS, MRVL, MU]
+  xlk-tech:
+    tradingview_name: Tech - XLK
+    source: https://www.tradingview.com/watchlists/345550912/
+    symbols: [MSFT, AAPL, NVDA, AVGO, ORCL, CRM, PLTR, CSCO, AMD, ACN]
+  trump-stocks:
+    tradingview_name: Trump Stock Tracker
+    source: https://www.tradingview.com/watchlists/167123620/
+    symbols: [TSLA, MARA, HUT, MSTR, RIOT, CITI, BTBT, C, JPM, KMI, LMT, COIN, WFC, EVR, DJT, CAT, MS,
+      XOM, BAC, GTLS, LHX, BKR, GS, IWO, CVX, KKR, VLO, RTX, MMM, GD, IWM, LAZ, NOC, DE, COP, CXW, BA,
+      HON, GEO]
+needs_review:
+  SQ: Block changed its ticker from SQ to XYZ in 2025; confirm and use the current symbol
+  CITI: not a US-listed ticker; Citigroup is C, which is already in this group
+  '000660': SK hynix on the Korea Exchange; not a US listing, needs a provider that covers KRX
+  VIX: an index, not a tradable security with volume; use as a market-regime input, do not score
+  XIACF: OTC (Xiaomi); may be missing from the provider or fail the liquidity floor
+  KRKNF: OTC; may be missing from the provider or fail the liquidity floor
+  XIC: Toronto-listed ETF; not a US listing
+  VCX: could not be identified; confirm what this is
+  CBRS: could not be identified; confirm what this is
+  SPLG: confirm the current symbol for this S&P 500 ETF with the provider
+  CFLT: Confluent stock, found in the crypto list; confirm it is still listed
