@@ -14,7 +14,6 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from supertrends.api.app import create_app
 from supertrends.api.routes import watchlist as routes
-from supertrends.api.security import get_settings
 from supertrends.data import watchlist as wl
 from supertrends.data.models import WATCHLIST_ITEM_CAP
 from supertrends.settings import Settings
@@ -42,11 +41,10 @@ def client(watchlist_engine: Engine) -> TestClient:
     with factory() as session:
         assert wl.seed_default_watchlist(session, wl.PermissiveResolver()) is not None
         session.commit()
-    app = create_app()
+    app = create_app(settings=Settings(api_token=TOKEN))  # type: ignore[arg-type]
     app.dependency_overrides[routes.get_session] = _session
     app.dependency_overrides[routes.get_symbol_resolver] = Unknown
-    app.dependency_overrides[get_settings] = lambda: Settings(api_token=TOKEN)  # type: ignore[arg-type]
-    return TestClient(app)
+    return TestClient(app, base_url="http://localhost")
 
 
 def _problem(response: Any, status: int, slug: str) -> dict[str, Any]:
@@ -212,9 +210,11 @@ def test_contract_api_watchlist_endpoints_before_seed_return_404_problem(
         with factory() as session:
             yield session
 
-    app = create_app()
+    app = create_app(settings=Settings(api_token=TOKEN))  # type: ignore[arg-type]
     app.dependency_overrides[routes.get_session] = _session
-    _problem(TestClient(app).get("/api/v1/watchlist"), 404, "not-found")
+    _problem(
+        TestClient(app, base_url="http://localhost").get("/api/v1/watchlist"), 404, "not-found"
+    )
 
 
 def test_unit_api_default_symbol_resolver_is_permissive() -> None:

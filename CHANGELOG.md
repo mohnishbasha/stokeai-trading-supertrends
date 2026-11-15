@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Deterministic fixture provider (synthetic bars, fundamentals, split) and XNYS calendar helpers (S1-T03).
 - Python package and the `supertrends` CLI with `--version`, `serve`, and `healthcheck`; `/healthz` and `/readyz` (S0-T01).
 - `supertrends config show | validate | export-schema` (S0-T09).
 - UI project: Vite, React, TypeScript strict, ESLint, Vitest, and Playwright with a placeholder route (S0-T02).
@@ -19,6 +20,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - SQLAlchemy 2 models and Alembic migrations for the complete live schema and the `backtests` schema, append-only triggers, run state guard, `supertrends db migrate`, and `supertrends.data.db` helpers (S1-T01).
 - Watchlist service and API: default watchlist with many-to-many groups, 300-ticker cap, bearer-token writes, seed from `config/watchlist.seed.yaml` (14 groups, 200 symbols), `config/watchlist.crypto.yaml`, `symbols_to_ingest`, and `supertrends watchlist seed | list | add | remove` (S1-T07).
 - `scripts/stoke-inventory.sh`, a read-only Stoke cluster inventory written to git-ignored `private/` (S0-T10).
+- Provider interfaces: `MarketDataProvider` and `FundamentalsProvider` Protocols with typed results, provider error types, a registry that selects providers from settings, and a shared provider contract test suite (S1-T02).
+- Alternate market data provider: Alpaca Market Data adapter behind the `alternate` registry name, with daily and 5-minute bars, splits, dividends, header auth, and retry (S1-T05, ADR-032).
+- Massive (formerly Polygon.io) market data and fundamentals adapter with header auth, a token-bucket rate limiter, retries with jittered backoff, response caching, and call recording (S1-T04).
+- Unit tests run with outbound network blocked via `pytest-socket` (loopback only).
+- API skeleton: `/readyz` checks database reachability and migrations at head (RFC 9457 503), `/metrics` Prometheus HTTP metrics, structlog JSON logs with request IDs and a secret scrubber, problem+json errors, Host allowlist with probe exemptions, and `require_write_token` (S1-T08).
+- Local Compose runs a one-shot `migrate` service (`supertrends db migrate`) before the app starts, so `/readyz` reports ready after `make up` (S1-T08).
 
 ### Scoring
 

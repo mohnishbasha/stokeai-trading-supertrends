@@ -3,20 +3,21 @@
 """Watchlist endpoints under /api/v1 (ARCHITECTURE 6.1, ADR-019, ADR-025).
 
 Reads are open; writes need the bearer token. Errors are RFC 9457 problem+json. The
-route class below renders them for this router so the module works with or without the
-app-wide handlers added by S1-T08.
+route class below renders domain and validation errors for this router; auth failures use
+the app-wide problem handlers. Mounted under `api_router`, which supplies the /api/v1 prefix.
 """
 
-import secrets
-from collections.abc import Callable, Coroutine, Iterator
+from collections.abc import Callable, Coroutine
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 
+from supertrends.api.deps import get_session
+from supertrends.api.problems import problem_response
 from supertrends.api.schemas.watchlist import (
     AddItemRequest,
     CreateGroupRequest,
@@ -27,11 +28,8 @@ from supertrends.api.schemas.watchlist import (
 )
 from supertrends.api.security import require_write_token
 from supertrends.data import watchlist as service
-from supertrends.data.db import session_scope
 from supertrends.data.watchlist import SymbolResolver, WatchlistError
 
-PROBLEM_TYPE_PREFIX = "urn:supertrends:problem:"
-PROBLEM_CONTENT_TYPE = "application/problem+json"
 _BAD_JSON = "json_invalid"
 
 
@@ -42,27 +40,13 @@ def _problem(  # noqa: PLR0913, PLR0917 (flat helper)
     title: str,
     detail: str,
     errors: list[dict[str, Any]] | None = None,
-    headers: dict[str, str] | None = None,
 ) -> JSONResponse:
-    request_id = getattr(request.state, "request_id", None) or request.headers.get(
-        "x-request-id", secrets.token_hex(8)
-    )
-    body: dict[str, Any] = {
-        "type": f"{PROBLEM_TYPE_PREFIX}{slug}",
-        "title": title,
-        "status": status,
-        "detail": detail,
-        "instance": request.url.path,
-        "request_id": request_id,
-    }
-    if errors is not None:
-        body["errors"] = errors
-    out = {"X-Request-ID": request_id, **(headers or {})}
-    return JSONResponse(body, status_code=status, media_type=PROBLEM_CONTENT_TYPE, headers=out)
+    extra = {"errors": errors} if errors is not None else None
+    return problem_response(request.scope, status, slug, detail, title=title, extra=extra)
 
 
 class ProblemRoute(APIRoute):
-    """Route class that turns domain, validation, and auth errors into problem+json."""
+    """Route class that turns domain and validation errors into problem+json."""
 
     def get_route_handler(self) -> Callable[[Request], Coroutine[Any, Any, Response]]:
         """Wrap the default handler with problem+json error rendering."""
@@ -92,28 +76,11 @@ class ProblemRoute(APIRoute):
                     "request validation failed",
                     errors,
                 )
-            except HTTPException as exc:
-                if exc.status_code != 401:
-                    raise
-                return _problem(
-                    request,
-                    401,
-                    "unauthorized",
-                    "Unauthorized",
-                    "a valid bearer token is required",
-                    headers=dict(exc.headers or {}),
-                )
 
         return handler
 
 
-router = APIRouter(prefix="/api/v1", route_class=ProblemRoute, tags=["watchlist"])
-
-
-def get_session() -> Iterator[Session]:
-    """A request-scoped database session (the routes commit explicitly)."""
-    with session_scope() as session:
-        yield session
+router = APIRouter(route_class=ProblemRoute, tags=["watchlist"])
 
 
 def get_symbol_resolver() -> SymbolResolver:

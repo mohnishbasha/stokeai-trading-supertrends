@@ -19,7 +19,6 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from supertrends.api.app import create_app
 from supertrends.api.routes import watchlist as routes
-from supertrends.api.security import get_settings
 from supertrends.data import db
 from supertrends.data import watchlist as wl
 from supertrends.data.models import Ticker, WatchlistGroupMember, WatchlistItem
@@ -78,11 +77,10 @@ def client(engine: Engine, session: Session) -> TestClient:
 
     assert wl.seed_default_watchlist(session, Provider()) is not None
     session.commit()
-    app = create_app()
+    app = create_app(settings=Settings(api_token=TOKEN))  # type: ignore[arg-type]
     app.dependency_overrides[routes.get_session] = _session
     app.dependency_overrides[routes.get_symbol_resolver] = Provider
-    app.dependency_overrides[get_settings] = lambda: Settings(api_token=TOKEN)  # type: ignore[arg-type]
-    return TestClient(app)
+    return TestClient(app, base_url="http://localhost")
 
 
 def test_it_watchlist_seed_unresolvable_symbol_marked_unresolved_with_reason(

@@ -1,38 +1,45 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright 2026 Serverless Ventures LLC
-"""Bearer-token protection for write endpoints (ARCHITECTURE 6.1 Authentication, ADR-015)."""
+"""Bearer-token auth for write endpoints (ARCHITECTURE 6.1 "Authentication", section 9)."""
+
+from __future__ import annotations
 
 import hmac
-from functools import lru_cache
+from typing import Annotated
 
-from fastapi import Depends, HTTPException, Request
+import structlog
+from fastapi import Depends, Header
 
-from supertrends.settings import Settings, load_settings
+from supertrends.api.deps import SettingsDep
+from supertrends.api.problems import ProblemError
 
-BEARER_PREFIX = "bearer "
-
-
-@lru_cache(maxsize=1)
-def get_settings() -> Settings:
-    """Process settings, read once. Tests override this dependency."""
-    return load_settings()
-
-
-def _unauthorized() -> HTTPException:
-    return HTTPException(
-        status_code=401, detail="unauthorized", headers={"WWW-Authenticate": "Bearer"}
-    )
+log = structlog.get_logger("supertrends.api.security")
 
 
 def require_write_token(
-    request: Request,
-    settings: Settings = Depends(get_settings),  # noqa: B008 (FastAPI dependency style)
+    settings: SettingsDep,
+    authorization: Annotated[str | None, Header()] = None,
 ) -> None:
-    """Require `Authorization: Bearer <SUPERTRENDS_API_TOKEN>`; compare in constant time."""
-    header = request.headers.get("authorization", "")
-    if not header.lower().startswith(BEARER_PREFIX):
-        raise _unauthorized()
-    presented = header[len(BEARER_PREFIX) :].strip().encode()
+    """Allow the request only with `Authorization: Bearer <SUPERTRENDS_API_TOKEN>`.
+
+    Compared with `hmac.compare_digest`. Missing or wrong token raises 401 with no detail
+    about which part failed. An unset token rejects every request.
+    """
+    scheme, _, supplied = (authorization or "").partition(" ")
     expected = settings.api_token.get_secret_value().encode()
-    if not expected or not hmac.compare_digest(presented, expected):
-        raise _unauthorized()
+    ok = (
+        bool(expected)
+        and scheme.lower() == "bearer"
+        and hmac.compare_digest(supplied.strip().encode(), expected)
+    )
+    if not ok:
+        log.warning("auth_failed", error_code="unauthorized")
+        raise ProblemError(
+            401,
+            "unauthorized",
+            "A valid bearer token is required.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+WriteToken = Depends(require_write_token)
