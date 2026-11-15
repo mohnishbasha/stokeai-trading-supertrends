@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Deterministic fixture provider (synthetic bars, fundamentals, split) and XNYS calendar helpers (S1-T03).
 - Python package and the `supertrends` CLI with `--version`, `serve`, and `healthcheck`; `/healthz` and `/readyz` (S0-T01).
 - `supertrends config show | validate | export-schema` (S0-T09).
 - UI project: Vite, React, TypeScript strict, ESLint, Vitest, and Playwright with a placeholder route (S0-T02).

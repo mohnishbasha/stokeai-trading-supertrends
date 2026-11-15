@@ -28,6 +28,7 @@ dependencies = [
     "typer>=0.13",
     "httpx>=0.27",
     "structlog>=24.4",
+    "exchange-calendars>=4.13.3",
 ]
 
 [project.urls]
@@ -79,6 +80,10 @@ python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
 mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ["exchange_calendars", "exchange_calendars.*"]
+ignore_missing_imports = true  # the library ships no type stubs
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]

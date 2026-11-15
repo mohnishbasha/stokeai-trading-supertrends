@@ -408,10 +408,10 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-ING-001 | `unit_fixture_provider_generate_same_seed_identical_bars` | Same seed gives byte-identical bars | FR-1xx, S1-T03 | Deferred |
-| TS-ING-002 | `unit_fixture_provider_dataset_has_trending_ranging_reversing_tickers` | By construction the dataset includes one trending, one ranging, one reversing ticker (asserted via ADX and flips) | FR-1xx, S1-T03 | Deferred |
+| TS-ING-001 | `unit_fixture_provider_generate_same_seed_identical_bars` | Same seed gives byte-identical bars | FR-1xx, S1-T03 | Automated |
+| TS-ING-002 | `unit_fixture_provider_dataset_has_trending_ranging_reversing_tickers` | By construction the dataset includes one trending, one ranging, one reversing ticker (asserted via ADX and flips) | FR-1xx, S1-T03 | Automated |
 | TS-ING-003 | `golden_fixture_provider_dataset_hash_matches_committed_hash` | Synthetic dataset hash equals `tests/golden/synthetic_dataset.sha256` | FR-1xx, A§12 | Deferred |
-| TS-ING-004 | `contract_provider_fixture_passes_shared_contract_suite` | Fixture provider passes the provider contract suite | FR-1xx, A§7 | Deferred |
+| TS-ING-004 | `contract_provider_fixture_passes_shared_contract_suite` | Fixture provider passes the provider contract suite | FR-1xx, A§7 | Automated |
 | TS-ING-005 | `contract_provider_massive_recorded_passes_shared_contract_suite` | Massive adapter passes the contract suite on recorded scrubbed responses | FR-1xx, A§7 | Deferred |
 | TS-ING-006 | `contract_provider_alternate_recorded_passes_shared_contract_suite` | Alternate provider adapter passes the contract suite | FR-1xx, S1-T05 | Deferred |
 | TS-ING-007 | `unit_provider_registry_unknown_name_fails_startup_with_clear_message` | An unknown provider name fails at startup | FR-1xx, A§7 | Automated |
@@ -452,6 +452,12 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 | TS-ING-042 | `unit_provider_contract_suite_violating_provider_detected_assertion_fails` | The suite fails a provider with unsorted bars, out-of-range bars, or a missing `CapabilityNotSupported` | A§7, S1-T02 | Automated |
 | TS-ING-043 | `unit_provider_registry_mixed_vendors_market_and_fundamentals_selected_independently` | Market and fundamentals providers from different vendors can be combined; a registered name with no implementation fails with a clear `ConfigError` | A§7.4, S1-T02 | Automated |
 | TS-ING-044 | `unit_provider_errors_derive_from_provider_error_and_validate_bar_rejects_invalid_rows` | Error hierarchy (A§7.3) and OHLC validation raising `ProviderDataError` | A§7.2, A§7.3, S1-T02 | Automated |
+| TS-ING-045 | `unit_fixture_provider_different_seed_different_bars` | A different seed gives different bars; values depend on the seed and session index only, not the end date | FR-1xx, ADR-028, S1-T03 | Automated |
+| TS-ING-046 | `unit_fixture_provider_split_reported_as_corporate_action` | Exactly one 4:1 split exists, is reported by `corporate_actions`, and bars are split adjusted | FR-1xx, A§7.5, S1-T03 | Automated |
+| TS-ING-047 | `unit_fixture_provider_history_sizes` | About 3 years of daily bars and 30 sessions of 5-minute bars (aggregating exactly to the daily bars) for 12 tickers plus `SPY` and `QQQ` | FR-1xx, A§7.5, S1-T03 | Automated |
+| TS-ING-048 | `unit_fixture_provider_unknown_symbol_none_unless_permissive` | Unknown symbols resolve to `None`; permissive mode generates bars from a hash of the symbol | FR-1xx, A§7.5, S1-T03 | Automated |
+| TS-ING-049 | `unit_fixture_provider_etf_has_no_financials_and_stocks_do` | Stocks have quarterly financials with `known_at` 30 days after period end; ETFs have none; earnings dates include one 3 sessions out | FR-1xx, A§7.5, S1-T03 | Automated |
+| TS-ING-050 | `unit_calendar_half_day_closes_early` | XNYS sessions skip holidays, half days close early, last completed session is computed from the clock | ADR-028, S1-T03 | Automated |
 
 ### 10.3 Indicators (TS-IND)
 

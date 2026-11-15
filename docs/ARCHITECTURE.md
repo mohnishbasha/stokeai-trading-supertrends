@@ -244,7 +244,7 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Context:** The owner wants public source, no commercial use by others, and all rights kept by Serverless Ventures LLC.
 - **Decision:** The unmodified PolyForm Noncommercial License 1.0.0 with the Required Notice line, plus a Contributor License Agreement enforced in CI. The project is described as source-available and free for noncommercial use.
 - **Alternatives rejected:** AGPL-3.0 (allows commercial use); Apache-2.0 or MIT (allow everything); a custom-written license (untested wording); BUSL (time-limited, converts later).
-- **Consequences:** Dependency licenses are restricted to a permissive allowlist (LGPL only for unmodified libraries such as psycopg); GPL, AGPL, SSPL, and unknown licenses fail CI. The license notice appears in the UI footer, `supertrends --version`, and `GET /api/v1/status`.
+- **Consequences:** Dependency licenses are restricted to a permissive allowlist (LGPL only for unmodified libraries such as psycopg; Zlib and CC0-1.0 are also accepted, added 2026-11-15 because numpy 2.5, pulled in by `exchange_calendars`, is `BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0`); GPL, AGPL, SSPL, and unknown licenses fail CI. The license notice appears in the UI footer, `supertrends --version`, and `GET /api/v1/status`.
 - **Status:** Accepted.
 
 ### ADR-017: GitHub repository name
