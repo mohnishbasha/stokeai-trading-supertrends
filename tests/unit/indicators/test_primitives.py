@@ -527,7 +527,7 @@ def test_unit_primitives_reject_bad_window() -> None:
         p.sma(SERIES, 0)
     with pytest.raises(ValueError, match="window"):
         p.percentile_rank(SERIES, 1)
-    with pytest.raises(ValueError, match="width"):
+    with pytest.raises(ValueError, match="pivot width"):
         p.pivots(SERIES, SERIES, 0)
     with pytest.raises(ValueError, match="length"):
         p.true_range(arr(1, 2), arr(1), arr(1, 2))
