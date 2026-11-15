@@ -571,17 +571,27 @@ Golden and property tests apply to every indicator. Tolerances are in section 5.
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-070 | `unit_divergence_detect_regular_bullish_price_lower_low_osc_higher_low_found` | Constructed fixture | FR-2xx, S2-T04 | Deferred |
-| TS-IND-071 | `unit_divergence_detect_regular_bearish_price_higher_high_osc_lower_high_found` | Constructed fixture | FR-2xx, S2-T04 | Deferred |
-| TS-IND-072 | `unit_divergence_detect_hidden_bullish_price_higher_low_osc_lower_low_found` | Constructed fixture | FR-2xx, S2-T04 | Deferred |
-| TS-IND-073 | `unit_divergence_detect_hidden_bearish_price_lower_high_osc_higher_high_found` | Constructed fixture | FR-2xx, S2-T04 | Deferred |
-| TS-IND-074 | `unit_divergence_detect_second_pivot_unconfirmed_not_reported` | A pivot fewer than 5 bars old is ignored | FR-2xx, NFR-007 | Deferred |
-| TS-IND-075 | `unit_divergence_detect_monotonic_series_no_false_detection` | No pivots, no divergence | FR-2xx, S2-T04 | Deferred |
-| TS-IND-076 | `unit_divergence_detect_second_pivot_older_than_15_bars_excluded` | Recency window | FR-2xx | Deferred |
-| TS-IND-077 | `unit_divergence_detect_pivots_outside_60_bar_lookback_excluded` | Lookback window | FR-2xx | Deferred |
-| TS-IND-078 | `unit_divergence_detect_rsi_macd_hist_obv_each_reported_separately` | Three oscillators produce separate records | FR-2xx | Deferred |
-| TS-IND-079 | `unit_divergence_detect_weekly_uses_pivot_width_3` | Weekly pivot width is 3 | FR-2xx | Deferred |
-| TS-IND-080 | `unit_divergence_record_contains_both_pivot_bars_prices_and_oscillator_values` | Typed record shape | FR-2xx, S2-T04 | Deferred |
+| TS-IND-070 | `unit_divergence_detect_regular_bullish_price_lower_low_osc_higher_low_found` | Constructed fixture | FR-2xx, S2-T04 | Automated |
+| TS-IND-071 | `unit_divergence_detect_regular_bearish_price_higher_high_osc_lower_high_found` | Constructed fixture | FR-2xx, S2-T04 | Automated |
+| TS-IND-072 | `unit_divergence_detect_hidden_bullish_price_higher_low_osc_lower_low_found` | Constructed fixture | FR-2xx, S2-T04 | Automated |
+| TS-IND-073 | `unit_divergence_detect_hidden_bearish_price_lower_high_osc_higher_high_found` | Constructed fixture | FR-2xx, S2-T04 | Automated |
+| TS-IND-074 | `unit_divergence_detect_second_pivot_unconfirmed_not_reported` | A pivot fewer than 5 bars old is ignored | FR-2xx, NFR-007 | Automated |
+| TS-IND-075 | `unit_divergence_detect_monotonic_series_no_false_detection` | No pivots, no divergence | FR-2xx, S2-T04 | Automated |
+| TS-IND-076 | `unit_divergence_detect_second_pivot_older_than_15_bars_excluded` | Recency window | FR-2xx | Automated |
+| TS-IND-077 | `unit_divergence_detect_pivots_outside_60_bar_lookback_excluded` | Lookback window | FR-2xx | Automated |
+| TS-IND-078 | `unit_divergence_detect_rsi_macd_hist_obv_each_reported_separately` | Three oscillators produce separate records | FR-2xx | Automated |
+| TS-IND-079 | `unit_divergence_detect_weekly_uses_pivot_width_3` | Weekly pivot width is 3 | FR-2xx | Automated |
+| TS-IND-080 | `unit_divergence_record_contains_both_pivot_bars_prices_and_oscillator_values` | Typed record shape | FR-2xx, S2-T04 | Automated |
+| TS-IND-200 | `unit_divergence_detect_newer_pivot_supersedes_second_pivot` | Only the two most recent pivots compare | FR-2xx, S2-T04 | Automated |
+| TS-IND-201 | `unit_divergence_macd_hist_helper_matches_independent_loop` | Local MACD histogram mirrors `momentum.macd` (cross-checked by S2-T08) | FR-2xx, S2-T04 | Automated |
+| TS-IND-202 | `unit_divergence_detect_nan_osc_or_equal_values_not_divergence` | NaN oscillator or equal values give none | FR-2xx, S2-T04 | Automated |
+| TS-IND-203 | `unit_divergence_detect_lows_and_highs_compared_separately` | Bullish and bearish pairs reported together | FR-2xx, S2-T04 | Automated |
+| TS-IND-204 | `unit_divergence_detect_invalid_inputs_and_empty` | Length mismatch, width < 1, empty, bad as_of | FR-2xx, S2-T04 | Automated |
+| TS-IND-205 | `unit_divergence_series_matches_detect_each_bar` | Per-bar flag array equals as-of detection | FR-2xx, S2-T04 | Automated |
+| TS-IND-206 | `unit_divergence_records_sorted_by_confirmed_at` | Record list ordering and confirmed_at | FR-2xx, S2-T04 | Automated |
+| TS-IND-207 | `unit_divergence_aggregation_exports` | Names re-exported by `supertrends.indicators` | FR-2xx, S2-T04 | Automated |
+| TS-IND-208 | `property_divergence_no_look_ahead_p2_plus_width_le_last_index` | Hypothesis: no record with p2 + width > last index; truncation invariance | FR-2xx, S2-T04 | Automated |
+| TS-IND-209 | `unit_divergence_detect_pivots_too_far_apart_never_active` | p1 and p2 more than 54 bars apart never form an active divergence | FR-2xx, S2-T04 | Automated |
 
 #### 10.3.7 Mean reversion and volatility indicators
 

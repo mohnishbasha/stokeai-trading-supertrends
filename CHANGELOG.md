@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Divergence detector: regular and hidden, bullish and bearish divergences for RSI, MACD histogram, and OBV on confirmed pivots (daily width 5, weekly width 3), with typed records and a per-bar series form (S2-T04).
 - Indicator primitives (`sma`, `ema`, `rma`, `stdev`, `true_range`, `atr`, `rsi`, `obv`, `percentile_rank`, `linreg_slope`, confirmed `pivots`, `zigzag`, array `resample_weekly`), the `supertrends.indicators` package skeleton with an aggregated `__all__`, and the `numpy` dependency (S2-T01).
 - `database_call_recorder()` returns the Postgres-backed `DbCallRecorder`, and the shared Massive client uses it, so every Massive call writes a sanitized `provider_calls` row; `call_recorder` reuses the adapters' `CallRecord` type (S1-T04, S1-T06 follow-up).
 - Deterministic fixture provider (synthetic bars, fundamentals, split) and XNYS calendar helpers (S1-T03).

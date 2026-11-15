@@ -342,3 +342,10 @@ def test_no_look_ahead_property(
     cut_series = dv.divergence_series(high[: t + 1], low[: t + 1], osc[: t + 1], width=width)
     assert np.array_equal(series.regular_bullish[: t + 1], cut_series.regular_bullish)
     assert np.array_equal(series.hidden_bearish[: t + 1], cut_series.hidden_bearish)
+
+
+def test_pivots_too_far_apart_never_active() -> None:
+    """TS-IND-209: p1 = 10, p2 = 70 are 60 apart; p1 leaves the window before p2 confirms."""
+    high, low, osc = build(90, dips={10: 9.0, 70: 8.0}, osc_at={10: 30.0, 70: 35.0})
+    assert dv.divergence_records(high, low, osc, oscillator="rsi") == []
+    assert all(detect(high, low, osc, as_of=t) == [] for t in range(90))
