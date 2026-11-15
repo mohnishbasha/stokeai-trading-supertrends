@@ -7,7 +7,7 @@ over the last `lookback` (250) bars are clustered; a cluster is a level whose st
 `touches * recency_weight`. The 4 strongest levels above price (resistance) and 4 below
 (support) are kept, and the 52-week (252 bar) high and low are added as extra levels.
 
-Clustering (ADR-054, PRD section 17): pivot prices are sorted ascending and a cluster is
+Clustering (ADR-055, PRD section 17): pivot prices are sorted ascending and a cluster is
 anchored on its lowest price; a pivot joins the open cluster while `price - anchor <= 0.5 * ATR`,
 otherwise it opens a new cluster. Every member is therefore within 0.5 ATR of every other
 member, with no chaining. The level price is the mean of the member prices.

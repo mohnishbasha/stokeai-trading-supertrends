@@ -93,7 +93,7 @@ module = ["exchange_calendars", "exchange_calendars.*"]
 ignore_missing_imports = true  # the library ships no type stubs
 
 [tool.pytest.ini_options]
-testpaths = ["tests/unit"]
+testpaths = ["tests/unit", "tests/golden"]
 addopts = "-ra --strict-markers --disable-socket --allow-unix-socket --allow-hosts=127.0.0.1,localhost,::1"
 asyncio_default_fixture_loop_scope = "function"
 markers = ["integration: needs services such as Postgres or Docker"]
