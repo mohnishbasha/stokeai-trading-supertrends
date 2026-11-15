@@ -1,0 +1,25 @@
+# Owner Checklist
+
+Actions only the owner can take. The executing agent appends to this file whenever it reaches an owner-only action, then keeps working on everything that is not blocked.
+
+Each entry: status, what, why, exact command or URL, and the task it blocks.
+
+Status values: `open` (waiting on the owner), `done` (owner confirmed), `info` (no action needed unless the owner wants to change it).
+
+| # | Status | Action | Why | Command or URL | Blocks |
+|---|---|---|---|---|---|
+| 1 | open | Create DNS records for `supertrends.openstoke.com` and `supertrends-stage.openstoke.com` pointing at the private Stoke entry point chosen in the inventory (tailnet address or internal ingress). Do not expose the instance to the public internet | The agent never creates DNS records | Your DNS provider for `openstoke.com` | S8-T05 hostname, S9-T07 |
+| 2 | open | Create a Massive (formerly Polygon.io) account and API key on a plan whose terms and rate limits fit personal use of daily and 5-minute bars and financials; confirm display terms | Vendor accounts and keys belong to the owner | https://massive.com (formerly https://polygon.io) | S8-T05 real-provider run |
+| 3 | open | Export two TradingView daily charts with the built-in Supertrend (10, 3) as CSV into `tests/golden/tradingview/` | Parity fixtures must come from TradingView itself | TradingView chart, add Supertrend (ATR length 10, factor 3), "Export chart data" | S2-T02 parity, release |
+| 4 | open | Run `scripts/stoke-inventory.sh` with the Stoke kubeconfig; the output stays in git-ignored `private/` and is never committed | Needs cluster credentials the agent does not have | `KUBECONFIG=~/.kube/stoke scripts/stoke-inventory.sh` | S8-T02 |
+| 5 | open | Create the `supertrends-stage` and `supertrends` namespaces' Secrets on Stoke (commands in Build and Deployment, docs/ARCHITECTURE.md section 10) | Secrets are never committed or created by CI | `kubectl -n supertrends-stage create secret generic ...` (see docs/ARCHITECTURE.md section 10) | S8-T05, S9-T07 |
+| 6 | open | After the first publish, set the GHCR image and chart packages to public, and confirm fork PR approval, secret scanning, and private vulnerability reporting are on in repo settings | Package visibility is an owner setting; the repo settings were applied by API during Step 2 and need a visual confirmation | https://github.com/mohnishbasha?tab=packages and https://github.com/mohnishbasha/stokeai-trading-supertrends/settings/security_analysis | S8-T05 |
+| 7 | open | Merge the Super Trends overlay pull request in the Stoke GitOps repository | Merges into the Stoke GitOps repository are owner-only | The PR link is added here when it is opened | S8-T05, S9-T07 |
+| 8 | open | Approve the `staging` to `main` pull request for v1.0.0 | `main` requires the owner's approval | `gh pr list --base main` | S9-T06 |
+| 9 | open | Review the first real-provider run on staging and the narrative evaluation result | Human judgment on real output before production | Staging UI and the run report | S9-T06 |
+| 10 | open | Before sharing Super Trends or its picks with anyone else, or charging for them, consult a securities lawyer | Compliance posture (see docs/PRD.md) | n/a | any sharing feature |
+| 11 | open | Have a lawyer review `CLA.md` before accepting the first outside contribution | Legal review | n/a | merging outside PRs |
+| 12 | open | Have a lawyer confirm the license choice (PolyForm Noncommercial 1.0.0) and `COMMERCIAL.md` before the repository is announced | Legal review | n/a | public announcement |
+| 13 | open | Review the `needs_review` and `unresolved` watchlist symbols (SQ, CITI, 000660, VIX, XIACF, KRKNF, XIC, VCX, CBRS, SPLG, CFLT) and confirm or replace each | Only the owner knows which instrument was meant | Edit the watchlist seed, or reply on the related issue | those symbols being scored |
+| 14 | info | The GitHub repository is `mohnishbasha/stokeai-trading-supertrends` (it already existed), while BUILD_PROMPT.md names it `stokeai-supertrends`. Step 2 says an existing repository is not recreated, so the existing one is used. Image, chart, package, and CLI names are unchanged (see ADR-017 in docs/ARCHITECTURE.md). If you prefer the shorter name, rename the repo; GitHub redirects the old URL | Repository naming is the owner's call | `gh repo rename stokeai-supertrends -R mohnishbasha/stokeai-trading-supertrends` then `git remote set-url origin https://github.com/mohnishbasha/stokeai-supertrends.git` | nothing |
+| 15 | open | Review the specification ambiguities and the literal reading chosen for each (docs/PRD.md section 17, "Ambiguities and resolutions", and the matching ADRs in docs/ARCHITECTURE.md section 3). Confirm or change each resolution; a change goes through the Spec Change Protocol and bumps `scoring.version` | Implementation Note 5: where the Signal Engine Specification is ambiguous, the most literal reading is implemented, recorded in an ADR, and flagged for the owner | Reply on the related issue or edit the spec docs | none (the literal readings are implemented unless you change them) |
