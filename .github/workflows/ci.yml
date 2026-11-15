@@ -33,10 +33,19 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
       - run: uv sync --locked
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy --strict src
+      - run: npm --prefix ui ci
+      - run: npm --prefix ui run build
+      - run: npm --prefix ui run lint
+      - run: npm --prefix ui run type-check
 
   unit-tests:
     name: ci / unit-tests
@@ -48,5 +57,12 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
       - run: uv sync --locked
       - run: uv run pytest tests/unit -q
+      - run: npm --prefix ui ci
+      - run: npm --prefix ui run test -- --run

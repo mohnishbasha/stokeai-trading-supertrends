@@ -148,8 +148,8 @@ Create the tree in Appendix B. `pyproject.toml` with uv, package `supertrends` u
 `ui/` with Vite, React, TypeScript strict, ESLint, Vitest, Playwright installed. A single placeholder route.
 
 **Acceptance criteria:**
-- [ ] `npm --prefix ui ci && npm --prefix ui run build` produces `ui/dist`
-- [ ] `npm --prefix ui run lint` and `type-check` exit 0 with 0 warnings
+- [x] `npm --prefix ui ci && npm --prefix ui run build` produces `ui/dist`
+- [x] `npm --prefix ui run lint` and `type-check` exit 0 with 0 warnings
 
 ### S0-T03: Root Makefile
 
