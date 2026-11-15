@@ -419,7 +419,7 @@ All eight Sprint 1 tasks are implemented in open PRs #117 to #124 and are waitin
 
 - [x] `supertrends ingest` on the fixture provider fills the database; a second run changes nothing (integrated tree: 5,292 daily, 16,380 intraday, and 1 corporate-action row for 7 symbols; the second run wrote 0 rows. Not on `develop` until #124 merges, GD-002)
 - [x] Provider contract tests pass for fixture, Massive, and the alternate provider (#120, #121, #119, and the integrated tree)
-- [x] Watchlist API works end to end against Postgres in CI (`integration-tests` job green on #123; the PR's red `lint-and-typecheck` is the cross-branch gitleaks finding, GD-011)
+- [x] Watchlist API works end to end against Postgres in CI (`integration-tests` job green on #123; its red `lint-and-typecheck` comes from the cross-branch gitleaks finding, GD-011)
 - [ ] No test touches the network (CI runs with outbound network blocked for the test step). Partly met: pytest-socket blocks every non-localhost socket in all test runs (#117), but the CI test step has no OS-level outbound block (GD-003)
 - [ ] `make up && make smoke` pass. On the integrated tree they pass (3 smoke tests) only with the Compose `migrate` service pushed to #122 (7819b0f). Not run on `develop` or `staging` (GD-004)
 - [x] Coverage thresholds met; spec docs audited (integrated tree: 91% line and branch, every per-directory threshold met; audit notes in docs/RETROSPECTIVES.md)
