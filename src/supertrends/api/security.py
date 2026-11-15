@@ -23,11 +23,15 @@ def require_write_token(
     """Allow the request only with `Authorization: Bearer <SUPERTRENDS_API_TOKEN>`.
 
     Compared with `hmac.compare_digest`. Missing or wrong token raises 401 with no detail
-    about which part failed.
+    about which part failed. An unset token rejects every request.
     """
     scheme, _, supplied = (authorization or "").partition(" ")
     expected = settings.api_token.get_secret_value().encode()
-    ok = scheme.lower() == "bearer" and hmac.compare_digest(supplied.strip().encode(), expected)
+    ok = (
+        bool(expected)
+        and scheme.lower() == "bearer"
+        and hmac.compare_digest(supplied.strip().encode(), expected)
+    )
     if not ok:
         log.warning("auth_failed", error_code="unauthorized")
         raise ProblemError(

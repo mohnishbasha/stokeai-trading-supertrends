@@ -18,6 +18,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Agent harness files: `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, and the `run-tests` and `check-types` skills (S0-T07).
 - License and community files, SPDX header check, dependency license check, and the CLA check (S0-T08).
 - SQLAlchemy 2 models and Alembic migrations for the complete live schema and the `backtests` schema, append-only triggers, run state guard, `supertrends db migrate`, and `supertrends.data.db` helpers (S1-T01).
+- Watchlist service and API: default watchlist with many-to-many groups, 300-ticker cap, bearer-token writes, seed from `config/watchlist.seed.yaml` (14 groups, 200 symbols), `config/watchlist.crypto.yaml`, `symbols_to_ingest`, and `supertrends watchlist seed | list | add | remove` (S1-T07).
 - `scripts/stoke-inventory.sh`, a read-only Stoke cluster inventory written to git-ignored `private/` (S0-T10).
 - Provider interfaces: `MarketDataProvider` and `FundamentalsProvider` Protocols with typed results, provider error types, a registry that selects providers from settings, and a shared provider contract test suite (S1-T02).
 - Alternate market data provider: Alpaca Market Data adapter behind the `alternate` registry name, with daily and 5-minute bars, splits, dividends, header auth, and retry (S1-T05, ADR-032).
