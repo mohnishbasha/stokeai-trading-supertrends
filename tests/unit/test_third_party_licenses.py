@@ -48,6 +48,7 @@ gtl = _load()
         "MIT OR Apache-2.0",
         "Apache Software License; MIT License",
         "(MIT OR GPL-3.0)",
+        "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
     ],
 )
 def test_allowed_licenses(license_text: str) -> None:
