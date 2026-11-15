@@ -485,6 +485,20 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** `nearest_miss` (section 6.1) carries `ticker`, `display_score`, and `reason`; present only when that side has fewer picks than the max.
 - **Status:** Accepted pending owner confirmation.
 
+### ADR-051: CLA enforced without `pull_request_target`
+- **Context:** S0-T08 needs a CLA check that blocks unsigned PRs from other accounts. Common CLA actions run on `pull_request_target`, which section 9 forbids, because it runs with a write token in the context of untrusted PR code.
+- **Decision:** Two workflows. `cla.yml` runs on `pull_request` with a read-only token, checks out the base commit (never the PR head), reads `signatures/cla.json` from the `cla-signatures` branch, and runs `scripts/cla.py check`; the owner, `dependabot[bot]`, and `github-actions[bot]` are exempt. `cla-sign.yml` runs on `issue_comment`, never checks out PR code, records a signature when the comment is exactly "I have read the CLA Document and I hereby sign the CLA" (creating the `cla-signatures` branch on first use), and re-runs the `cla` check for that PR.
+- **Alternatives rejected:** A hosted CLA bot (third-party write access to the repo); `pull_request_target` actions (forbidden); signatures committed to `develop` (every signature would need a protected-branch PR).
+- **Consequences:** The check is merge-blocking only when `cla` is a required status check (owner checklist #18). A fork PR runs workflows from its own head, so a PR that edits `cla.yml` is visible in review and fork PRs from first-time contributors need approval before workflows run.
+- **Status:** Accepted.
+
+### ADR-052: Reviewed dev-only license exceptions
+- **Context:** The license allowlist (ADR-016) rejects every license outside MIT, BSD, Apache-2.0, ISC, PSF, MPL-2.0, and LGPL. Four npm packages that only the UI toolchain uses carry other permissive licenses: `caniuse-lite` (CC-BY-4.0, browser data used by the build), `minimatch`, `lru-cache`, and `@isaacs/nonrecursive-glob-match` (BlueOak-1.0.0).
+- **Decision:** `scripts/gen_third_party_licenses.py` keeps a named list of reviewed exceptions that applies only to dev-only npm packages. The same license on a runtime dependency still fails CI, as does GPL, AGPL, SSPL, or unknown anywhere.
+- **Alternatives rejected:** Widening the allowlist for all dependencies (silently admits these licenses at runtime); dropping the tools (not possible without dropping Vite and ESLint).
+- **Consequences:** Adding an exception is a reviewed code change with a test. `THIRD_PARTY_LICENSES.md` still lists these packages with their licenses.
+- **Status:** Accepted.
+
 ---
 
 ## 4. Data Flows
@@ -1643,6 +1657,13 @@ This section mirrors the Build and Deployment, Versioning, Environment Model, an
 | Make target `narrative-eval` (S5-T03): `uv run python scripts/narrative_eval.py --report docs/NARRATIVE_EVAL.md`, needs `SUPERTRENDS_LLM_BASE_URL`. | Makefile | none (named by S5-T03) |
 | Retention runs after each daily run (no extra CronJob). | none | ADR-031 |
 | Metrics from the CronJob and worker are persisted to Postgres and exposed by the API, so ServiceMonitor targets only the API Service. | `servicemonitor.yaml` | ADR-023 |
+| Root `Makefile` adds `export IMAGE VERSION` so Compose can substitute `${IMAGE}:${VERSION}`. | Makefile | none (needed for Compose) |
+| The local Compose host port is `${SUPERTRENDS_HOST_PORT:-8080}`, still bound to 127.0.0.1, so a machine where 8080 is taken can run `make up` and `make smoke` (set `SMOKE_BASE_URL` to match). | `docker-compose.local.yml` | none (default unchanged) |
+| Until Sprint 1 adds Alembic, the Dockerfile build stage copies `README.md`, `src/`, and `config/` and runs `uv sync --locked --no-dev --no-editable`; base images are pinned by digest. | Dockerfile | none (staged delivery) |
+| The required jobs carry the display names `ci / lint-and-typecheck` and `ci / unit-tests`, which are the check contexts branch protection requires. | `ci.yml` | none (alignment) |
+| Ruff excludes `*.md`: ruff 0.17 formats Python code blocks inside Markdown, and the spec documents are not reformatted by tools. | `pyproject.toml` | none (tooling) |
+| CLA check and signer workflows. | `cla.yml`, `cla-sign.yml` | ADR-051 |
+| Dev-only npm license exceptions in the license script. | `scripts/gen_third_party_licenses.py` | ADR-052 |
 
 Additional values (merged into the seed `values.yaml` in 10.6):
 

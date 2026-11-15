@@ -133,9 +133,9 @@ Indicator and scoring thresholds are high on purpose: a silent math error here p
 Create the tree in Appendix B. `pyproject.toml` with uv, package `supertrends` under `src/`, Python 3.12, ruff, mypy strict, pytest, pytest-cov, hypothesis. A `supertrends` console entry point that prints version and commit.
 
 **Acceptance criteria:**
-- [ ] `uv sync --locked` works on a clean clone
-- [ ] `supertrends --version` prints `supertrends {VERSION} ({commit})`
-- [ ] `mypy --strict src` passes on the empty package
+- [x] `uv sync --locked` works on a clean clone
+- [x] `supertrends --version` prints `supertrends {VERSION} ({commit})`
+- [x] `mypy --strict src` passes on the empty package
 
 ### S0-T02: UI project
 
@@ -148,8 +148,8 @@ Create the tree in Appendix B. `pyproject.toml` with uv, package `supertrends` u
 `ui/` with Vite, React, TypeScript strict, ESLint, Vitest, Playwright installed. A single placeholder route.
 
 **Acceptance criteria:**
-- [ ] `npm --prefix ui ci && npm --prefix ui run build` produces `ui/dist`
-- [ ] `npm --prefix ui run lint` and `type-check` exit 0 with 0 warnings
+- [x] `npm --prefix ui ci && npm --prefix ui run build` produces `ui/dist`
+- [x] `npm --prefix ui run lint` and `type-check` exit 0 with 0 warnings
 
 ### S0-T03: Root Makefile
 
@@ -162,8 +162,8 @@ Create the tree in Appendix B. `pyproject.toml` with uv, package `supertrends` u
 Create the root `Makefile` exactly as specified in Build and Deployment, with `make help`. Targets that depend on later sprints exist now and print "not available until Sprint N" with exit 0.
 
 **Acceptance criteria:**
-- [ ] `make help` lists every required target
-- [ ] `make setup`, `make build`, `make check` pass on a clean clone
+- [x] `make help` lists every required target
+- [x] `make setup`, `make build`, `make check` pass on a clean clone
 
 ### S0-T04: Version source of truth and scripts
 
@@ -176,8 +176,8 @@ Create the root `Makefile` exactly as specified in Build and Deployment, with `m
 Root `VERSION` file containing `0.1.0`. `scripts/check-versions.sh`, `scripts/extract-changelog.sh`, `CHANGELOG.md` with an `[Unreleased]` section. See Versioning.
 
 **Acceptance criteria:**
-- [ ] `scripts/check-versions.sh` exits 0
-- [ ] changing `ui/package.json` version alone makes it exit 1 naming that file
+- [x] `scripts/check-versions.sh` exits 0
+- [x] changing `ui/package.json` version alone makes it exit 1 naming that file
 
 ### S0-T05: CI pipeline
 
@@ -190,9 +190,9 @@ Root `VERSION` file containing `0.1.0`. `scripts/check-versions.sh`, `scripts/ex
 `.github/workflows/ci.yml` with jobs `lint-and-typecheck`, `unit-tests`, `coverage`, `integration-tests` (Postgres service container), `e2e-tests` (placeholder until Sprint 4), `build-image` (buildx, amd64 and arm64, no push on PRs). Dependabot for pip, npm, GitHub Actions, and Docker. `pip-audit` and `npm audit --audit-level=high` in CI.
 
 **Acceptance criteria:**
-- [ ] CI is green on `develop`
-- [ ] a PR with a lint error fails `lint-and-typecheck`
-- [ ] the image job builds both architectures
+- [x] CI is green on `develop`
+- [x] a PR with a lint error fails `lint-and-typecheck`
+- [x] the image job builds both architectures
 
 ### S0-T06: Dockerfile skeleton and Compose
 
@@ -205,10 +205,10 @@ Root `VERSION` file containing `0.1.0`. `scripts/check-versions.sh`, `scripts/ex
 Multi-stage `Dockerfile` in the shape given in Build and Deployment, building the placeholder UI and the empty API. `deploy/compose/docker-compose.local.yml` with Postgres and the app.
 
 **Acceptance criteria:**
-- [ ] `make image` builds
-- [ ] the container runs as non-root with a read-only root filesystem
-- [ ] `make up` then `curl -fsS localhost:8080/healthz` returns `{"status":"ok"}`
-- [ ] `make down` cleans up
+- [x] `make image` builds
+- [x] the container runs as non-root with a read-only root filesystem
+- [x] `make up` then `curl -fsS localhost:8080/healthz` returns `{"status":"ok"}`
+- [x] `make down` cleans up
 
 ### S0-T07: Agent harness files
 
@@ -221,9 +221,9 @@ Multi-stage `Dockerfile` in the shape given in Build and Deployment, building th
 Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent/skills/run-tests/` and `.agent/skills/check-types/` (each with `SKILL.md` and `run.sh`), per Appendix J. `.gitignore` includes `logs/`.
 
 **Acceptance criteria:**
-- [ ] each file contains every required section
-- [ ] both skill `run.sh` scripts exit 0
-- [ ] `runner.mk`, `run-supertrends.sh`, `run-supertrends-status.sh` are untouched and not ignored
+- [x] each file contains every required section
+- [x] both skill `run.sh` scripts exit 0
+- [x] `runner.mk`, `run-supertrends.sh`, `run-supertrends-status.sh` are untouched and not ignored
 
 ### S0-T08: License and community files
 
@@ -236,10 +236,10 @@ Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent
 `LICENSE` (the unmodified PolyForm Noncommercial License 1.0.0 text, fetched from polyformproject.org, never retyped or edited, preceded only by the line "Required Notice: Copyright 2026 Serverless Ventures LLC (https://serverlessvc.com)"), `COPYRIGHT` (Copyright 2026 Serverless Ventures LLC, a Delaware limited liability company formed on November 26, 2024; the copyright year is the year this software was first published, 2026, not the formation year; all rights reserved except as granted in LICENSE; noncommercial use only; commercial licenses from legal@serverlessvc.com), `COMMERCIAL.md` (plain-language summary: what counts as noncommercial, examples of commercial use that need a license, how to ask for one; states that commercial licenses are governed by Delaware law and that LICENSE controls if the two differ), `CLA.md` (governed by Delaware law; names the company as "Serverless Ventures LLC, a Delaware limited liability company formed on November 26, 2024"; individual contributor license agreement granting Serverless Ventures LLC the right to relicense; base it on a standard template such as the Apache ICLA adapted for this project and flag it in the owner checklist for legal review), a CLA check in CI, SPDX headers on every source file with `scripts/check-spdx.sh`, `CONTRIBUTING.md` (dev setup, TDD and spec rules, Conventional Commits, CLA requirement), `CODE_OF_CONDUCT.md` (Contributor Covenant), `SECURITY.md` (private vulnerability reporting through GitHub Security Advisories, contact legal@serverlessvc.com), `THIRD_PARTY_LICENSES.md` generated by `scripts/gen-third-party-licenses.sh` from the Python and npm lock files, `DISCLAIMER.md` with the text from Security Guidelines.
 
 **Acceptance criteria:**
-- [ ] files exist
-- [ ] the license script runs in CI and fails if a dependency has a license outside the allowlist (MIT, BSD, Apache-2.0, ISC, PSF, MPL-2.0, and LGPL for unmodified libraries such as psycopg), and fails on GPL, AGPL, SSPL, or unknown, because strong-copyleft dependencies cannot be combined with a noncommercial license
-- [ ] `scripts/check-spdx.sh` fails on a source file without the SPDX header
-- [ ] a PR from a non-owner account without a signed CLA is blocked
+- [x] files exist
+- [x] the license script runs in CI and fails if a dependency has a license outside the allowlist (MIT, BSD, Apache-2.0, ISC, PSF, MPL-2.0, and LGPL for unmodified libraries such as psycopg), and fails on GPL, AGPL, SSPL, or unknown, because strong-copyleft dependencies cannot be combined with a noncommercial license
+- [x] `scripts/check-spdx.sh` fails on a source file without the SPDX header
+- [ ] a PR from a non-owner account without a signed CLA is blocked (not met: the `cla` check fails such a PR but is not yet a required status check; owner checklist #18 and #19, docs/GATE_DEBT.md GD-001)
 
 ### S0-T09: Config and settings skeleton
 
@@ -252,9 +252,9 @@ Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent
 `config/scoring.yaml` with every default from the Signal Engine Specification, a pydantic settings model, a JSON schema export, and a `config_hash` function (sha256 of the canonical JSON).
 
 **Acceptance criteria:**
-- [ ] loading the default file succeeds
-- [ ] an unknown key or out-of-range weight fails with a message naming the key
-- [ ] the hash is stable across key order
+- [x] loading the default file succeeds
+- [x] an unknown key or out-of-range weight fails with a message naming the key
+- [x] the hash is stable across key order
 
 ### S0-T10: Stoke inventory script
 
@@ -267,9 +267,9 @@ Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent
 `scripts/stoke-inventory.sh` that, given a kubeconfig, writes `private/STOKE_INVENTORY.md` (git-ignored: it describes a real cluster and must never be committed to this public repository) classifying each dependency as REUSE, UPGRADE, INSTALL, or NOT NEEDED (see Build and Deployment, Stoke profile). It is read-only: `kubectl get` and `flux get` only.
 
 **Acceptance criteria:**
-- [ ] with no kubeconfig it writes the table with every row "UNKNOWN: run against the cluster" and exits 0
-- [ ] `shellcheck` passes
-- [ ] the owner checklist has an entry asking the owner to run it
+- [x] with no kubeconfig it writes the table with every row "UNKNOWN: run against the cluster" and exits 0
+- [x] `shellcheck` passes
+- [x] the owner checklist has an entry asking the owner to run it
 
 ### Sprint 0 checklist (non-blocking; unmet items go to docs/GATE_DEBT.md)
 

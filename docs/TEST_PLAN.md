@@ -817,7 +817,7 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-REG-003 | `unit_regime_classify_adx_20_is_transitional` | Boundary: ranging is `< 20` | FR-3xx | Deferred |
 | TS-REG-004 | `unit_regime_classify_adx_19_99_is_ranging` | Just below 20 | FR-3xx | Deferred |
 | TS-REG-005 | `unit_weights_base_sum_equals_100` | Eleven base weights sum to 100 | FR-3xx, A§13 | Deferred |
-| TS-REG-006 | `unit_config_weights_not_summing_to_100_fails_validation_naming_key` | Schema rejects | FR-3xx, S0-T09 | Deferred |
+| TS-REG-006 | `unit_config_weights_not_summing_to_100_fails_validation_naming_key` | Schema rejects | FR-3xx, S0-T09 | Automated |
 | TS-REG-007 | `unit_weights_multiplier_table_every_cell_trending_matches_spec` | One parametrized row per cell, trending column (11 cells) | FR-3xx, S5-T05 | Deferred |
 | TS-REG-008 | `unit_weights_multiplier_table_every_cell_ranging_matches_spec` | Ranging column (11 cells) | FR-3xx, S5-T05 | Deferred |
 | TS-REG-009 | `unit_weights_multiplier_table_every_cell_transitional_all_1_0` | Transitional column (11 cells) | FR-3xx, S5-T05 | Deferred |
@@ -1113,7 +1113,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-CLI-001 | `unit_cli_version_prints_version_and_commit_and_license_notice` | `supertrends {VERSION} ({commit})` | FR-8xx, S0-T01 | Deferred |
+| TS-CLI-001 | `unit_cli_version_prints_version_and_commit_and_license_notice` | `supertrends {VERSION} ({commit})` | FR-8xx, S0-T01 | Automated |
 | TS-CLI-002 | `unit_cli_every_command_has_help_text` | `--help` for each command | FR-8xx, S7-T01 | Deferred |
 | TS-CLI-003 | `unit_cli_today_json_validates_against_api_schema` | `--json` | FR-8xx | Deferred |
 | TS-CLI-004 | `unit_cli_today_json_matches_api_payload` | Same answers as API | FR-8xx, S7 checklist | Deferred |
@@ -1132,7 +1132,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-CLI-017 | `unit_cli_runtime_error_exits_1` | Generic error | FR-8xx | Deferred |
 | TS-CLI-018 | `unit_cli_remote_mode_api_url_and_token_env_used` | `--api-url`, `SUPERTRENDS_API_TOKEN` | FR-8xx | Deferred |
 | TS-CLI-019 | `unit_cli_remote_mode_write_without_token_exits_1_with_message` | Auth failure | FR-8xx | Deferred |
-| TS-CLI-020 | `unit_cli_config_show_and_validate_unknown_key_fails_naming_key` | Config commands | FR-8xx, S0-T09 | Deferred |
+| TS-CLI-020 | `unit_cli_config_show_and_validate_unknown_key_fails_naming_key` | Config commands | FR-8xx, S0-T09 | Automated |
 | TS-CLI-021 | `unit_cli_db_migrate_and_backup_invoke_expected_operations` | DB commands | FR-8xx | Deferred |
 | TS-CLI-022 | `unit_cli_output_never_prints_secrets_token_redacted_in_errors` | Secret hygiene | NFR-009 | Deferred |
 | TS-CLI-023 | `it_cli_serve_binds_address_and_healthcheck_passes` | `serve` | FR-8xx | Deferred |
@@ -1160,7 +1160,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-MCP-017 | `it_harness_goose_opencode_claude_code_configs_start_stdio_server_and_list_tools` | Config validation script | S7-T04 | Deferred |
 | TS-MCP-018 | `it_harness_smoke_mcp_client_runs_all_read_tools_on_staging_and_tags` | CI `harness-smoke-tests` | S7-T05 | Deferred |
 | TS-MCP-019 | `unit_agent_skill_daily_brief_run_sh_prints_picks_from_running_instance` | Skill script | S7-T06 | Deferred |
-| TS-MCP-020 | `unit_agent_skills_run_tests_and_check_types_run_sh_exit_0` | Agent harness skills | S0-T07 | Deferred |
+| TS-MCP-020 | `unit_agent_skills_run_tests_and_check_types_run_sh_exit_0` | Agent harness skills | S0-T07 | Automated |
 
 ### 10.15 Operations and run state machine (TS-OPS)
 
@@ -1201,13 +1201,13 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-DEP-001 | `it_build_clean_clone_setup_build_check_succeed` | `make setup && make build && make check` | A§10, S0-T03 | Deferred |
-| TS-DEP-002 | `unit_version_check_script_passes_when_all_files_agree` | `scripts/check-versions.sh` | A§10, S0-T04 | Deferred |
-| TS-DEP-003 | `unit_version_check_script_fails_naming_ui_package_json_on_mismatch` | Negative | A§10, S0-T04 | Deferred |
-| TS-DEP-004 | `unit_changelog_extract_script_returns_section_for_version` | `scripts/extract-changelog.sh` | A§10, S0-T04 | Deferred |
-| TS-DEP-005 | `it_image_runs_as_non_root_uid_10001_read_only_root_fs` | Container hardening | A§9, S0-T06 | Deferred |
-| TS-DEP-006 | `it_image_compose_up_healthz_returns_ok_then_down_cleans_volumes` | Compose loop | A§10, S0-T06 | Deferred |
-| TS-DEP-007 | `it_image_builds_for_linux_amd64_and_linux_arm64_in_ci` | NFR-005 | NFR-005, S0-T05 | Deferred |
+| TS-DEP-001 | `it_build_clean_clone_setup_build_check_succeed` | `make setup && make build && make check` | A§10, S0-T03 | Automated |
+| TS-DEP-002 | `unit_version_check_script_passes_when_all_files_agree` | `scripts/check-versions.sh` | A§10, S0-T04 | Automated |
+| TS-DEP-003 | `unit_version_check_script_fails_naming_ui_package_json_on_mismatch` | Negative | A§10, S0-T04 | Automated |
+| TS-DEP-004 | `unit_changelog_extract_script_returns_section_for_version` | `scripts/extract-changelog.sh` | A§10, S0-T04 | Automated |
+| TS-DEP-005 | `it_image_runs_as_non_root_uid_10001_read_only_root_fs` | Container hardening | A§9, S0-T06 | Automated |
+| TS-DEP-006 | `it_image_compose_up_healthz_returns_ok_then_down_cleans_volumes` | Compose loop | A§10, S0-T06 | Automated |
+| TS-DEP-007 | `it_image_builds_for_linux_amd64_and_linux_arm64_in_ci` | NFR-005 | NFR-005, S0-T05 | Automated |
 | TS-DEP-008 | `it_image_arm64_runs_smoke_under_emulation_or_arm_runner` | Prove arm64, do not assume | NFR-005, Impl. Notes 14 | Deferred |
 | TS-DEP-009 | `it_image_no_gpu_requested_in_any_chart_profile` | CPU only | NFR-005, A§10 | Deferred |
 | TS-DEP-010 | `it_chart_helm_lint_and_template_pass_for_kind_stoke_selfhost_hosted_profiles` | `make helm-lint` | A§10, S8-T01 | Deferred |
@@ -1238,13 +1238,13 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-DEP-035 | `it_demo_seed_replays_60_trading_days_through_real_orchestrator` | Seed | A§10, S3-T13 | Deferred |
 | TS-DEP-036 | `it_demo_latest_run_has_3_buys_2_sells_by_construction` | Synthetic tickers constructed for it | A§10, S3-T13 | Deferred |
 | TS-DEP-037 | `it_systemd_units_and_install_script_pass_shellcheck_and_unit_verify` | Single host path | A§10 | Deferred |
-| TS-DEP-038 | `unit_scripts_shellcheck_passes_for_all_scripts` | Shell hygiene | A§10, S0-T10 | Deferred |
-| TS-DEP-039 | `unit_scripts_stoke_inventory_no_kubeconfig_writes_unknown_rows_exit_0` | Inventory script | S0-T10 | Deferred |
-| TS-DEP-040 | `unit_scripts_stoke_inventory_is_read_only_only_get_commands_issued` | Read-only | S0-T10 | Deferred |
-| TS-DEP-041 | `unit_repo_private_directory_and_logs_are_git_ignored_and_untracked` | Public repo hygiene | A§9, S0-T07 | Deferred |
-| TS-DEP-042 | `unit_repo_operator_files_runner_mk_and_run_scripts_not_ignored_and_untouched` | Operator files | S0-T07 | Deferred |
-| TS-DEP-043 | `it_ci_lint_error_in_pr_fails_lint_and_typecheck_job` | CI guard | S0-T05 | Deferred |
-| TS-DEP-044 | `it_ci_workflows_use_pull_request_not_pull_request_target_and_pinned_actions` | Workflow lint | A§9 | Deferred |
+| TS-DEP-038 | `unit_scripts_shellcheck_passes_for_all_scripts` | Shell hygiene | A§10, S0-T10 | Automated |
+| TS-DEP-039 | `unit_scripts_stoke_inventory_no_kubeconfig_writes_unknown_rows_exit_0` | Inventory script | S0-T10 | Automated |
+| TS-DEP-040 | `unit_scripts_stoke_inventory_is_read_only_only_get_commands_issued` | Read-only | S0-T10 | Automated |
+| TS-DEP-041 | `unit_repo_private_directory_and_logs_are_git_ignored_and_untracked` | Public repo hygiene | A§9, S0-T07 | Automated |
+| TS-DEP-042 | `unit_repo_operator_files_runner_mk_and_run_scripts_not_ignored_and_untouched` | Operator files | S0-T07 | Automated |
+| TS-DEP-043 | `it_ci_lint_error_in_pr_fails_lint_and_typecheck_job` | CI guard | S0-T05 | Automated |
+| TS-DEP-044 | `it_ci_workflows_use_pull_request_not_pull_request_target_and_pinned_actions` | Workflow lint | A§9 | Automated |
 | TS-DEP-045 | `it_ci_openapi_drift_fails_when_docs_openapi_json_stale` | Drift | S3-T09 | Deferred |
 | TS-DEP-046 | `it_ci_test_step_runs_with_outbound_network_blocked` | No network in tests | S1 checklist | Deferred |
 
@@ -1267,9 +1267,9 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-SEC-013 | `unit_security_no_brokerage_dependency_or_credential_setting_in_codebase` | Hard boundary | A§9 | Deferred |
 | TS-SEC-014 | `unit_security_app_never_stores_holdings_account_size_or_risk_tolerance_fields` | Schema scan | A§9 | Deferred |
 | TS-SEC-015 | `it_security_gitleaks_full_history_scan_reports_no_findings` | CI gate | A§9, S9-T01 | Deferred |
-| TS-SEC-016 | `it_security_pip_audit_and_npm_audit_no_high_or_critical` | Dependency audit | A§9, S0-T05 | Deferred |
-| TS-SEC-017 | `it_security_license_script_fails_on_gpl_agpl_sspl_or_unknown` | Dependency licenses | A§9, S0-T08 | Deferred |
-| TS-SEC-018 | `it_security_spdx_header_check_fails_on_source_file_without_header` | SPDX | A§9, S0-T08 | Deferred |
+| TS-SEC-016 | `it_security_pip_audit_and_npm_audit_no_high_or_critical` | Dependency audit | A§9, S0-T05 | Automated |
+| TS-SEC-017 | `it_security_license_script_fails_on_gpl_agpl_sspl_or_unknown` | Dependency licenses | A§9, S0-T08 | Automated |
+| TS-SEC-018 | `it_security_spdx_header_check_fails_on_source_file_without_header` | SPDX | A§9, S0-T08 | Automated |
 | TS-SEC-019 | `it_security_cla_check_blocks_pr_from_non_owner_without_signed_cla` | CLA | A§9, S0-T08 | Skipped: needs a real fork PR from a second GitHub account; manual: open a PR from a test account with no CLA and confirm the check blocks, then sign and confirm it passes |
 | TS-SEC-020 | `unit_security_docs_and_package_metadata_never_say_open_source` | Wording scan for README, docs, UI, package metadata, topics | A§9 | Deferred |
 | TS-SEC-021 | `unit_security_docs_contain_no_em_dash_or_hype_words` | Style lint for files written by the agent | Impl. Notes 19 | Deferred |
