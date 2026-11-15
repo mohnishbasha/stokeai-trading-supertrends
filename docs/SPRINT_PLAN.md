@@ -267,9 +267,9 @@ Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent
 `scripts/stoke-inventory.sh` that, given a kubeconfig, writes `private/STOKE_INVENTORY.md` (git-ignored: it describes a real cluster and must never be committed to this public repository) classifying each dependency as REUSE, UPGRADE, INSTALL, or NOT NEEDED (see Build and Deployment, Stoke profile). It is read-only: `kubectl get` and `flux get` only.
 
 **Acceptance criteria:**
-- [ ] with no kubeconfig it writes the table with every row "UNKNOWN: run against the cluster" and exits 0
-- [ ] `shellcheck` passes
-- [ ] the owner checklist has an entry asking the owner to run it
+- [x] with no kubeconfig it writes the table with every row "UNKNOWN: run against the cluster" and exits 0
+- [x] `shellcheck` passes
+- [x] the owner checklist has an entry asking the owner to run it
 
 ### Sprint 0 checklist (non-blocking; unmet items go to docs/GATE_DEBT.md)
 

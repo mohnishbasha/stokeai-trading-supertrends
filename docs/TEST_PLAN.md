@@ -1238,9 +1238,9 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-DEP-035 | `it_demo_seed_replays_60_trading_days_through_real_orchestrator` | Seed | A§10, S3-T13 | Deferred |
 | TS-DEP-036 | `it_demo_latest_run_has_3_buys_2_sells_by_construction` | Synthetic tickers constructed for it | A§10, S3-T13 | Deferred |
 | TS-DEP-037 | `it_systemd_units_and_install_script_pass_shellcheck_and_unit_verify` | Single host path | A§10 | Deferred |
-| TS-DEP-038 | `unit_scripts_shellcheck_passes_for_all_scripts` | Shell hygiene | A§10, S0-T10 | Deferred |
-| TS-DEP-039 | `unit_scripts_stoke_inventory_no_kubeconfig_writes_unknown_rows_exit_0` | Inventory script | S0-T10 | Deferred |
-| TS-DEP-040 | `unit_scripts_stoke_inventory_is_read_only_only_get_commands_issued` | Read-only | S0-T10 | Deferred |
+| TS-DEP-038 | `unit_scripts_shellcheck_passes_for_all_scripts` | Shell hygiene | A§10, S0-T10 | Automated |
+| TS-DEP-039 | `unit_scripts_stoke_inventory_no_kubeconfig_writes_unknown_rows_exit_0` | Inventory script | S0-T10 | Automated |
+| TS-DEP-040 | `unit_scripts_stoke_inventory_is_read_only_only_get_commands_issued` | Read-only | S0-T10 | Automated |
 | TS-DEP-041 | `unit_repo_private_directory_and_logs_are_git_ignored_and_untracked` | Public repo hygiene | A§9, S0-T07 | Automated |
 | TS-DEP-042 | `unit_repo_operator_files_runner_mk_and_run_scripts_not_ignored_and_untouched` | Operator files | S0-T07 | Automated |
 | TS-DEP-043 | `it_ci_lint_error_in_pr_fails_lint_and_typecheck_job` | CI guard | S0-T05 | Automated |
