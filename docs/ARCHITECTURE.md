@@ -245,7 +245,7 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Context:** The owner wants public source, no commercial use by others, and all rights kept by Serverless Ventures LLC.
 - **Decision:** The unmodified PolyForm Noncommercial License 1.0.0 with the Required Notice line, plus a Contributor License Agreement enforced in CI. The project is described as source-available and free for noncommercial use.
 - **Alternatives rejected:** AGPL-3.0 (allows commercial use); Apache-2.0 or MIT (allow everything); a custom-written license (untested wording); BUSL (time-limited, converts later).
-- **Consequences:** Dependency licenses are restricted to a permissive allowlist (LGPL only for unmodified libraries such as psycopg); GPL, AGPL, SSPL, and unknown licenses fail CI. The license notice appears in the UI footer, `supertrends --version`, and `GET /api/v1/status`.
+- **Consequences:** Dependency licenses are restricted to a permissive allowlist (LGPL only for unmodified libraries such as psycopg; Zlib and CC0-1.0 are also accepted, added 2026-11-15 because numpy 2.5, pulled in by `exchange_calendars`, is `BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0`); GPL, AGPL, SSPL, and unknown licenses fail CI. The license notice appears in the UI footer, `supertrends --version`, and `GET /api/v1/status`.
 - **Status:** Accepted.
 
 ### ADR-017: GitHub repository name
@@ -354,11 +354,17 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Status:** Accepted.
 
 ### ADR-032: Alternate market data provider selection
-- **Context:** S1-T05 requires a second provider behind the same interface, chosen between Alpaca Market Data and Tiingo after reading their current docs and terms.
-- **Decision:** The registry name is `alternate` and the module is `data/providers/alternate.py`. The vendor choice, its verified endpoints, rate limits, and terms, and the date verified are recorded by amending this ADR in the S1-T05 PR.
-- **Alternatives rejected:** Choosing now without reading current terms.
-- **Consequences:** Settings keys for the alternate vendor are added with that PR (`SUPERTRENDS_ALTERNATE_API_KEY`, `SUPERTRENDS_ALTERNATE_BASE_URL`).
-- **Status:** Proposed (decided in S1-T05).
+- **Context:** S1-T05 requires a second provider behind the same interface, chosen between Alpaca Market Data and Tiingo after reading their current docs and terms (verified 2026-11-15).
+- **Decision:** Alpaca Market Data. The registry name is `alternate` and the module is `data/providers/alternate.py`.
+  - Auth: headers `APCA-API-KEY-ID` and `APCA-API-SECRET-KEY` against `https://data.alpaca.markets`. Alpaca uses a key pair, so `SUPERTRENDS_ALTERNATE_API_KEY` holds `KEY_ID:SECRET`; a value without both parts reports `unconfigured`.
+  - Endpoints: `GET /v2/stocks/bars` (`timeframe=1Day` or `5Min`, `adjustment=all`, `feed=iex`, `limit` up to 10000, `page_token` pagination, response `bars.{symbol}[]` with `t o h l c v n vw`) and `GET /v1/corporate-actions` (`forward_splits`, `reverse_splits` with `new_rate` and `old_rate`, `cash_dividends` with `rate`, `ex_date`).
+  - Plan: the free Basic plan allows 200 calls per minute, the IEX feed only for equities, and history since 2016; Algo Trader Plus (about $99 per month) has 10,000 calls per minute and the full SIP feed. Intraday 5-minute bars and adjusted daily bars are available on the free plan, so `intraday=True` and `adjusted=True`.
+  - Capabilities: `grouped_daily=False` (no whole-market endpoint) and `trades=False` raise `CapabilityNotSupported`. `resolve_symbol` is a recent-bar lookup (the asset catalog is on the trading API host and does not distinguish ETFs), so it returns type `stock` and no name.
+  - Terms: market data is licensed under the NASDAQ and NYSE subscriber agreements, which restrict republishing or reselling data. The product publishes derived picks, not raw quotes, but the owner must review the terms before production use (OWNER_CHECKLIST row 20).
+- **Why Alpaca over Tiingo:** The free Tiingo plan allows 50 requests per hour and 1,000 per day (a 200-symbol backfill is impractical), and limits use to personal use with no display or sharing of data (the paid personal plan is $30 per month). Alpaca's 200 calls per minute and multi-symbol bars fit the daily run, and header-key auth matches ADR-035. Tiingo remains a documented fallback: its single-token header auth (`Authorization: Token`), `/tiingo/daily/{ticker}/prices` (with `divCash` and `splitFactor`), and a per-ticker `adj*` series would also fit the interface.
+- **Alternatives rejected:** Tiingo (rate limits and personal-use terms above); choosing without reading current terms.
+- **Consequences:** Settings keys `SUPERTRENDS_ALTERNATE_API_KEY` and `SUPERTRENDS_ALTERNATE_BASE_URL` (added in S1-T02). On the free plan, volume comes from IEX only, so volume-based factors differ from the primary vendor; `feed="sip"` is a constructor option for a paid plan. The adapter has its own retry loop; consolidate with the Massive adapter into one shared HTTP helper (token bucket, per-run cache, `provider_calls` recording) when S1-T04 lands.
+- **Status:** Accepted (verified 2026-11-15).
 
 ### ADR-033: Weekly bars are resampled in memory, not persisted
 - **Context:** Weekly bars are resampled from daily bars (week ending Friday) for Supertrend, MACD, and divergences.
@@ -1486,7 +1492,7 @@ Massive was formerly Polygon.io. Endpoint paths below follow the vendor's docume
 
 ### 7.7 Alternate provider (`data/providers/alternate.py`)
 
-Implements `MarketDataProvider` for the vendor chosen in S1-T05 (Alpaca Market Data or Tiingo, ADR-032). Same error, retry, rate-limit, recording, and header-auth rules. Passes the shared contract suite in `tests/contract/test_market_provider.py`.
+Implements `MarketDataProvider` for Alpaca Market Data (chosen over Tiingo, ADR-032, verified 2026-11-15). Header auth only, with the key pair in `SUPERTRENDS_ALTERNATE_API_KEY` as `KEY_ID:SECRET`; retry on 429, 5xx, and transport errors per 7.3. Daily bars are adjusted; intraday is 5-minute regular-session bars; `grouped_daily` and `trades` raise `CapabilityNotSupported`. Tested by the shared contract suite (`tests/contract/provider_contract.py`) against recorded fixtures in `tests/fixtures/providers/alpaca/`. The rate-limit token bucket, per-run cache, and `provider_calls` recording land with the shared HTTP helper (see ADR-032 consequences).
 
 ### 7.8 Narrative provider (`narrative/`)
 
