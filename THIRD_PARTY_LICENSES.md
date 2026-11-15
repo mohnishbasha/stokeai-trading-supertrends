@@ -48,6 +48,7 @@ or the UI bundle; `dev` dependencies are build, test, and lint tools only.
 | pip_audit | 2.10.1 | Apache Software License | dev |
 | platformdirs | 4.14.5 | MIT | dev |
 | pluggy | 1.7.0 | MIT License | dev |
+| prometheus_client | 0.26.0 | Apache-2.0 AND BSD-2-Clause | runtime |
 | psycopg | 3.3.9 | LGPL-3.0-only | runtime |
 | psycopg-binary | 3.3.9 | LGPL-3.0-only | runtime |
 | py-serializable | 2.2.0 | Apache Software License | dev |

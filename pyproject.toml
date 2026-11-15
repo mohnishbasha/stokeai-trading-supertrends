@@ -31,6 +31,7 @@ dependencies = [
     "sqlalchemy>=2",
     "alembic>=1.14",
     "psycopg[binary]>=3.2",
+    "prometheus-client>=0.21",
 ]
 
 [project.urls]

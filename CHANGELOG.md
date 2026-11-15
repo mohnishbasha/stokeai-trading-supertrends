@@ -18,6 +18,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - License and community files, SPDX header check, dependency license check, and the CLA check (S0-T08).
 - SQLAlchemy 2 models and Alembic migrations for the complete live schema and the `backtests` schema, append-only triggers, run state guard, `supertrends db migrate`, and `supertrends.data.db` helpers (S1-T01).
 - `scripts/stoke-inventory.sh`, a read-only Stoke cluster inventory written to git-ignored `private/` (S0-T10).
+- API skeleton: `/readyz` checks database reachability and migrations at head (RFC 9457 503), `/metrics` Prometheus HTTP metrics, structlog JSON logs with request IDs and a secret scrubber, problem+json errors, Host allowlist with probe exemptions, and `require_write_token` (S1-T08).
 
 ### Scoring
 
