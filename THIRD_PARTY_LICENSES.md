@@ -21,6 +21,7 @@ or the UI bundle; `dev` dependencies are build, test, and lint tools only.
 | coverage | 7.17.3 | Apache-2.0 | dev |
 | cyclonedx-python-lib | 11.12.0 | Apache Software License | dev |
 | defusedxml | 0.7.1 | Python Software Foundation License | dev |
+| exchange_calendars | 4.13.3 | Apache-2.0 | runtime |
 | fastapi | 0.163.0 | MIT | runtime |
 | filelock | 4.2.10 | MIT | dev |
 | h11 | 0.16.0 | MIT License | runtime |
@@ -30,6 +31,7 @@ or the UI bundle; `dev` dependencies are build, test, and lint tools only.
 | hypothesis | 6.170.15 | MPL-2.0 | dev |
 | idna | 3.20 | BSD-3-Clause | runtime |
 | iniconfig | 2.3.1 | MIT | dev |
+| korean_lunar_calendar | 0.4.0 | MIT | runtime |
 | librt | 0.16.0 | MIT | dev |
 | license-expression | 30.4.4 | Apache-2.0 | dev |
 | Mako | 1.4.3 | MIT | runtime |
@@ -39,9 +41,11 @@ or the UI bundle; `dev` dependencies are build, test, and lint tools only.
 | msgpack | 1.2.4 | Apache-2.0 | dev |
 | mypy | 2.4.1 | MIT | dev |
 | mypy_extensions | 1.2.0 | MIT | dev |
+| numpy | 2.5.4 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | runtime |
 | opentelemetry-api | 1.45.2 | Apache-2.0 | runtime |
 | packageurl-python | 0.17.6 | MIT License | dev |
 | packaging | 26.3 | Apache-2.0 OR BSD-2-Clause | dev |
+| pandas | 3.1.1 | BSD-3-Clause | runtime |
 | pathspec | 1.1.1 | Mozilla Public License 2.0 (MPL 2.0) | dev |
 | pip-requirements-parser | 32.0.1 | MIT | dev |
 | pip_api | 0.0.35 | Apache Software License | dev |
@@ -55,11 +59,13 @@ or the UI bundle; `dev` dependencies are build, test, and lint tools only.
 | pydantic-settings | 2.16.3 | MIT | runtime |
 | pydantic_core | 2.50.4 | MIT | runtime |
 | Pygments | 2.21.0 | BSD-2-Clause | runtime |
+| pyluach | 2.3.0 | MIT License | runtime |
 | pyparsing | 3.3.3 | MIT | dev |
 | pytest | 9.2.0 | MIT | dev |
 | pytest-asyncio | 1.5.0 | Apache-2.0 | dev |
 | pytest-cov | 7.1.0 | MIT | dev |
 | pytest-socket | 0.8.1 | MIT | dev |
+| python-dateutil | 4.0.0 | BSD-3-Clause | runtime |
 | python-dotenv | 1.2.4 | BSD-3-Clause | runtime |
 | PyYAML | 6.0.3 | MIT License | runtime |
 | requests | 2.34.2 | Apache Software License | dev |
@@ -72,10 +78,12 @@ or the UI bundle; `dev` dependencies are build, test, and lint tools only.
 | structlog | 26.1.0 | MIT OR Apache-2.0 | runtime |
 | tomli | 2.5.0 | MIT | dev |
 | tomli_w | 1.2.0 | MIT License | dev |
+| toolz | 1.2.0 | BSD-3-Clause | runtime |
 | typer | 0.29.1 | MIT | runtime |
 | types-PyYAML | 6.0.12.20261113 | Apache-2.0 | dev |
 | typing-inspection | 0.4.5 | MIT | runtime |
 | typing_extensions | 4.16.0 | PSF-2.0 | runtime |
+| tzdata | 2026.6 | Apache-2.0 | runtime |
 | urllib3 | 2.8.0 | MIT | dev |
 | uvicorn | 0.54.0 | BSD-3-Clause | runtime |
 | uvloop | 0.23.0 | Apache Software License; MIT License | runtime |
