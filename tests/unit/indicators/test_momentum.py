@@ -73,8 +73,10 @@ def test_ts_ind_050_macd_daily_matches_loops_to_1e6() -> None:
     assert_close(res.line, line)
     assert_close(res.signal, signal)
     assert_close(res.hist, hist)
-    assert np.isnan(res.line[24]) and not np.isnan(res.line[25])
-    assert np.isnan(res.signal[32]) and not np.isnan(res.signal[33])
+    assert np.isnan(res.line[24])
+    assert not np.isnan(res.line[25])
+    assert np.isnan(res.signal[32])
+    assert not np.isnan(res.signal[33])
 
 
 def test_ts_ind_050_macd_hand_values_and_params() -> None:
@@ -100,7 +102,9 @@ def test_ts_ind_050_macd_hand_values_and_params() -> None:
     assert res.hist[4] == pytest.approx(line[4] - sig[4], abs=TOL)
 
 
-def weekly_loop(dates: list[date], close: list[float]) -> tuple[list[float], list[float], list[float]]:
+def weekly_loop(
+    dates: list[date], close: list[float]
+) -> tuple[list[float], list[float], list[float]]:
     """As-of daily MACD from weekly closes: for each day, rebuild weekly closes up to that day."""
     n = len(close)
     line, signal, hist = [NAN] * n, [NAN] * n, [NAN] * n
@@ -135,7 +139,9 @@ def test_ts_ind_051_macd_weekly_matches_asof_loop_and_has_no_lookahead() -> None
 def test_macd_weekly_small_params_and_short_input() -> None:
     """TS-IND-051: small periods exercise every seed path; too little history is NaN."""
     start = date(2024, 1, 1)  # a Monday
-    days = [start + timedelta(days=i) for i in range(70) if (start + timedelta(days=i)).weekday() < 5]
+    days = [
+        start + timedelta(days=i) for i in range(70) if (start + timedelta(days=i)).weekday() < 5
+    ]
     close = [100 + math.sin(i / 3) * 5 + i * 0.1 for i in range(len(days))]
     res = m.macd_weekly(np.array(days, dtype="datetime64[D]"), np.array(close), 2, 3, 2)
     keys = [d.isocalendar()[:2] for d in days]
@@ -178,7 +184,7 @@ def test_ts_ind_052_signal_cross_bullish_and_bearish_within_3_bars() -> None:
     assert m.macd_signal_cross(line[:7], sig[:7]) == Cross(4, 1)  # window bars 4..6
     assert m.macd_signal_cross(line[:8], sig[:8]) is None  # window bars 5..7, cross at 4 is old
     assert m.macd_signal_cross(line[:8], sig[:8], 4) == Cross(4, 1)
-    assert m.macd_signal_cross(line, sig, 1) == Cross(8, -1)
+    assert m.macd_signal_cross(line, sig, 1) is None  # window is bar 9 only
 
 
 def test_ts_ind_053_hist_run_three_rising_and_three_falling_bars() -> None:

@@ -56,7 +56,8 @@ def test_ts_ind_040_sma_stack_matches_loops_on_synthetic_dataset() -> None:
     assert_close(stack.sma20, loop_sma(values, 20))
     assert_close(stack.sma50, loop_sma(values, 50))
     assert_close(stack.sma200, loop_sma(values, 200))
-    assert np.isnan(stack.sma200[198]) and not np.isnan(stack.sma200[199])
+    assert np.isnan(stack.sma200[198])
+    assert not np.isnan(stack.sma200[199])
 
 
 def test_ts_ind_041_sma_slope_sign_positive_negative_flat() -> None:
@@ -171,8 +172,10 @@ def test_ts_ind_060_adx_matches_wilder_loop_hand_series_and_fixture() -> None:
     assert_close(res.plus_di, pdi)
     assert_close(res.minus_di, mdi)
     assert_close(res.adx, adx_)
-    assert np.isnan(res.adx[26]) and not np.isnan(res.adx[27])
-    assert np.isnan(res.plus_di[13]) and not np.isnan(res.plus_di[14])
+    assert np.isnan(res.adx[26])
+    assert not np.isnan(res.adx[27])
+    assert np.isnan(res.plus_di[13])
+    assert not np.isnan(res.plus_di[14])
     h, lo, c = fixture_ohlc("FXC")
     res2 = t.adx(h, lo, c)
     pdi, mdi, adx_ = loop_adx(h.tolist(), lo.tolist(), c.tolist(), 14)
@@ -225,3 +228,8 @@ def test_sma_stack_params_and_short_input() -> None:
     assert_close(stack.sma20, [NAN, 1.5, 2.5, 3.5])
     assert_close(stack.sma50, [NAN, NAN, 2, 3])
     assert np.isnan(stack.sma200).all()
+
+
+def test_slope_shorter_than_bars_is_all_nan() -> None:
+    """TS-IND-041: fewer than bars+1 values gives all NaN."""
+    assert np.isnan(t.sma_slope(arr(1, 2, 3), 5)).all()
