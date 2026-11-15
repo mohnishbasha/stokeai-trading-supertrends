@@ -20,7 +20,7 @@ from pathlib import Path
 
 ALLOWED = re.compile(
     r"^(MIT|(0)?BSD|Apache|ISC|PSF|Python Software Foundation|MPL|Mozilla Public License|"
-    r"LGPL|GNU Lesser General Public License)",
+    r"LGPL|GNU Lesser General Public License|Zlib|CC0)",
     re.IGNORECASE,
 )
 # Strong copyleft, never allowed. LGPL is matched by ALLOWED first.
