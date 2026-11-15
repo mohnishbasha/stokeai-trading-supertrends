@@ -9,3 +9,4 @@ class SuperTrendsError(Exception):
 
 class ConfigError(SuperTrendsError):
     """Invalid scoring config or environment settings. The message names the offending key."""
+import os  # deliberate lint error (F401) for TS-DEP-043
