@@ -14,12 +14,12 @@ from supertrends.api.app import create_app
 from supertrends.logs import configure_logging
 from supertrends.settings import Settings
 
-TOKEN = "tok-abcdef-123456"  # noqa: S105
-PROVIDER_KEY = "pk_live_ZZZ987654321"
-LLM_KEY = "llm-key-QQQ-424242"
-DSN_PASSWORD = "dsnPassw0rdXYZ"  # noqa: S105
+TOKEN = "tok-abcdef-123456"  # noqa: S105  # gitleaks:allow
+PROVIDER_KEY = "pk_live_ZZZ987654321"  # gitleaks:allow
+LLM_KEY = "llm-key-QQQ-424242"  # gitleaks:allow
+DSN_PASSWORD = "dsnPassw0rdXYZ"  # noqa: S105  # gitleaks:allow
 DSN = f"postgresql+psycopg://svc:{DSN_PASSWORD}@db.internal:5432/st"
-JWT = "eyJhbGciOi.payload.sig-9999"
+JWT = "eyJhbGciOi.payload.sig-9999"  # gitleaks:allow
 AUTH_VALUE = f"Bearer {JWT}"
 SECRETS = [TOKEN, PROVIDER_KEY, LLM_KEY, DSN_PASSWORD, JWT]
 

@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import inspect
+from pathlib import Path
 
 import pytest
 from fastapi import APIRouter, Depends
@@ -17,8 +18,8 @@ from supertrends.api.app import create_app
 from supertrends.api.security import require_write_token
 from supertrends.settings import Settings
 
-DOWN_URL = "postgresql+psycopg://u:hunter2pw@127.0.0.1:1/x"
-TOKEN = "tok-abcdef-123456"  # noqa: S105
+DOWN_URL = "postgresql+psycopg://u:hunter2pw@127.0.0.1:1/x"  # gitleaks:allow
+TOKEN = "tok-abcdef-123456"  # noqa: S105  # gitleaks:allow
 
 
 def _settings() -> Settings:
@@ -31,7 +32,7 @@ class Body(BaseModel):
 
 @pytest.fixture
 def client() -> TestClient:
-    app = create_app(settings=_settings())
+    app = create_app(Path("/nonexistent-ui"), settings=_settings())
     router = APIRouter(prefix="/api/v1")
 
     @router.post("/_t/write", dependencies=[Depends(require_write_token)])
