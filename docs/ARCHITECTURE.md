@@ -1452,7 +1452,7 @@ def market_provider(settings: Settings) -> MarketDataProvider: ...
 def fundamentals_provider(settings: Settings) -> FundamentalsProvider: ...
 ```
 
-An unknown name raises `ConfigError("SUPERTRENDS_MARKET_PROVIDER='x' is not one of: fixture, massive, alternate")` at startup. `SUPERTRENDS_DEMO=1` with a non-fixture market provider is a startup error.
+The tables hold lazy `"module:attribute"` targets (or registered factories via `register_market_provider` and `register_fundamentals_provider`) so each adapter module is imported only when selected and the S1-T03, S1-T04, and S1-T05 adapters plug in independently; a name whose module does not exist yet raises `ConfigError` ("has no implementation yet"). The market and fundamentals providers are chosen independently and may come from different vendors. An unknown name raises `ConfigError("SUPERTRENDS_MARKET_PROVIDER='x' is not one of: fixture, massive, alternate")` at startup. `SUPERTRENDS_DEMO=1` with a non-fixture market provider is a startup error.
 
 ### 7.5 Fixture provider (`data/providers/fixture.py`)
 
@@ -1663,6 +1663,7 @@ This section mirrors the Build and Deployment, Versioning, Environment Model, an
 | The required jobs carry the display names `ci / lint-and-typecheck` and `ci / unit-tests`, which are the check contexts branch protection requires. | `ci.yml` | none (alignment) |
 | Ruff excludes `*.md`: ruff 0.17 formats Python code blocks inside Markdown, and the spec documents are not reformatted by tools. | `pyproject.toml` | none (tooling) |
 | CLA check and signer workflows. | `cla.yml`, `cla-sign.yml` | ADR-051 |
+| Network is blocked for tests: `pytest-socket` (MIT) with `--disable-socket --allow-unix-socket --allow-hosts=127.0.0.1,localhost,::1` in pytest `addopts`, so unit and integration tests reach only loopback (local Postgres) and a stray outbound call fails the test. | `pyproject.toml` | none (Sprint 1 checklist) |
 | Dev-only npm license exceptions in the license script. | `scripts/gen_third_party_licenses.py` | ADR-052 |
 
 Additional values (merged into the seed `values.yaml` in 10.6):

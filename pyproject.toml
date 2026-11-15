@@ -47,6 +47,7 @@ dev = [
     "types-pyyaml>=6.0",
     "pip-audit>=2.7",
     "pip-licenses>=5.0",
+    "pytest-socket>=0.8.1",
 ]
 
 [tool.hatch.version]
@@ -81,7 +82,7 @@ mypy_path = "src"
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
-addopts = "-ra --strict-markers"
+addopts = "-ra --strict-markers --disable-socket --allow-unix-socket --allow-hosts=127.0.0.1,localhost,::1"
 asyncio_default_fixture_loop_scope = "function"
 markers = ["integration: needs services such as Postgres or Docker"]
 
