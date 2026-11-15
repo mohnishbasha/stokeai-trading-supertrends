@@ -291,6 +291,9 @@ The Ticker screen uses `lightweight-charts` for the candlestick chart and its su
 | SMA 20 | 1 px line | `--info` | Off |
 | SMA 50 | 1 px line | `--text-1` | Off |
 | SMA 200 | 1 px line | `--accent` | Off |
+| Ripster 5/12 cloud | Fill at 15 percent opacity, `--up-soft` when the cloud is bullish and `--down-soft` when bearish, no edge lines | `--up-soft`, `--down-soft` | On |
+| Ripster 34/50 cloud | Fill at 15 percent opacity, `--up-soft` when the cloud is bullish and `--down-soft` when bearish, no edge lines | `--up-soft`, `--down-soft` | On |
+| Ripster 8/9, 72/89 and 180/200 clouds | Fill at 15 percent opacity, `--up-soft` when the cloud is bullish and `--down-soft` when bearish, no edge lines | `--up-soft`, `--down-soft` | Off |
 | Fibonacci levels | Dashed 1 px, right-edge labels (for example "61.8%  214.20") | `--text-2` | Off |
 | Support | Solid 1 px; strength shown by opacity (0.35 weakest to 1.0 strongest) | `--neutral` | Off |
 | Resistance | Solid 1 px; strength shown by opacity (0.35 to 1.0) | `--neutral` | Off |
@@ -300,8 +303,9 @@ The Ticker screen uses `lightweight-charts` for the candlestick chart and its su
 | RSI (sub-panel) | 1 px line `--text-0`, reference lines at 30 and 70 dashed `--text-2`; divergence markers as 8 px triangles with a text tooltip | per series | Off |
 
 Rules:
-- **Default overlays on first load:** candles, Supertrend line, volume sub-panel, and the invalidation level when present. Everything else is a toggle. Never more than the default overlays on first load.
+- **Default overlays on first load:** candles, Supertrend line, the Ripster 5/12 and 34/50 clouds, volume sub-panel, and the invalidation level when present. Everything else is a toggle. Never more than the default overlays on first load.
 - Toggle state persists per browser (local UI state), keyed by overlay id. A "Reset overlays" control returns to the defaults.
+- Ripster EMA Clouds: the 5/12 and 34/50 clouds as fills at 15 percent opacity, `--up-soft` when the cloud is bullish and `--down-soft` when bearish, no edge lines. Shown on the ticker chart by default; the 8/9, 72/89 and 180/200 clouds are toggles. Never on the pick card sparkline.
 - Supertrend flip markers always carry a shape (triangle) in addition to the line color change, so flips do not rely on color.
 - Support and resistance lines use opacity for strength, so each line also carries a right-edge label with the level and a strength word ("strong", "moderate", "weak").
 - Every right-edge label is 12 px mono `--text-2` on a `--bg-1` plate for readability, with 4.5:1 contrast per section 2.
@@ -395,8 +399,8 @@ Global state rules:
 
 **C-07 LevelList**
 - Purpose: key price levels for a pick.
-- Props: `support` (list), `resistance` (list), `fib` (map), `nextTarget`, `invalidation` ({level, rule}), `expected1dMove` (required on a pick).
-- Layout: a compact two-column list. Invalidation first and emphasized: "Invalidation 212.40: daily close below the Supertrend line". Then "Expected 1-day move: plus or minus 4.10 (14-day ATR, an estimate from recent volatility, not a forecast)", shown on every pick card including on phone. Then "Next target 236.00", "Resistance 229.50, 236.00", "Support 215.10, 208.70", "Fib 61.8%: 214.20". Numbers in mono, two decimals.
+- Props: `support` (list), `resistance` (list), `fib` (map), `cloud3450` ([bottom, top] of the Ripster 34/50 cloud), `nextTarget`, `invalidation` ({level, rule}), `expected1dMove` (required on a pick).
+- Layout: a compact two-column list. Invalidation first and emphasized: "Invalidation 212.40: daily close below the Supertrend line". Then "Expected 1-day move: plus or minus 4.10 (14-day ATR, an estimate from recent volatility, not a forecast)", shown on every pick card including on phone. Then "Next target 236.00", "Resistance 229.50, 236.00", "Support 215.10, 208.70", "Fib 61.8%: 214.20", "34/50 cloud 206.30 to 210.80" (the trend-bias level). Numbers in mono, two decimals.
 - States: D as above; H n/a; F n/a (static list); X n/a; L Skeleton rows; E missing groups are omitted, not shown as zero; if there is no level data the list shows "No key levels computed"; R n/a; S n/a.
 
 **C-08 DataQualityTag**
@@ -471,7 +475,7 @@ Global state rules:
 **C-19 PickCard**
 - Purpose: the core unit of the product. One buy or sell pick on the Today screen.
 - Data (from `GET /api/v1/recommendations/latest`, `buys[]` or `sells[]`, enriched by the analysis endpoint when a detail is expanded): `rank`, `ticker`, `side`, `display_score`, `band`, `confidence`, `supertrend` (`dir_d`, `dir_w`, `bars_since_flip`, `line`), `regime`, `flags`, `days_on_list`, `invalidation`, `expected_1d_move` (always present, always rendered), `top_factors`, `narrative` (`text`, `source`, `model`), `ribbon`, watchlist groups.
-- Layout (top to bottom): 1) header row: rank number, ticker (20 px), company or ETF name if available (13 px `--text-1`), BuySellMark with the band; 2) ScoreDial at left with Confidence beside it ("Confidence 71 of 100" and a short bar); 3) TrendRibbon with the caption "Supertrend up (daily), up (weekly), flipped 3 bars ago"; 4) "Day 1 on the list" (or "Day N on the list"); 5) factor contribution breakdown: top 3 FactorBars (the `top_factors`, the two largest positive and the largest opposing factor when known), with a "Show all 11 factors" disclosure that expands the full list in place (not a modal); 6) NarrativeBlock; 7) LevelList with the invalidation level first; 8) flags row: FlagChip for event risk, DataQualityTag for estimated order flow, regime chip ("Trending", "Ranging", "Transitional"), watchlist group chips; 9) footer: "Details" link to `/ticker/:symbol?date=...`. The Disclaimer is page-level on Today (section 10), not repeated in every card.
+- Layout (top to bottom): 1) header row: rank number, ticker (20 px), company or ETF name if available (13 px `--text-1`), BuySellMark with the band; 2) ScoreDial at left with Confidence beside it ("Confidence 71 of 100" and a short bar); 3) TrendRibbon with the caption "Supertrend up (daily), up (weekly), flipped 3 bars ago"; 4) "Day 1 on the list" (or "Day N on the list"); 5) factor contribution breakdown: top 3 FactorBars (the `top_factors`, the two largest positive and the largest opposing factor when known), with a "Show all 12 factors" disclosure that expands the full list in place (not a modal); 6) NarrativeBlock; 7) LevelList with the invalidation level first; 8) flags row: FlagChip for event risk, DataQualityTag for estimated order flow, regime chip ("Trending", "Ranging", "Transitional"), watchlist group chips; 9) footer: "Details" link to `/ticker/:symbol?date=...`. The Disclaimer is page-level on Today (section 10), not repeated in every card.
 - Interactions: the whole card is not a link. The ticker symbol and the "Details" link navigate to the Ticker screen. The factor disclosure is a button with `aria-expanded`. Expand state persists in session UI state only.
 - States: D as above; H subtle `--bg-2` on header row only; F each interactive child shows focus; X n/a; L a card-shaped skeleton with all blocks at final size; E not applicable per card (an empty side uses NearestMissLine); R the card is replaced in place by ErrorState if the whole recommendations call fails (not per card); S a stale strip at the top of the card when its data date is behind ("Data for this pick is one session old").
 - Reading order in the DOM follows the visual order: header, score, ribbon, factors, narrative, levels, flags.
@@ -516,7 +520,7 @@ Global state rules:
 
 **C-26 PriceChart**
 - Purpose: the Ticker screen candlestick chart with overlays and sub-panels (section 6).
-- Props: `bars`, `overlays` (Supertrend, SMAs, fib, support and resistance), `invalidation`, `tf`, `visible` (overlay ids), `onVisibleChange`.
+- Props: `bars`, `overlays` (Supertrend, SMAs, Ripster clouds, fib, support and resistance), `invalidation`, `tf`, `visible` (overlay ids), `onVisibleChange`.
 - States: D defaults per 6.1; H crosshair and tooltip; F the chart region is focusable; Left and Right move the cursor one session, Shift plus Left or Right moves 5 sessions, Home and End jump to ends, the tooltip text is mirrored in an `aria-live="polite"` region; X n/a; L Skeleton block at the final chart height; E "No price history for this ticker"; R ErrorState inside the chart region keeping its height; S the footer line turns `--warn` and the chart title reads "Data is one session behind".
 
 **C-27 ChartLegend and OverlayToggles**
@@ -533,7 +537,7 @@ Global state rules:
 **C-29 FactorTable**
 - Purpose: full factor table on the Ticker right rail.
 - Props: `factors` (id, label, score, weight, contribution, quality, reasons).
-- Columns: Factor, Score (-100 to 100), Weight, Contribution, Quality, Reasons (expand). A footer row shows "Composite" and "Display score". All 11 factors are always listed, including ones with quality `missing` ("Not available", weight shown as 0). Contributions sum to the composite and the footer states it.
+- Columns: Factor, Score (-100 to 100), Weight, Contribution, Quality, Reasons (expand). A footer row shows "Composite" and "Display score". All 12 factors are always listed, including ones with quality `missing` ("Not available", weight shown as 0). Contributions sum to the composite and the footer states it.
 - States: D; H row surface step; F reasons disclosure per row; X n/a; L Skeleton rows; E "No factor data for this date"; R ErrorState; S as-of stamp in the caption.
 
 **C-30 RegimePanel**
@@ -669,7 +673,7 @@ Data layer rules common to all screens:
 - `GET /api/v1/recommendations/latest` (or `GET /api/v1/recommendations?date=` for `/date/:yyyy-mm-dd`): `date`, `run_id`, `published_at`, `market_regime`, `config`, `buys`, `sells`, `also_qualified`, `nearest_miss`, `excluded`, `disclaimer`.
 - `GET /api/v1/status`: `last_completed_session`, `data_freshness`, `latest_run`, `active_run`, `providers`, `llm`.
 - `GET /api/v1/watchlist`: group names for the optional group filter.
-- `GET /api/v1/tickers/{symbol}/analysis?date=`: only when a card's "Show all 11 factors" is opened, to fetch the full factor list for that ticker.
+- `GET /api/v1/tickers/{symbol}/analysis?date=`: only when a card's "Show all 12 factors" is opened, to fetch the full factor list for that ticker.
 
 **Header band.** As-of date, market regime (for example "Market regime: risk on"), run status ("Published 2026-11-13 22:34 UTC", config version and short hash), data freshness ("Data through 2026-11-13"), count of excluded tickers with a link to the details ("3 tickers excluded: stale or insufficient history"). Market regime uses shape plus word (up triangle "Risk on", down triangle "Risk off", bar "Mixed").
 
@@ -699,7 +703,7 @@ Data layer rules common to all screens:
 | | Why: Supertrend  +23.4 ==> | | Why: Supertrend  +22.0 ==> | | Why: Supertrend  +21.5 ==> |  |
 | |      MACD         +9.1 =>  | |      Buy/sell vol +10.2 => | |      SMA analysis +8.8 =>  |  |
 | |  Against: RSI     -4.2 <=  | |  Against: Volatility -5.0 <| |  Against: Fundam.  -3.1 <= |  |
-| |  [Show all 11 factors v]   | |  [Show all 11 factors v]   | |  [Show all 11 factors v]   |  |
+| |  [Show all 12 factors v]   | |  [Show all 12 factors v]   | |  [Show all 12 factors v]   |  |
 | | Narrative (3 to 5 sentences| | Narrative text ...         | | Narrative text ...         |  |
 | | ...). Written by a language| |                            | |                            |  |
 | | model (model-name).        | |                            | |                            |  |
@@ -709,6 +713,7 @@ Data layer rules common to all screens:
 | | Next target 236.00         | | Next target ...            | | Next target ...            |  |
 | | Resist 229.50 236.00       | |                            | |                            |  |
 | | Support 215.10 208.70      | |                            | |                            |  |
+| | Cloud 34/50 206.30 210.80  | |                            | |                            |  |
 | | [Event risk: earnings in 3 | | [Est. order flow: intraday]| | [Est. order flow: daily    |  |
 | |  trading days]             | | [Trending] [semis]         | |  estimate] [Trending]      |  |
 | | [Est. order flow: intraday]| |                            | |                            |  |
@@ -762,7 +767,7 @@ Notes on the wireframe: `^` is the up triangle and `v` is the down triangle; "==
 | | Why: Supertrend +23.4 ==>  | |
 | |      MACD        +9.1 =>   | |
 | |  Against: RSI    -4.2 <=   | |
-| | [Show all 11 factors v]    | |
+| | [Show all 12 factors v]    | |
 | | Narrative ...              | |
 | | Invalidation 212.40: daily | |
 | | close below the Supertrend | |
@@ -791,11 +796,11 @@ On phone the factor breakdown shows the same top 3 bars; the level list shows in
 - Click or press Enter on a ticker or "Details" to open `/ticker/:symbol?date=...`.
 - Group filter: re-ranks within the group, shows the note "Showing a group view. Published picks for all tickers are unchanged." with a "Show published picks" button. The published overall picks stay the source of truth and the URL records `?group=semis`.
 - DateNavigator moves through stored trading days (`/date/:yyyy-mm-dd`). A historical view shows the banner "Historical view: exactly what was published on <date>, with config version <n> (sha256:<short>)".
-- "Show all 11 factors" expands in place. "Also qualified" expands in place.
+- "Show all 12 factors" expands in place. "Also qualified" expands in place.
 - Keyboard: Tab order is skip link, navigation, theme, group filter, date controls, then each card in DOM order (ticker link, factor disclosure, details link), then the also-qualified disclosures, then the footer.
 - Refresh: the screen refetches on window focus and every 5 minutes in place. It does not animate when data changes. If a newer run was published, the AsOfStamp updates and a Toast reads "Newer results published for 2026-11-14", with no layout shift.
 
-**Card field checklist (every PickCard shows these).** rank, ticker, band with side mark, display score (dial and number), confidence, Supertrend state (daily and weekly direction), bars since flip, TrendRibbon, factor contribution breakdown (top factors plus all on demand), key levels (support, resistance, Fibonacci, next target), invalidation level and rule, event risk flag when set, estimated order flow quality label, regime, watchlist groups, "Day N on the list", narrative with source label (llm or template). Expected 1-day move is shown unconditionally on every PickCard (BUILD_PROMPT Factor 8: `expected_1d_move = atr14`, "shown on every card"). It reads the Pick field `expected_1d_move` (always present, price units; docs/ARCHITECTURE.md section 6.1) and renders in the key levels block as "Expected 1-day move: plus or minus 4.10 (14-day ATR, an estimate from recent volatility, not a forecast)". A Pick without this field is a contract error, not a reason to hide the line.
+**Card field checklist (every PickCard shows these).** rank, ticker, band with side mark, display score (dial and number), confidence, Supertrend state (daily and weekly direction), bars since flip, TrendRibbon, factor contribution breakdown (top factors plus all on demand), key levels (support, resistance, Fibonacci, the 34/50 cloud, next target), invalidation level and rule, event risk flag when set, estimated order flow quality label, regime, watchlist groups, "Day N on the list", narrative with source label (llm or template). Expected 1-day move is shown unconditionally on every PickCard (BUILD_PROMPT Factor 8: `expected_1d_move = atr14`, "shown on every card"). It reads the Pick field `expected_1d_move` (always present, price units; docs/ARCHITECTURE.md section 6.1) and renders in the key levels block as "Expected 1-day move: plus or minus 4.10 (14-day ATR, an estimate from recent volatility, not a forecast)". A Pick without this field is a contract error, not a reason to hide the line.
 
 **States.**
 
@@ -815,7 +820,7 @@ On phone the factor breakdown shows the same top 3 bars; the level list shows in
 
 ### 9.2 Ticker
 
-**Purpose.** For one ticker, show the chart with Supertrend, SMAs, Fibonacci levels, support and resistance, and the full factor table, regime, adjustments, fundamentals summary, and the ticker's score history (US-003, US-005, US-009).
+**Purpose.** For one ticker, show the chart with Supertrend, Ripster EMA Clouds, SMAs, Fibonacci levels, support and resistance, and the full factor table, regime, adjustments, fundamentals summary, and the ticker's score history (US-003, US-005, US-009).
 
 **Data sources.**
 - `GET /api/v1/tickers/{symbol}/analysis?date=`: factor table, evidence, levels, regime, narrative.
@@ -833,9 +838,9 @@ On phone the factor breakdown shows the same top 3 bars; the level list shows in
 | ORCL  Oracle Corp   [semis] [software]        ^ Buy (day 1 on the list)   Score 78.4   Conf 71  |
 | Supertrend: ^ Up daily, ^ Up weekly, flipped 3 bars ago   [UUUU DDD UUUUUUUUUUUUUUUUUUUUUUUU]   |
 +----------------------------------------------------------------+-------------------------------+
-| Timeframe: (o) 1d ( ) 1w     [View as table]  [Reset overlays] | Factors (11)                  |
+| Timeframe: (o) 1d ( ) 1w     [View as table]  [Reset overlays] | Factors (12)                  |
 | Overlays: [x]Candles [x]Supertrend [ ]SMA 20 [ ]SMA 50 [ ]SMA 200  | Factor     Scr  Wt  Contrib|
-|           [ ]Fibonacci [ ]Support/Resistance [x]Invalidation       | Supertrend 100 23.4  +23.4 |
+|  [x]Clouds [ ]Fibonacci [ ]Support/Resistance [x]Invalidation      | Supertrend 100 23.4  +23.4 |
 | +------------------------------------------------------------+ | MACD        81 11.2   +9.1 |
 | |                                      invalidation 212.40 --| | ...                        |
 | |   candles + Supertrend line with flip markers (^ v)        | | Composite             +56.8 |
@@ -851,7 +856,7 @@ On phone the factor breakdown shows the same top 3 bars; the level list shows in
 | End-of-day data, as of 2026-11-13                              | (summary, quality, known at)|
 +----------------------------------------------------------------+-----------------------------+
 | Narrative (llm or template, 3 to 5 sentences)                                                  |
-| Key levels: Invalidation 212.40 | Next target 236.00 | Resist 229.50 236.00 | Support 215.10 ... |
+| Key levels: Invalidation 212.40 | Next target 236.00 | Resist 229.50 236.00 | Cloud 34/50 ... |   
 | Score history for ORCL   Date        Score  Band   Pick                                        |
 |                          2026-11-13  78.4   Buy    Pick: buy, day 1                            |
 |                          2026-11-12  66.0   Buy    Not picked                                  |

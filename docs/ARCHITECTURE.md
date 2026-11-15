@@ -21,7 +21,7 @@
 
 ## 1. System Overview
 
-Super Trends is a CPU-only, single-owner server product. A scheduled job ingests end-of-day market data for a watchlist, computes indicators, scores eleven factors per ticker, combines them into a composite score, selects at most 3 buys and at most 2 sells, writes a justification per pick, and publishes the result atomically. A stateless API serves the published results to a browser UI, a CLI, and an MCP server. An LLM is used only to word the narrative, never to score.
+Super Trends is a CPU-only, single-owner server product. A scheduled job ingests end-of-day market data for a watchlist, computes indicators, scores twelve factors per ticker, combines them into a composite score, selects at most 3 buys and at most 2 sells, writes a justification per pick, and publishes the result atomically. A stateless API serves the published results to a browser UI, a CLI, and an MCP server. An LLM is used only to word the narrative, never to score.
 
 ```
                                    Owner (browser, terminal, AI agent)
@@ -61,7 +61,7 @@ Super Trends is a CPU-only, single-owner server product. A scheduled job ingests
 
  Daily run pipeline inside the job or worker process (one code path, also used by backtests):
 
-   providers -> ingest + data quality -> indicators -> factors (11) -> regime + weights
+   providers -> ingest + data quality -> indicators -> factors (12) -> regime + weights
      -> composite, display score, band, confidence -> selection (candidates, ranking,
      correlation guard) -> evidence documents -> narrative (LLM with numeric guard, or
      template) -> atomic publication -> outcome tracking for earlier picks -> retention
@@ -96,8 +96,8 @@ Module paths are relative to `src/supertrends/` unless stated otherwise. The imp
 | Errors | `errors.py` | Domain error hierarchy rooted at `SuperTrendsError` | none | exception classes | Every `except` handles, re-raises, or records and fails the run cleanly. |
 | Logging | `logging.py` | structlog JSON configuration, request ID binding, secret redaction processor | settings | JSON log lines on stdout | No `print` anywhere. Redaction is unit-tested. |
 | Version | `version.py` | Version and commit from `SUPERTRENDS_VERSION` / `SUPERTRENDS_COMMIT` (image) or package metadata (wheel) | build args | `VERSION`, `COMMIT` | `supertrends --version` prints `supertrends {VERSION} ({commit})`. |
-| Indicator engine | `indicators/` | Pure, vectorized indicator functions: primitives, Supertrend, SMA, MACD, ADX, divergences, mean reversion, volatility, Fibonacci, levels, volume, estimated order flow; a registry of every public indicator | numpy arrays or pandas frames, parameters | arrays of the same length with NaN during warm-up; typed records for pivots, divergences, legs, levels | Imports nothing from `api`, `cli`, `mcp`, `data`, `runs`. No I/O, clock, randomness, or globals. Every public function is registered with the no-look-ahead harness. |
-| Scoring | `scoring/` | `Factor` protocol and registry, the eleven factor modules, regime detection, weight adjustment and renormalization, composite, display score, band, confidence, the scoring config model and `config_hash` | indicator snapshot, context (benchmarks, fundamentals, earnings), scoring config | `FactorResult` per factor, `TickerScore` per ticker | Same import rules as indicators. Factor scores validated in [-100, 100]. Every factor ID in `config/scoring.yaml` maps to a registered factor and the reverse. |
+| Indicator engine | `indicators/` | Pure, vectorized indicator functions: primitives, Supertrend, Ripster EMA Clouds, SMA, MACD, ADX, divergences, mean reversion, volatility, Fibonacci, levels, volume, estimated order flow; a registry of every public indicator | numpy arrays or pandas frames, parameters | arrays of the same length with NaN during warm-up; typed records for pivots, divergences, legs, levels | Imports nothing from `api`, `cli`, `mcp`, `data`, `runs`. No I/O, clock, randomness, or globals. Every public function is registered with the no-look-ahead harness. |
+| Scoring | `scoring/` | `Factor` protocol and registry, the twelve factor modules, regime detection, weight adjustment and renormalization, composite, display score, band, confidence, the scoring config model and `config_hash` | indicator snapshot, context (benchmarks, fundamentals, earnings), scoring config | `FactorResult` per factor, `TickerScore` per ticker | Same import rules as indicators. Factor scores validated in [-100, 100]. Every factor ID in `config/scoring.yaml` maps to a registered factor and the reverse. |
 | Selection | `selection/` | Candidate rules, ranking with the tie-breaker chain, max counts, correlation guard, "also qualified" list, nearest-miss record | `TickerScore` list, return series for correlation, config | `Selection` (buys, sells, also qualified, nearest misses) | Same import rules. Never pads a side. |
 | Narrative | `narrative/` | Evidence document builder, deterministic template narrative, `NarrativeProvider` implementations (`template`, `openai_compatible`), numeric guard, banned-phrase and sentence-count checks, versioned prompts | evidence document | `Narrative` (text, source, model, prompt version, tokens) | The prompt contains only numbers and enumerated labels from the evidence document. Output treated as untrusted plain text. Never changes a score. |
 | Data layer | `data/` | SQLAlchemy 2 models, repository functions, ingestion, trading calendar (XNYS via `exchange_calendars`), data-quality pass, provider protocols, adapters, and registry | provider responses, database | rows in Postgres, typed frames for the engine | Providers are selected only from settings. Base URLs never come from request input. |
@@ -480,9 +480,16 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 
 ### ADR-050: Nearest miss selection (PRD A-15)
 - **Context:** "The nearest candidate" is not defined when several tickers miss for different reasons.
-- **Decision:** Per side, the nearest miss is the scored, non-excluded ticker with the smallest distance between its display score and that side's adjusted threshold; ties use the selection tie-breakers. The reason names the first failing rule in the order of the selection rules (PRD section 7.15).
+- **Decision:** Per side, the nearest miss is the scored, non-excluded ticker with the smallest distance between its display score and that side's adjusted threshold; ties use the selection tie-breakers. The reason names the first failing rule in the order of the selection rules (PRD section 7.16).
 - **Alternatives rejected:** Counting failed rules (less intuitive, needs its own tie rule).
 - **Consequences:** `nearest_miss` (section 6.1) carries `ticker`, `display_score`, and `reason`; present only when that side has fewer picks than the max.
+- **Status:** Accepted pending owner confirmation.
+
+### ADR-051: Ripster EMA Clouds fidelity and parity (PRD A-16)
+- **Context:** Factor 12 must "match" Ripster47's TradingView indicator at its default settings, but the seed does not say which price source or EMA seeding to use, or which bars the parity test runs on.
+- **Decision:** The price source is `hl2` and the average type is EMA, matching the TradingView Ripster EMA Clouds defaults. EMA is seeded per the Signal Engine conventions (alpha = 2/(n+1), seeded with the SMA of the first n values). Parity is computed on the export's own bars, not on the fixture provider's bars, with a 200-bar warm-up. The 72/89 cloud is evidence only and is not scored. The owner may revisit the weights (Factor 12 base weight 10, regime multipliers 1.20, 0.70, 1.00) after seeing real results; any change bumps `scoring.version`.
+- **Alternatives rejected:** `close` as the source (does not match the indicator's defaults); parity on provider bars (differences in adjustment or timestamps would mask indicator errors); scoring the 72/89 cloud (the seed gives it no points).
+- **Consequences:** `indicators/ripster_clouds.py` is registered with the no-look-ahead harness; the parity test is skipped with a visible reason until the owner supplies the export (OWNER_CHECKLIST item 3).
 - **Status:** Accepted pending owner confirmation.
 
 ---
@@ -517,7 +524,7 @@ transition computing
   indicators on daily + weekly (resampled in memory, ADR-033) + intraday
   -------------------------------> indicator_snapshots
 transition scoring
-  11 factors, ticker regime, market regime, weight multipliers,
+  12 factors, ticker regime, market regime, weight multipliers,
   event and fundamentals adjustments, renormalize, composite,
   display, band, confidence
   -------------------------------> factor_scores, ticker_scores (scored and excluded rows)
@@ -786,7 +793,7 @@ PK (`run_id`, `symbol`). Index on (`symbol`, `run_id`). `CHECK (status = 'scored
 |---|---|---|---|---|
 | `run_id` | `text` | no | | FK `runs(id)` |
 | `symbol` | `text` | no | | |
-| `factor_id` | `text` | no | | one of the 11 factor IDs |
+| `factor_id` | `text` | no | | one of the 12 factor IDs |
 | `score` | `double precision` | yes | | `CHECK (score BETWEEN -100 AND 100)`; NULL when quality is missing |
 | `weight` | `double precision` | no | | final weight after renormalization, 0..100 |
 | `contribution` | `double precision` | no | | `weight * score / 100` |
@@ -807,7 +814,7 @@ PK (`run_id`, `symbol`, `factor_id`). FK (`run_id`, `symbol`) to `ticker_scores`
 | `display_score` | `numeric(4,1)` | no | | |
 | `confidence` | `double precision` | no | | |
 | `band` | `text` | no | | |
-| `evidence` | `jsonb` | no | | the evidence document (validated against the committed JSON schema): the section 7.16 shape plus required `expected_1d_move` (`atr14`) and flow quality |
+| `evidence` | `jsonb` | no | | the evidence document (validated against the committed JSON schema): the section 7.17 shape plus required `expected_1d_move` (`atr14`) and flow quality |
 | `entry_price` | `double precision` | yes | | filled once |
 | `entry_date` | `date` | yes | | filled once with `entry_price` |
 | `created_at` | `timestamptz` | no | `now()` | |
@@ -1055,6 +1062,7 @@ Response 200:
   "display_score": 78.4, "composite": 56.8, "band": "Buy", "confidence": 71,
   "regime": "trending", "market_regime": "risk_on",
   "supertrend": {"dir_d": 1, "dir_w": 1, "bars_since_flip": 3, "line": 212.4, "distance_atr": 1.2},
+  "ripster": {"bias": 1, "stack": 1, "bars_since_stack_flip": 12, "c2_dir": 1, "c3_dir": 1, "c3_top": 210.8, "c3_bot": 206.3, "dir_w": 1},
   "thresholds": {"buy": 65.0, "sell": 30.0},
   "candidate": "buy", "picked": {"side": "buy", "rank": 1, "recommendation_id": "01JCX..."},
   "factors": [
@@ -1063,7 +1071,7 @@ Response 200:
   ],
   "adjustments": ["trending regime"],
   "flags": [],
-  "levels": {"support": [215.1, 208.7], "resistance": [229.5, 236.0], "fib": {"61.8": 214.2}, "next_target": 236.0},
+  "levels": {"support": [215.1, 208.7], "resistance": [229.5, 236.0], "fib": {"61.8": 214.2}, "cloud_34_50": [206.3, 210.8], "next_target": 236.0},
   "invalidation": {"level": 212.4, "rule": "daily close below the Supertrend line"},
   "expected_1d_move": 4.1,
   "fundamentals": {"quality": "ok", "valuation_basis": "trailing_pe", "days_to_earnings": 12, "sub_scores": {}},
@@ -1084,7 +1092,8 @@ Response 200:
   "bars": [{"t": "2026-11-13", "o": 220.1, "h": 224.0, "l": 219.2, "c": 223.5, "v": 9123000}],
   "overlays": {
     "supertrend": [{"t": "2026-11-13", "value": 212.4, "dir": 1}],
-    "sma_20": [{"t": "2026-11-13", "value": 218.0}], "sma_50": [], "sma_200": []
+    "sma_20": [{"t": "2026-11-13", "value": 218.0}], "sma_50": [], "sma_200": [],
+    "ripster_c2": [{"t": "2026-11-13", "top": 221.9, "bot": 220.4, "dir": 1}], "ripster_c3": [{"t": "2026-11-13", "top": 210.8, "bot": 206.3, "dir": 1}]
   }
 }
 ```
@@ -1495,7 +1504,7 @@ def write_narrative(evidence: EvidenceDocument, provider: NarrativeProvider, set
 - `openai_compatible`: `POST {SUPERTRENDS_LLM_BASE_URL}/chat/completions` with `model`, `messages` (versioned system prompt plus compact evidence rendering), `max_tokens = 220`, `temperature`. Optional `Authorization: Bearer <SUPERTRENDS_LLM_API_KEY>`. Timeout `SUPERTRENDS_LLM_TIMEOUT_SECONDS` (default 8).
 - Prompt budget: the rendered prompt must be at most 900 tokens (counted with a fixed tokenizer approximation in code, tested in CI on the fixture set); if over budget, lower-ranked factor reasons are dropped from the rendering until it fits.
 - Validation chain on every draft: plain text only (no Markdown links, no HTML), 3 to 5 sentences, max 1200 characters, banned phrases ("guaranteed", "will", "can't lose", position size, options, leverage terms), numeric guard (every number in the text matches an evidence value within rounding to the displayed precision). Rejection reasons are recorded in `narratives.rejection_reasons`.
-- `template`: deterministic, built from the evidence document in the required order (Supertrend state, two largest positive contributions, largest opposing factor, invalidation level); always passes the numeric guard (tested).
+- `template`: deterministic, built from the evidence document in the required order (Supertrend state and the Ripster 34/50 cloud bias, two largest positive contributions, largest opposing factor, invalidation level); always passes the numeric guard (tested).
 - Errors and timeouts never propagate; `write_narrative` always returns a `Narrative`.
 
 ---
@@ -1915,7 +1924,7 @@ Demo matrix (extend it in the same PR as any new function):
 | Function | Verified by | Added in |
 |---|---|---|
 | Ingest and data quality flags | API status, excluded ticker shown with reason | 3 |
-| All 11 factors scored, contributions sum to the composite | analysis endpoint for 3 tickers | 3 (fundamentals and regimes in 5) |
+| All 12 factors scored, contributions sum to the composite | analysis endpoint for 3 tickers | 3 (fundamentals and regimes in 5) |
 | Top 3 buys and top 2 sells, duplicate guard | latest recommendations | 3 |
 | Supertrend line, direction, flip age | bars endpoint and chart overlay | 3, chart in 4 |
 | Today, Ticker, Watchlist, Runs, Settings screens | Playwright screenshots | 4 |
@@ -2658,7 +2667,7 @@ stokeai-trading-supertrends/
     env.py  script.py.mako  versions/                                   (+ layout)
   src/supertrends/
     __init__.py  version.py  settings.py  errors.py  logging.py
-    indicators/     primitives.py  supertrend.py  trend.py  momentum.py  divergence.py
+    indicators/     primitives.py  supertrend.py  ripster_clouds.py  trend.py  momentum.py  divergence.py
                     meanrev.py  volatility.py  fibonacci.py  levels.py  volume.py  flow.py  registry.py
     scoring/        factor.py  factors/ (one module per factor)  regime.py  weights.py
                     composite.py  confidence.py  config.py
@@ -2772,25 +2781,39 @@ flow:
 fundamentals:
   stale_days: 120
   stale_weight_multiplier: 0.5
+ripster:
+  source: hl2
+  ma_type: ema
+  clouds:
+    c1: [8, 9]
+    c2: [5, 12]
+    c3: [34, 50]
+    c4: [72, 89]
+    c5: [180, 200]
+  points: { bias: 30, trend: 20, stack: 20, mid: 10, long: 10, pullback: 10 }
+  pullback_lookback_bars: 3
+  confidence_stack_conflict_penalty: 10
+  selection_bias_gate: true
 weights:
   supertrend: 20
-  sma: 10
-  macd: 10
-  divergence: 10
-  mean_reversion: 8
-  fibonacci: 6
-  levels: 8
-  volatility: 5
+  sma: 7
+  macd: 8
+  divergence: 9
+  mean_reversion: 7
+  fibonacci: 5
+  levels: 7
+  volatility: 4
   volume_osc: 6
   flow: 9
   fundamentals: 8
+  ripster: 10
 regime:
   adx_length: 14
   trending_min: 25
   ranging_max: 20
   multipliers:
-    trending:     { supertrend: 1.25, sma: 1.20, macd: 1.10, divergence: 0.90, mean_reversion: 0.50, fibonacci: 1.00, levels: 0.90 }
-    ranging:      { supertrend: 0.70, sma: 0.70, macd: 0.90, divergence: 1.20, mean_reversion: 1.60, fibonacci: 1.10, levels: 1.40 }
+    trending:     { supertrend: 1.25, sma: 1.20, macd: 1.10, divergence: 0.90, mean_reversion: 0.50, fibonacci: 1.00, levels: 0.90, ripster: 1.20 }
+    ranging:      { supertrend: 0.70, sma: 0.70, macd: 0.90, divergence: 1.20, mean_reversion: 1.60, fibonacci: 1.10, levels: 1.40, ripster: 0.70 }
     transitional: {}
 events:
   earnings_window_days: 5
@@ -2820,8 +2843,8 @@ The pydantic model `scoring.config.ScoringConfig` (exported as `docs/schemas/sco
 
 - Unknown keys at any level are rejected (`extra = "forbid"`). Every key in the seed is required; there are no silent defaults in code for values that the file defines (exception: omitted regime multipliers, below).
 - `scoring.version` is an integer >= 1.
-- `weights` has exactly the eleven factor IDs `supertrend`, `sma`, `macd`, `divergence`, `mean_reversion`, `fibonacci`, `levels`, `volatility`, `volume_osc`, `flow`, `fundamentals`; each weight is a number >= 0; the sum must equal 100 (tolerance 1e-9). Every weight key maps to a registered factor and every registered factor has a weight (S3-T01).
-- `regime.multipliers` has exactly the three regimes `trending`, `ranging`, `transitional`; each maps a subset of the eleven factor IDs to a multiplier > 0. A factor omitted from a regime has multiplier 1.00, which matches the specification table (the seed lists only the cells that differ from 1.00, and `transitional: {}`). This is the one documented default; it is applied by the model, so it is part of the validated document and of the hash (ADR-037).
+- `weights` has exactly the twelve factor IDs `supertrend`, `sma`, `macd`, `divergence`, `mean_reversion`, `fibonacci`, `levels`, `volatility`, `volume_osc`, `flow`, `fundamentals`, `ripster`; each weight is a number >= 0; the sum must equal 100 (tolerance 1e-9). Every weight key maps to a registered factor and every registered factor has a weight (S3-T01).
+- `regime.multipliers` has exactly the three regimes `trending`, `ranging`, `transitional`; each maps a subset of the twelve factor IDs to a multiplier > 0. A factor omitted from a regime has multiplier 1.00, which matches the specification table (the seed lists only the cells that differ from 1.00, and `transitional: {}`). This is the one documented default; it is applied by the model, so it is part of the validated document and of the hash (ADR-037).
 - Periods and lengths are positive integers; `regime.ranging_max <= regime.trending_min`; `thresholds.sell_display_max < thresholds.buy_display_min`; display thresholds are within 0..100; `min_confidence` within 0..100; `selection.max_buys` and `max_sells` are integers 0..10; `correlation_max` within (0, 1]; `track_record.horizons_days` is a non-empty ascending list of positive integers.
 - `benchmarks` contains SPY and QQQ (the market regime rule is defined on both).
 - `supertrends config validate [PATH]` prints `valid sha256:<hash>` or the list of errors and exits 2. The API and jobs refuse to start with an invalid config.
