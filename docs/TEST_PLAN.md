@@ -414,8 +414,8 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 | TS-ING-004 | `contract_provider_fixture_passes_shared_contract_suite` | Fixture provider passes the provider contract suite | FR-1xx, A§7 | Deferred |
 | TS-ING-005 | `contract_provider_massive_recorded_passes_shared_contract_suite` | Massive adapter passes the contract suite on recorded scrubbed responses | FR-1xx, A§7 | Deferred |
 | TS-ING-006 | `contract_provider_alternate_recorded_passes_shared_contract_suite` | Alternate provider adapter passes the contract suite | FR-1xx, S1-T05 | Deferred |
-| TS-ING-007 | `unit_provider_registry_unknown_name_fails_startup_with_clear_message` | An unknown provider name fails at startup | FR-1xx, A§7 | Deferred |
-| TS-ING-008 | `unit_provider_registry_env_switch_changes_active_provider_without_code_change` | `SUPERTRENDS_MARKET_PROVIDER` selects the provider | FR-1xx, S1-T05 | Deferred |
+| TS-ING-007 | `unit_provider_registry_unknown_name_fails_startup_with_clear_message` | An unknown provider name fails at startup | FR-1xx, A§7 | Automated |
+| TS-ING-008 | `unit_provider_registry_env_switch_changes_active_provider_without_code_change` | `SUPERTRENDS_MARKET_PROVIDER` selects the provider | FR-1xx, S1-T05 | Automated |
 | TS-ING-009 | `it_provider_massive_429_sequence_retried_then_succeeds` | A 429 sequence backs off with jitter and succeeds | FR-1xx, S1-T04 | Deferred |
 | TS-ING-010 | `unit_provider_rate_limiter_token_bucket_respects_calls_per_minute` | The token bucket never exceeds the configured calls per minute (fake clock) | FR-1xx, S1-T04 | Deferred |
 | TS-ING-011 | `it_provider_massive_5xx_exponential_backoff_with_jitter_bounded` | 5xx retries are bounded in count and backoff | FR-1xx | Deferred |
@@ -448,15 +448,19 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 | TS-ING-038 | `contract_provider_fundamentals_recorded_passes_shared_contract_suite` | `FundamentalsProvider` contract on recorded fixtures | FR-1xx, A§7 | Deferred |
 | TS-ING-039 | `it_provider_capability_flags_intraday_trades_adjusted_reported_correctly` | Capability flags are exposed and respected | FR-1xx, A§7 | Deferred |
 | TS-ING-040 | `unit_fixtures_validate_script_recorded_responses_match_provider_models` | `scripts/validate-fixtures.sh` fails on a stale recorded response | A§12, Appendix G | Deferred |
-| TS-ING-041 | `it_schema_recommendations_delete_rejected_by_append_only_trigger` | DELETE on `recommendations` is rejected; `entry_price` may be set once from NULL | A§5.3, S1-T01 | Automated |
-| TS-ING-042 | `it_schema_factor_scores_update_rejected_by_append_only_trigger` | UPDATE on `factor_scores` is rejected with SQLSTATE `P0001` naming the table | A§5.3, S1-T01 | Automated |
-| TS-ING-043 | `it_schema_every_append_only_table_has_the_reject_trigger` | The seven append-only tables, `recommendations`, and `runs` carry their triggers | A§5.3, S1-T01 | Automated |
-| TS-ING-044 | `it_schema_runs_forward_transition_allowed_and_backward_rejected` | The `runs` trigger allows only section 8 edges; terminal runs are immutable except `superseded_by` once; DELETE rejected; one active run | A§5.1, A§8, S1-T01 | Automated |
-| TS-ING-045 | `it_schema_watchlist_cap_rejects_301st_item_at_commit` | The 300-item cap trigger; a symbol in three groups is stored once | A§5.1, ADR-019, S1-T01 | Automated |
-| TS-ING-046 | `it_schema_models_match_migrated_database` | Model metadata equals the migrated schema (no drift), including the `backtests` schema | A§5.4, S1-T01 | Automated |
-| TS-ING-047 | `it_schema_migrations_at_head_false_when_behind_and_true_after_migrate` | `migrations_at_head` for `/readyz`; `migrate` is idempotent | A§5.4, S1-T01 | Automated |
-| TS-ING-048 | `unit_models_define_every_live_and_backtest_table` | Table set, primary keys, partial unique indexes, ULID checks, named constraints | A§5.1, A§5.2, S1-T01 | Automated |
-| TS-ING-049 | `unit_db_session_scope_rolls_back_on_error` | Engine from settings, URL normalization, session commit and rollback, advisory-locked `migrate` | A§5.4, S1-T01 | Automated |
+| TS-ING-041 | `contract_provider_fake_passes_shared_contract_suite` | A fake provider (full and reduced capabilities) passes the shared market and fundamentals contract suite in `tests/contract/provider_contract.py` | FR-1xx, A§7, S1-T02 | Automated |
+| TS-ING-042 | `unit_provider_contract_suite_violating_provider_detected_assertion_fails` | The suite fails a provider with unsorted bars, out-of-range bars, or a missing `CapabilityNotSupported` | A§7, S1-T02 | Automated |
+| TS-ING-043 | `unit_provider_registry_mixed_vendors_market_and_fundamentals_selected_independently` | Market and fundamentals providers from different vendors can be combined; a registered name with no implementation fails with a clear `ConfigError` | A§7.4, S1-T02 | Automated |
+| TS-ING-044 | `unit_provider_errors_derive_from_provider_error_and_validate_bar_rejects_invalid_rows` | Error hierarchy (A§7.3) and OHLC validation raising `ProviderDataError` | A§7.2, A§7.3, S1-T02 | Automated |
+| TS-ING-045 | `it_schema_recommendations_delete_rejected_by_append_only_trigger` | DELETE on `recommendations` is rejected; `entry_price` may be set once from NULL | A§5.3, S1-T01 | Automated |
+| TS-ING-046 | `it_schema_factor_scores_update_rejected_by_append_only_trigger` | UPDATE on `factor_scores` is rejected with SQLSTATE `P0001` naming the table | A§5.3, S1-T01 | Automated |
+| TS-ING-047 | `it_schema_every_append_only_table_has_the_reject_trigger` | The seven append-only tables, `recommendations`, and `runs` carry their triggers | A§5.3, S1-T01 | Automated |
+| TS-ING-048 | `it_schema_runs_forward_transition_allowed_and_backward_rejected` | The `runs` trigger allows only section 8 edges; terminal runs are immutable except `superseded_by` once; DELETE rejected; one active run | A§5.1, A§8, S1-T01 | Automated |
+| TS-ING-049 | `it_schema_watchlist_cap_rejects_301st_item_at_commit` | The 300-item cap trigger; a symbol in three groups is stored once | A§5.1, ADR-019, S1-T01 | Automated |
+| TS-ING-050 | `it_schema_models_match_migrated_database` | Model metadata equals the migrated schema (no drift), including the `backtests` schema | A§5.4, S1-T01 | Automated |
+| TS-ING-051 | `it_schema_migrations_at_head_false_when_behind_and_true_after_migrate` | `migrations_at_head` for `/readyz`; `migrate` is idempotent | A§5.4, S1-T01 | Automated |
+| TS-ING-052 | `unit_models_define_every_live_and_backtest_table` | Table set, primary keys, partial unique indexes, ULID checks, named constraints | A§5.1, A§5.2, S1-T01 | Automated |
+| TS-ING-053 | `unit_db_session_scope_rolls_back_on_error` | Engine from settings, URL normalization, session commit and rollback, advisory-locked `migrate` | A§5.4, S1-T01 | Automated |
 
 ### 10.3 Indicators (TS-IND)
 
@@ -1298,6 +1302,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-SEC-034 | `it_security_llm_prompt_and_provider_strings_excluded_from_prompt_no_injection_path` | Duplicate coverage at integration level | A§9 | Deferred |
 | TS-SEC-035 | `unit_security_license_notice_shown_in_footer_version_output_and_status_endpoint` | Required notice | A§9 | Deferred |
 | TS-SEC-036 | `it_security_review_document_records_evidence_for_every_guideline_item` | `docs/SECURITY_REVIEW.md` completeness check | A§9, S9-T01 | Skipped: requires human judgment on evidence quality; manual: reviewer walks Security Guidelines line by line against `docs/SECURITY_REVIEW.md` |
+| TS-SEC-037 | `unit_network_outbound_connection_attempt_fails_blocked` | Unit tests run with sockets disabled (`pytest-socket`: `--disable-socket --allow-unix-socket --allow-hosts=127.0.0.1,localhost,::1`); an outbound connection raises `SocketConnectBlockedError`, loopback still works | A§7, Sprint 1 checklist, S1-T02 | Automated |
 
 ### 10.18 Accessibility (TS-A11Y)
 
@@ -1322,7 +1327,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | Area | Prefix | Scenarios |
 |---|---|---|
 | Watchlist | TS-WL | 15 |
-| Ingestion and data | TS-ING | 40 |
+| Ingestion and data | TS-ING | 44 |
 | Indicators | TS-IND | 96 |
 | Scoring (11 factors plus framework) | TS-SCR | 140 |
 | Regime and weights | TS-REG | 30 |
@@ -1337,7 +1342,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | MCP and harnesses | TS-MCP | 20 |
 | Operations and run state machine | TS-OPS | 30 |
 | Deployment and packaging | TS-DEP | 46 |
-| Security | TS-SEC | 36 |
+| Security | TS-SEC | 37 |
 | Accessibility | TS-A11Y | 13 |
 
 The counts are maintained by `scripts/count-scenarios.sh`, which parses this file and fails CI if the number of rows, the status vocabulary, or the id sequence is inconsistent with the table above, or if any `Automated` row has no matching test function.

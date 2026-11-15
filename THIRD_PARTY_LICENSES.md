@@ -59,6 +59,7 @@ or the UI bundle; `dev` dependencies are build, test, and lint tools only.
 | pytest | 9.2.0 | MIT | dev |
 | pytest-asyncio | 1.5.0 | Apache-2.0 | dev |
 | pytest-cov | 7.1.0 | MIT | dev |
+| pytest-socket | 0.8.1 | MIT | dev |
 | python-dotenv | 1.2.4 | BSD-3-Clause | runtime |
 | PyYAML | 6.0.3 | MIT License | runtime |
 | requests | 2.34.2 | Apache Software License | dev |
