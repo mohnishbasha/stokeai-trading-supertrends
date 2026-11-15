@@ -11,6 +11,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - `supertrends config show | validate | export-schema` (S0-T09).
 - UI project: Vite, React, TypeScript strict, ESLint, Vitest, and Playwright with a placeholder route (S0-T02).
 - `VERSION` as the version source of truth, `scripts/check-versions.sh`, `scripts/version-sync.sh`, `scripts/extract-changelog.sh`, and this changelog (S0-T04).
+- Root `Makefile` with `make help`; later-sprint targets print when they arrive (S0-T03).
 
 ### Scoring
 
