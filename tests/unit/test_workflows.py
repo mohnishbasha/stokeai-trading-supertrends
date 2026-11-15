@@ -61,7 +61,7 @@ def test_ci_workflows_use_pull_request_not_pull_request_target_and_pinned_action
                 assert PINNED.match(uses), f"{path.name}:{name} action not pinned by SHA: {uses}"
 
 
-def test_build_image_job_targets_amd64_and_arm64_without_push() -> None:
+def test_image_builds_for_linux_amd64_and_linux_arm64_in_ci() -> None:
     """TS-DEP-007 (static half; the job itself proves the build)."""
     job = _load(REPO / ".github" / "workflows" / "ci.yml")["jobs"]["build-image"]
     text = yaml.safe_dump(job)

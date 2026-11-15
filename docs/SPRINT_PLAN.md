@@ -273,14 +273,16 @@ Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent
 
 ### Sprint 0 checklist (non-blocking; unmet items go to docs/GATE_DEBT.md)
 
-- [ ] `make setup && make build && make check` pass on a clean clone (proven in CI)
-- [ ] CI green on `develop` and `staging`
-- [ ] Image builds for `linux/amd64` and `linux/arm64` in CI
-- [ ] `make up`, `/healthz`, `make down` work
-- [ ] All agent harness files and legal files present
-- [ ] `scripts/check-versions.sh` passes
-- [ ] Five spec docs audited and current
-- [ ] Retrospective written; tag `sprint-0-complete` pushed
+- [x] `make setup && make build && make check` pass on a clean clone (proven in CI)
+- [x] CI green on `develop` and `staging`
+- [x] Image builds for `linux/amd64` and `linux/arm64` in CI
+- [x] `make up`, `/healthz`, `make down` work
+- [x] All agent harness files and legal files present
+- [x] `scripts/check-versions.sh` passes
+- [x] Five spec docs audited and current
+- [x] Retrospective written; tag `sprint-0-complete` pushed
+
+Checklist run 2026-11-15. All eight items pass. One task-level criterion is unmet and is logged in `docs/GATE_DEBT.md` (GD-001: S0-T08 CLA check not yet merge-blocking).
 
 ---
 

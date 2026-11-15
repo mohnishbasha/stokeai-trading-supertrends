@@ -2,7 +2,7 @@
 
 Version: 1.0.0
 Date: 2026-11-14
-Status: Specification. No code exists yet, so every scenario starts as `Deferred`.
+Status: Specification, living document. Scenarios start as `Deferred` and flip to `Automated` in the PR that adds the test (Sprint 0 rows are automated; see section 10).
 
 Companion documents: `docs/PRD.md` (FR and NFR ids), `docs/ARCHITECTURE.md` (section numbers), `docs/SPRINT_PLAN.md` (task ids), `docs/DESIGN.md`.
 
