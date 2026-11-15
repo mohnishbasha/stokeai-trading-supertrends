@@ -303,8 +303,8 @@ Checklist run 2026-11-15. All eight items pass. One task-level criterion is unme
 SQLAlchemy 2 models and Alembic migrations for: `tickers`, `watchlists`, `watchlist_items`, `bars_daily`, `bars_intraday`, `fundamentals`, `earnings_calendar`, `runs`, `indicator_snapshots`, `factor_scores`, `recommendations`, `narratives`, `outcomes`, `config_versions`, `provider_calls`. Composite primary keys on (ticker, ts) for bars. `recommendations` and `factor_scores` are append-only (enforced by a trigger that rejects UPDATE and DELETE).
 
 **Acceptance criteria:**
-- [ ] `alembic upgrade head` and `downgrade base` both succeed on an empty database
-- [ ] the append-only trigger rejects an UPDATE in an integration test
+- [x] `alembic upgrade head` and `downgrade base` both succeed on an empty database (#118)
+- [x] the append-only trigger rejects an UPDATE in an integration test (#118)
 
 ### S1-T02: Provider interfaces
 
@@ -317,8 +317,8 @@ SQLAlchemy 2 models and Alembic migrations for: `tickers`, `watchlists`, `watchl
 `MarketDataProvider` (daily bars, intraday bars, splits and dividends, capability flags `intraday`, `trades`, `adjusted`), `FundamentalsProvider` (quarterly financials, forward estimates if available, earnings dates), both as Protocols with typed results. A registry selects providers from settings.
 
 **Acceptance criteria:**
-- [ ] a fake provider passes the shared contract test suite
-- [ ] an unknown provider name fails at startup with a clear message
+- [x] a fake provider passes the shared contract test suite (#117)
+- [x] an unknown provider name fails at startup with a clear message (#117)
 
 ### S1-T03: Fixture provider
 
@@ -331,8 +331,8 @@ SQLAlchemy 2 models and Alembic migrations for: `tickers`, `watchlists`, `watchl
 A deterministic synthetic generator (seeded geometric Brownian motion with regime switches, gaps, a split, and volume patterns) that produces 3 years of daily and 30 days of 5-minute bars for 12 synthetic tickers plus `SPY` and `QQQ` stand-ins. No vendor data is committed to the repository. This provider powers dev, CI, kind, and the smoke suite.
 
 **Acceptance criteria:**
-- [ ] same seed produces identical bars
-- [ ] the dataset includes at least one trending, one ranging, and one reversing ticker by construction, asserted in tests
+- [x] same seed produces identical bars (#120)
+- [x] the dataset includes at least one trending, one ranging, and one reversing ticker by construction, asserted in tests (#120)
 
 ### S1-T04: Massive (formerly Polygon.io) provider
 
@@ -345,10 +345,10 @@ A deterministic synthetic generator (seeded geometric Brownian motion with regim
 REST adapter for daily aggregates, 5-minute aggregates, splits, dividends, and financials. Base URL is configurable (`https://api.massive.com` default; `https://api.polygon.io` is the legacy host). Token-bucket rate limiter with a configurable calls-per-minute (default 5, the free-tier limit; verify the current plan limits at implementation time), exponential backoff with jitter on 429 and 5xx, response caching by (endpoint, params), and every call recorded in `provider_calls`. The seed watchlist has about 200 symbols, so daily updates must use the grouped daily bars endpoint (one call returns the whole market for a date) with per-ticker calls only for backfill, corporate actions, and intraday bars; record in the owner checklist that a paid plan is likely needed for 5-minute bars on 200 symbols. Tests use recorded, scrubbed fixtures; no test calls the network.
 
 **Acceptance criteria:**
-- [ ] contract tests pass
-- [ ] a 429 sequence is retried and succeeds
-- [ ] the API key never appears in logs, errors, or `provider_calls`
-- [ ] with no key configured the provider reports `unconfigured` and the app still starts on the fixture provider
+- [x] contract tests pass (#121)
+- [x] a 429 sequence is retried and succeeds (#121)
+- [x] the API key never appears in logs, errors, or `provider_calls` (#121; the key is never part of a `CallRecord`, and `sanitize` drops credential-named parameters before #128's `DbCallRecorder` writes `provider_calls`)
+- [x] with no key configured the provider reports `unconfigured` and the app still starts on the fixture provider (#121)
 
 ### S1-T05: Second provider adapter
 
@@ -361,8 +361,8 @@ REST adapter for daily aggregates, 5-minute aggregates, splits, dividends, and f
 One alternate provider behind the same interface so the product is not tied to a single vendor. Choose between Alpaca Market Data and Tiingo by reading their current docs and terms at implementation time; record the choice as an ADR. Fundamentals may come from a different vendor than bars (for example Financial Modeling Prep); the registry allows mixing.
 
 **Acceptance criteria:**
-- [ ] contract tests pass with recorded fixtures
-- [ ] switching `SUPERTRENDS_MARKET_PROVIDER` changes the active provider with no code change
+- [x] contract tests pass with recorded fixtures (#119)
+- [x] switching `SUPERTRENDS_MARKET_PROVIDER` changes the active provider with no code change (#119)
 
 ### S1-T06: Ingestion service
 
@@ -375,10 +375,10 @@ One alternate provider behind the same interface so the product is not tied to a
 `supertrends ingest` and an internal function used by runs: incremental fetch per ticker (from last stored bar), upsert, corporate-action handling (on a new split, refetch the full adjusted history for that ticker), weekly resample, and a data-quality pass that sets `ok`, `degraded`, `stale` (latest daily bar older than the last completed session), or `insufficient_history`. Trading calendar from `exchange_calendars` (XNYS), including half days and holidays.
 
 **Acceptance criteria:**
-- [ ] re-running ingestion is idempotent
-- [ ] a simulated split triggers a full refetch
-- [ ] a holiday does not mark tickers stale
-- [ ] a ticker with a gap of more than 3 sessions is flagged `degraded`
+- [x] re-running ingestion is idempotent (#124)
+- [x] a simulated split triggers a full refetch (#124)
+- [x] a holiday does not mark tickers stale (#124)
+- [x] a ticker with a gap of more than 3 sessions is flagged `degraded` (#124)
 
 ### S1-T07: Watchlist service and API
 
@@ -391,12 +391,12 @@ One alternate provider behind the same interface so the product is not tied to a
 CRUD for one default watchlist plus named groups. Symbol validation against the provider's reference data (or a permissive regex on the fixture provider). Seed on first start: the 14 groups and 200 unique symbols in Appendix L, written to `config/watchlist.seed.yaml`, following the seed rules there (many-to-many group membership, provider validation, `unresolved` and `needs_review` handling, VIX not scored, crypto file kept but not ingested). Hard cap 300 tickers. `SPY` and `QQQ` are always ingested as benchmarks even if removed from the watchlist.
 
 **Acceptance criteria:**
-- [ ] endpoints in the API contract behave as specified
-- [ ] adding ticker 301 returns 422
-- [ ] the seed loads all 14 groups
-- [ ] a symbol in three groups is stored once with three memberships
-- [ ] an unresolvable seed symbol is recorded as `unresolved` with a reason and excluded, never substituted
-- [ ] write endpoints require the bearer token; read endpoints do not
+- [x] endpoints in the API contract behave as specified (#123)
+- [x] adding ticker 301 returns 422 (#123)
+- [x] the seed loads all 14 groups (#123)
+- [x] a symbol in three groups is stored once with three memberships (#123)
+- [ ] an unresolvable seed symbol is recorded as `unresolved` with a reason and excluded, never substituted. Not met: `000660` fails the `tickers.symbol` CHECK and is reported as "not storable" instead of being stored as `unresolved` (GD-005)
+- [x] write endpoints require the bearer token; read endpoints do not (#123)
 
 ### S1-T08: API skeleton and observability base
 
@@ -409,19 +409,23 @@ CRUD for one default watchlist plus named groups. Symbol validation against the 
 FastAPI app with `/healthz` (process up), `/readyz` (database reachable, migrations at head), `/metrics` (Prometheus), structured JSON logs via structlog with a request ID, and RFC 9457 problem responses. Settings from environment with the `SUPERTRENDS_` prefix.
 
 **Acceptance criteria:**
-- [ ] `/readyz` returns 503 when the database is down
-- [ ] logs are valid JSON lines
-- [ ] no log line contains a secret (tested by a log-scrubbing unit test)
+- [x] `/readyz` returns 503 when the database is down (#122)
+- [x] logs are valid JSON lines (#122)
+- [x] no log line contains a secret (tested by a log-scrubbing unit test) (#122)
 
 ### Sprint 1 checklist (non-blocking; unmet items go to docs/GATE_DEBT.md)
 
-- [ ] `supertrends ingest` on the fixture provider fills the database; a second run changes nothing
-- [ ] Provider contract tests pass for fixture, Massive, and the alternate provider
-- [ ] Watchlist API works end to end against Postgres in CI
-- [ ] No test touches the network (CI runs with outbound network blocked for the test step)
-- [ ] `make up && make smoke` pass
-- [ ] Coverage thresholds met; spec docs audited
-- [ ] Retrospective written; tag `sprint-1-complete` pushed
+All eight Sprint 1 tasks are merged to `develop` (#117 to #124, plus #127 for CI and #128 for provider-call recording) and promoted to `staging` (#129).
+
+- [x] `supertrends ingest` on the fixture provider fills the database; a second run changes nothing (`develop` f9ffd93 on local Postgres 17, 2026-11-15: `db migrate`, `watchlist seed`, then `ingest --symbols` for the 10 fixture symbols plus SPY and QQQ, run twice. Both runs left the same row counts, 9,072 daily, 28,080 intraday, 128 fundamentals, and 20 earnings, and the same `bars_daily` checksum. Also automated as `it_cli_ingest_fills_database_and_second_run_changes_nothing`)
+- [x] Provider contract tests pass for fixture, Massive, and the alternate provider (#120, #121, #119; green on `develop`)
+- [x] Watchlist API works end to end against Postgres in CI (`integration-tests` job green on `develop` and on the `staging` promotion #129)
+- [ ] No test touches the network (CI runs with outbound network blocked for the test step). Partly met: pytest-socket blocks every non-localhost socket in all test runs (#117), but the CI test step has no OS-level outbound block (GD-003)
+- [x] `make up && make smoke` pass (3 of 3 on `develop` 0304bd8 and on `staging` a6bc05d, 2026-11-15)
+- [x] Coverage thresholds met; spec docs audited (`staging` a6bc05d: Python 96% line and branch, 3,146 statements, every per-directory threshold met; audit notes in docs/RETROSPECTIVES.md)
+- [x] Retrospective written; tag `sprint-1-complete` pushed (on the `staging` promotion of this checklist)
+
+Checklist run 2026-11-15. Six of seven items pass. One task criterion is unmet (S1-T07 unresolved seed symbols, GD-005). Unmet and process items are in `docs/GATE_DEBT.md`: GD-003, GD-005, GD-006, GD-008, and GD-012 to GD-014 are open; GD-002, GD-004, GD-007, and GD-009 to GD-011 are resolved.
 
 ---
 
