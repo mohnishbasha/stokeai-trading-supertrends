@@ -29,6 +29,7 @@ INTRADAY_FROM = 200
 def make_bundle(
     seed: int,
     n: int,
+    *,
     sigma: float = 0.015,
     p_gap: float = 0.05,
     p_flat: float = 0.03,
