@@ -14,6 +14,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Root `Makefile` with `make help`; later-sprint targets print when they arrive (S0-T03).
 - Multi-stage `Dockerfile` (non-root, read-only root filesystem) and `deploy/compose/docker-compose.local.yml` with Postgres (S0-T06).
 - CI pipeline (lint and type-check, unit, coverage, integration, e2e placeholder, multi-arch image build, changelog rule) and Dependabot (S0-T05).
+- Agent harness files: `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, and the `run-tests` and `check-types` skills (S0-T07).
 
 ### Scoring
 

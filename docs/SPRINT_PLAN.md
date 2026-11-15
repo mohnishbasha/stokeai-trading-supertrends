@@ -221,9 +221,9 @@ Multi-stage `Dockerfile` in the shape given in Build and Deployment, building th
 Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent/skills/run-tests/` and `.agent/skills/check-types/` (each with `SKILL.md` and `run.sh`), per Appendix J. `.gitignore` includes `logs/`.
 
 **Acceptance criteria:**
-- [ ] each file contains every required section
-- [ ] both skill `run.sh` scripts exit 0
-- [ ] `runner.mk`, `run-supertrends.sh`, `run-supertrends-status.sh` are untouched and not ignored
+- [x] each file contains every required section
+- [x] both skill `run.sh` scripts exit 0
+- [x] `runner.mk`, `run-supertrends.sh`, `run-supertrends-status.sh` are untouched and not ignored
 
 ### S0-T08: License and community files
 
