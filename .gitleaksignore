@@ -1,0 +1,2 @@
+# Synthetic test credential committed before it was renamed (S1-T04); not a real secret.
+e96c5108b418b6c0673ddf52f159726c772880c7:tests/contract/massive_support.py:generic-api-key:17

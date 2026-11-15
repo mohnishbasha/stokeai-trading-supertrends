@@ -14,7 +14,7 @@ from supertrends.data.providers.recording import InMemoryCallRecorder
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "providers" / "massive"
 BASE_URL = "https://api.massive.com"
-SECRET = "sk-test-SECRET-KEY-123456"  # noqa: S105 (fake key)
+SECRET = "unit-test-fake-vendor-credential"  # noqa: S105  # gitleaks:allow
 
 Handler = Callable[[httpx.Request], httpx.Response]
 
