@@ -499,22 +499,24 @@ Golden and property tests apply to every indicator. Tolerances are in section 5.
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-001 | `golden_sma_compute_handcomputed_series_matches_1e9` | SMA(5) on a hand series | FR-2xx, S2-T01 | Deferred |
-| TS-IND-002 | `golden_ema_compute_seeded_with_sma_of_first_n_matches_1e9` | EMA alpha 2/(n+1) seeded with the SMA of the first n values | FR-2xx, Conventions | Deferred |
-| TS-IND-003 | `golden_rma_compute_wilder_seed_and_recursion_matches_1e9` | RMA seeded with SMA, then `(prev*(n-1)+x)/n` | FR-2xx, Conventions | Deferred |
-| TS-IND-004 | `golden_true_range_compute_gap_up_gap_down_inside_bar_matches_1e9` | TR uses prior close for gaps | FR-2xx | Deferred |
-| TS-IND-005 | `unit_true_range_compute_first_bar_is_high_minus_low` | First bar has no prior close | FR-2xx | Deferred |
-| TS-IND-006 | `golden_atr_compute_rma10_and_rma14_match_1e9` | ATR is RMA of TR | FR-2xx | Deferred |
-| TS-IND-007 | `golden_rsi_compute_wilder_14_matches_1e9` | RSI(14) Wilder on a hand series | FR-2xx | Deferred |
-| TS-IND-008 | `unit_rsi_compute_all_gains_returns_100_all_losses_returns_0` | Degenerate series bounds | FR-2xx | Deferred |
-| TS-IND-009 | `golden_obv_compute_up_down_flat_closes_matches_1e9` | OBV adds, subtracts, or holds | FR-2xx | Deferred |
-| TS-IND-010 | `golden_stdev_compute_population_20_matches_1e9` | Population stdev, not sample | FR-2xx | Deferred |
-| TS-IND-011 | `unit_percentile_rank_compute_trailing_window_only_matches_1e9` | Percentile rank over trailing window | FR-2xx | Deferred |
-| TS-IND-012 | `golden_linreg_slope_compute_known_line_returns_exact_slope` | Least-squares slope on a linear series | FR-2xx | Deferred |
-| TS-IND-013 | `unit_pivots_compute_width_5_never_marks_within_5_bars_of_end` | Confirmed pivot rule | FR-2xx, S2-T01 | Deferred |
-| TS-IND-014 | `unit_zigzag_compute_threshold_8pct_vs_3_atr_pct_uses_max` | Threshold is `max(8%, 3*ATR%)` | FR-2xx, S2-T01 | Deferred |
-| TS-IND-015 | `unit_resample_weekly_compute_friday_close_matches_manual` | Weekly resample helper | FR-1xx, FR-2xx | Deferred |
-| TS-IND-016 | `prop_primitives_compute_output_length_equals_input_nan_warmup` | All primitives return same-length arrays with NaN warm-up | FR-2xx | Deferred |
+| TS-IND-001 | `golden_sma_compute_handcomputed_series_matches_1e9` | SMA(5) on a hand series | FR-2xx, S2-T01 | Automated |
+| TS-IND-002 | `golden_ema_compute_seeded_with_sma_of_first_n_matches_1e9` | EMA alpha 2/(n+1) seeded with the SMA of the first n values | FR-2xx, Conventions | Automated |
+| TS-IND-003 | `golden_rma_compute_wilder_seed_and_recursion_matches_1e9` | RMA seeded with SMA, then `(prev*(n-1)+x)/n` | FR-2xx, Conventions | Automated |
+| TS-IND-004 | `golden_true_range_compute_gap_up_gap_down_inside_bar_matches_1e9` | TR uses prior close for gaps | FR-2xx | Automated |
+| TS-IND-005 | `unit_true_range_compute_first_bar_is_high_minus_low` | First bar has no prior close | FR-2xx | Automated |
+| TS-IND-006 | `golden_atr_compute_rma10_and_rma14_match_1e9` | ATR is RMA of TR | FR-2xx | Automated |
+| TS-IND-007 | `golden_rsi_compute_wilder_14_matches_1e9` | RSI(14) Wilder on a hand series | FR-2xx | Automated |
+| TS-IND-008 | `unit_rsi_compute_all_gains_returns_100_all_losses_returns_0` | Degenerate series bounds | FR-2xx | Automated |
+| TS-IND-009 | `golden_obv_compute_up_down_flat_closes_matches_1e9` | OBV adds, subtracts, or holds | FR-2xx | Automated |
+| TS-IND-010 | `golden_stdev_compute_population_20_matches_1e9` | Population stdev, not sample | FR-2xx | Automated |
+| TS-IND-011 | `unit_percentile_rank_compute_trailing_window_only_matches_1e9` | Percentile rank over trailing window | FR-2xx | Automated |
+| TS-IND-012 | `golden_linreg_slope_compute_known_line_returns_exact_slope` | Least-squares slope on a linear series | FR-2xx | Automated |
+| TS-IND-013 | `unit_pivots_compute_width_5_never_marks_within_5_bars_of_end` | Confirmed pivot rule | FR-2xx, S2-T01 | Automated |
+| TS-IND-014 | `unit_zigzag_compute_threshold_8pct_vs_3_atr_pct_uses_max` | Threshold is `max(8%, 3*ATR%)` | FR-2xx, S2-T01 | Automated |
+| TS-IND-015 | `unit_resample_weekly_compute_friday_close_matches_manual` | Weekly resample helper | FR-1xx, FR-2xx | Automated |
+| TS-IND-016 | `prop_primitives_compute_output_length_equals_input_nan_warmup` | All primitives return same-length arrays with NaN warm-up | FR-2xx | Automated |
+| TS-IND-017 | `unit_indicators_all_aggregation_exposes_primitives` | `supertrends.indicators.__all__` aggregates every module's `__all__` | FR-2xx, S2-T01 | Automated |
+| TS-IND-018 | `unit_indicators_import_boundary_no_api_cli_mcp_data_runs` | No indicator module imports api, cli, mcp, data, or runs | ARCHITECTURE 2 | Automated |
 
 #### 10.3.2 Supertrend
 

@@ -348,6 +348,10 @@ def test_unit_zigzag_compute_downtrend_start_nan_and_trivial_inputs() -> None:
     down = p.zigzag(arr(100, 96, 90, 94.6, 99), 0.05)
     assert [(s.index, s.kind) for s in down.confirmed] == [(0, "high"), (2, "low")]
     assert down.tentative == p.Swing(4, 99.0, "high", None)
+    # Up leg then reversal: 106 confirms the low at 0, 99 confirms the high at 1, low runs on.
+    low_run = p.zigzag(arr(100, 106, 99, 95), 0.05)
+    assert [(s.index, s.kind) for s in low_run.confirmed] == [(0, "low"), (1, "high")]
+    assert low_run.tentative == p.Swing(3, 95.0, "low", None)
     skipped = p.zigzag(arr(100, NAN, 90, 100), arr(0.05, 0.05, NAN, 0.05))
     assert skipped.confirmed == ()
     assert skipped.tentative is None

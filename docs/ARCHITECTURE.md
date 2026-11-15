@@ -506,6 +506,13 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** Adding an exception is a reviewed code change with a test. `THIRD_PARTY_LICENSES.md` still lists these packages with their licenses.
 - **Status:** Accepted.
 
+### ADR-053: Indicator primitive definitions and package aggregation
+- **Context:** S2-T01 needs exact definitions the spec leaves open, and later Sprint 2 tasks must add indicators in parallel without merge conflicts in `indicators/__init__.py`.
+- **Decision:** `percentile_rank` is the share of the window's earlier n-1 values strictly below the current value, times 100. RSI of a flat window is 50 (all gains 100, all losses 0). ZigZag runs on closes; a swing is confirmed on the first close reversing by at least the threshold (per-bar array allowed, value at the reversal bar), and the running extreme is returned separately as tentative. `zigzag_threshold` uses the 8% floor while ATR is in warm-up. Pivots are reported only when `p + width <= last index`, with `confirmed_at = p + width`. `resample_weekly` works on numpy arrays and does not import `supertrends.data`; tests assert equality with `data/resample.py`. `indicators/__init__.py` star-imports every module and concatenates their `__all__`; tasks add names only to their own module's `__all__` (ruff `F401`/`F403` are ignored for that one file).
+- **Alternatives rejected:** Dynamic `globals()` re-export (mypy cannot see the names); hand-edited `__init__.py` (conflicts across parallel tasks).
+- **Consequences:** The number may need renumbering at merge. A new indicator module needs a one-line change here.
+- **Status:** Accepted.
+
 ---
 
 ## 4. Data Flows
