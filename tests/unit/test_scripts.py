@@ -6,9 +6,12 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
+
+import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 SCRIPTS = REPO / "scripts"
@@ -94,6 +97,21 @@ def test_changelog_has_unreleased_section() -> None:
     assert "## [Unreleased]" in (REPO / "CHANGELOG.md").read_text()
 
 
+def test_repo_private_directory_and_logs_are_git_ignored_and_untracked() -> None:
+    """TS-DEP-041."""
+    for path in ("private/STOKE_INVENTORY.md", "logs/run.log"):
+        assert _run(["git", "check-ignore", "-q", path], REPO).returncode == 0, path
+    tracked = _run(["git", "ls-files", "private", "logs"], REPO).stdout
+    assert tracked == ""
+
+
+def test_repo_operator_files_runner_mk_and_run_scripts_not_ignored_and_untouched() -> None:
+    """TS-DEP-042: the operator's runner files stay visible to git and are never committed."""
+    for name in RUNNER_FILES:
+        assert _run(["git", "check-ignore", "-q", name], REPO).returncode == 1, name
+        assert _run(["git", "ls-files", "--error-unmatch", name], REPO).returncode != 0, name
+
+
 def test_shell_scripts_use_strict_mode() -> None:
     for path in [*SCRIPTS.glob("*.sh"), *(REPO / ".agent" / "skills").glob("*/run.sh")]:
         assert "set -euo pipefail" in path.read_text(), path
@@ -102,3 +120,38 @@ def test_shell_scripts_use_strict_mode() -> None:
 
 def test_env_example_is_committed_not_ignored() -> None:
     assert _run(["git", "check-ignore", "-q", ".env.example"], REPO).returncode == 1
+
+
+@pytest.mark.parametrize(("skill", "target"), [("run-tests", "test"), ("check-types", "check")])
+def test_agent_skills_run_tests_and_check_types_run_sh_exit_0(
+    skill: str, target: str, tmp_path: Path
+) -> None:
+    """TS-MCP-020: each run.sh runs its make target from the repo root and exits 0.
+
+    A fake make records the call; running the real target here would recurse into pytest.
+    """
+    directory = REPO / ".agent" / "skills" / skill
+    assert (directory / "SKILL.md").is_file()
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    log = tmp_path / "make.log"
+    fake = bin_dir / "make"
+    fake.write_text(f'#!/usr/bin/env bash\necho "$PWD $*" >> "{log}"\n')
+    fake.chmod(0o755)
+    env = {**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}"}
+    result = _run([str(directory / "run.sh")], tmp_path, env)
+    assert result.returncode == 0, result.stderr
+    assert log.read_text().split() == [str(REPO), target]
+
+
+def test_claude_md_imports_agents_md() -> None:
+    first = (REPO / "CLAUDE.md").read_text().splitlines()[0]
+    assert first == "@import AGENTS.md"
+
+
+def test_soul_md_has_no_build_commands_or_paths() -> None:
+    text = (REPO / "SOUL.md").read_text()
+    assert not re.search(r"\bmake (setup|build|check|test|coverage|up|down|smoke|image)\b", text)
+    assert "`" not in text
+    assert "scripts/" not in text
+    assert text.count("NEVER") + text.lower().count("never ") >= 8

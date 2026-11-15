@@ -1160,7 +1160,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-MCP-017 | `it_harness_goose_opencode_claude_code_configs_start_stdio_server_and_list_tools` | Config validation script | S7-T04 | Deferred |
 | TS-MCP-018 | `it_harness_smoke_mcp_client_runs_all_read_tools_on_staging_and_tags` | CI `harness-smoke-tests` | S7-T05 | Deferred |
 | TS-MCP-019 | `unit_agent_skill_daily_brief_run_sh_prints_picks_from_running_instance` | Skill script | S7-T06 | Deferred |
-| TS-MCP-020 | `unit_agent_skills_run_tests_and_check_types_run_sh_exit_0` | Agent harness skills | S0-T07 | Deferred |
+| TS-MCP-020 | `unit_agent_skills_run_tests_and_check_types_run_sh_exit_0` | Agent harness skills | S0-T07 | Automated |
 
 ### 10.15 Operations and run state machine (TS-OPS)
 
@@ -1241,8 +1241,8 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-DEP-038 | `unit_scripts_shellcheck_passes_for_all_scripts` | Shell hygiene | A§10, S0-T10 | Deferred |
 | TS-DEP-039 | `unit_scripts_stoke_inventory_no_kubeconfig_writes_unknown_rows_exit_0` | Inventory script | S0-T10 | Deferred |
 | TS-DEP-040 | `unit_scripts_stoke_inventory_is_read_only_only_get_commands_issued` | Read-only | S0-T10 | Deferred |
-| TS-DEP-041 | `unit_repo_private_directory_and_logs_are_git_ignored_and_untracked` | Public repo hygiene | A§9, S0-T07 | Deferred |
-| TS-DEP-042 | `unit_repo_operator_files_runner_mk_and_run_scripts_not_ignored_and_untouched` | Operator files | S0-T07 | Deferred |
+| TS-DEP-041 | `unit_repo_private_directory_and_logs_are_git_ignored_and_untracked` | Public repo hygiene | A§9, S0-T07 | Automated |
+| TS-DEP-042 | `unit_repo_operator_files_runner_mk_and_run_scripts_not_ignored_and_untouched` | Operator files | S0-T07 | Automated |
 | TS-DEP-043 | `it_ci_lint_error_in_pr_fails_lint_and_typecheck_job` | CI guard | S0-T05 | Automated |
 | TS-DEP-044 | `it_ci_workflows_use_pull_request_not_pull_request_target_and_pinned_actions` | Workflow lint | A§9 | Automated |
 | TS-DEP-045 | `it_ci_openapi_drift_fails_when_docs_openapi_json_stale` | Drift | S3-T09 | Deferred |
