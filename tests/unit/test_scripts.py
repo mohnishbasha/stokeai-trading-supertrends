@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -91,3 +92,9 @@ def test_changelog_extract_script_returns_section_for_version(tmp_path: Path) ->
 
 def test_changelog_has_unreleased_section() -> None:
     assert "## [Unreleased]" in (REPO / "CHANGELOG.md").read_text()
+
+
+def test_shell_scripts_use_strict_mode() -> None:
+    for path in [*SCRIPTS.glob("*.sh"), *(REPO / ".agent" / "skills").glob("*/run.sh")]:
+        assert "set -euo pipefail" in path.read_text(), path
+        assert os.access(path, os.X_OK), path

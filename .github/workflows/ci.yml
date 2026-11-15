@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright 2026 Serverless Ventures LLC
 #
-# Minimal CI until S0-T05 adds the full pipeline (ARCHITECTURE section 10). Uses
-# pull_request, never pull_request_target. Actions are pinned by SHA.
+# Pull request and branch CI; S0-T05 adds the remaining jobs (ARCHITECTURE section 10). Uses pull_request, never
+# pull_request_target; fork PRs get a read-only token and no secrets. Actions are pinned by SHA.
 name: ci
 
 on:
@@ -29,6 +29,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           version: ${{ env.UV_VERSION }}
@@ -38,15 +40,12 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: ui/package-lock.json
-      - run: uv sync --locked
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
-      - run: uv run mypy --strict src
-      - run: npm --prefix ui ci
-      - run: npm --prefix ui run build
-      - run: npm --prefix ui run lint
-      - run: npm --prefix ui run type-check
-      - run: ./scripts/check-versions.sh
+      - name: make setup (clean clone)
+        run: make setup
+      - name: make build
+        run: make build
+      - name: make check
+        run: make check
 
   unit-tests:
     name: ci / unit-tests
@@ -64,6 +63,6 @@ jobs:
           cache: npm
           cache-dependency-path: ui/package-lock.json
       - run: uv sync --locked
-      - run: uv run pytest tests/unit -q
       - run: npm --prefix ui ci
-      - run: npm --prefix ui run test -- --run
+      - run: npm --prefix ui run build
+      - run: make test

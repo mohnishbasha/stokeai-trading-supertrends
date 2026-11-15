@@ -162,8 +162,8 @@ Create the tree in Appendix B. `pyproject.toml` with uv, package `supertrends` u
 Create the root `Makefile` exactly as specified in Build and Deployment, with `make help`. Targets that depend on later sprints exist now and print "not available until Sprint N" with exit 0.
 
 **Acceptance criteria:**
-- [ ] `make help` lists every required target
-- [ ] `make setup`, `make build`, `make check` pass on a clean clone
+- [x] `make help` lists every required target
+- [x] `make setup`, `make build`, `make check` pass on a clean clone
 
 ### S0-T04: Version source of truth and scripts
 
