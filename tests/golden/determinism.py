@@ -29,6 +29,20 @@ START = date(2023, 1, 1)
 _NY = ZoneInfo("America/New_York")
 
 
+SIGNIFICANT_DIGITS = 10  # indicator floats are hashed to 10 digits: libm and BLAS differ by ulps
+
+
+def _round(obj: object) -> object:
+    """Round every float to `SIGNIFICANT_DIGITS` so macOS and Linux agree on the last bits."""
+    if isinstance(obj, float):
+        return float(f"{obj:.{SIGNIFICANT_DIGITS - 1}e}")
+    if isinstance(obj, dict):
+        return {k: _round(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_round(v) for v in obj]
+    return obj
+
+
 def _dump(obj: object) -> bytes:
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
 
@@ -90,7 +104,7 @@ def determinism_hash() -> str:
     digest = hashlib.sha256()
     for symbol in symbols():
         outputs = compute_all(bundle_for(fixture, symbol))
-        digest.update(_dump({"symbol": symbol, "outputs": outputs}))
+        digest.update(_dump({"symbol": symbol, "outputs": _round(outputs)}))
     return digest.hexdigest()
 
 
