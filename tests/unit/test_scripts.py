@@ -98,3 +98,7 @@ def test_shell_scripts_use_strict_mode() -> None:
     for path in [*SCRIPTS.glob("*.sh"), *(REPO / ".agent" / "skills").glob("*/run.sh")]:
         assert "set -euo pipefail" in path.read_text(), path
         assert os.access(path, os.X_OK), path
+
+
+def test_env_example_is_committed_not_ignored() -> None:
+    assert _run(["git", "check-ignore", "-q", ".env.example"], REPO).returncode == 1

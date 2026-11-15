@@ -1644,6 +1644,8 @@ This section mirrors the Build and Deployment, Versioning, Environment Model, an
 | Retention runs after each daily run (no extra CronJob). | none | ADR-031 |
 | Metrics from the CronJob and worker are persisted to Postgres and exposed by the API, so ServiceMonitor targets only the API Service. | `servicemonitor.yaml` | ADR-023 |
 | Root `Makefile` adds `export IMAGE VERSION` so Compose can substitute `${IMAGE}:${VERSION}`. | Makefile | none (needed for Compose) |
+| The local Compose host port is `${SUPERTRENDS_HOST_PORT:-8080}`, still bound to 127.0.0.1, so a machine where 8080 is taken can run `make up` and `make smoke` (set `SMOKE_BASE_URL` to match). | `docker-compose.local.yml` | none (default unchanged) |
+| Until Sprint 1 adds Alembic, the Dockerfile build stage copies `README.md`, `src/`, and `config/` and runs `uv sync --locked --no-dev --no-editable`; base images are pinned by digest. | Dockerfile | none (staged delivery) |
 | Ruff excludes `*.md`: ruff 0.17 formats Python code blocks inside Markdown, and the spec documents are not reformatted by tools. | `pyproject.toml` | none (tooling) |
 
 Additional values (merged into the seed `values.yaml` in 10.6):

@@ -205,10 +205,10 @@ Root `VERSION` file containing `0.1.0`. `scripts/check-versions.sh`, `scripts/ex
 Multi-stage `Dockerfile` in the shape given in Build and Deployment, building the placeholder UI and the empty API. `deploy/compose/docker-compose.local.yml` with Postgres and the app.
 
 **Acceptance criteria:**
-- [ ] `make image` builds
-- [ ] the container runs as non-root with a read-only root filesystem
-- [ ] `make up` then `curl -fsS localhost:8080/healthz` returns `{"status":"ok"}`
-- [ ] `make down` cleans up
+- [x] `make image` builds
+- [x] the container runs as non-root with a read-only root filesystem
+- [x] `make up` then `curl -fsS localhost:8080/healthz` returns `{"status":"ok"}`
+- [x] `make down` cleans up
 
 ### S0-T07: Agent harness files
 

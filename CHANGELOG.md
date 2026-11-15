@@ -12,6 +12,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - UI project: Vite, React, TypeScript strict, ESLint, Vitest, and Playwright with a placeholder route (S0-T02).
 - `VERSION` as the version source of truth, `scripts/check-versions.sh`, `scripts/version-sync.sh`, `scripts/extract-changelog.sh`, and this changelog (S0-T04).
 - Root `Makefile` with `make help`; later-sprint targets print when they arrive (S0-T03).
+- Multi-stage `Dockerfile` (non-root, read-only root filesystem) and `deploy/compose/docker-compose.local.yml` with Postgres (S0-T06).
 
 ### Scoring
 
