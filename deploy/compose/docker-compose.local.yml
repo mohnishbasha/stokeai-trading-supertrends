@@ -22,14 +22,28 @@ services:
       SUPERTRENDS_DATABASE_URL: postgresql+psycopg://supertrends:supertrends@postgres:5432/supertrends
       SUPERTRENDS_ALLOWED_HOSTS: localhost,127.0.0.1
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "supertrends", "healthcheck", "--url", "http://127.0.0.1:8080"]
       interval: 5s
       timeout: 3s
       start_period: 10s
       retries: 10
+
+  migrate:
+    image: ${IMAGE:-ghcr.io/mohnishbasha/stokeai-supertrends}:${VERSION:-0.1.0}
+    command: ["db", "migrate"]
+    read_only: true
+    user: "10001:10001"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      SUPERTRENDS_DATABASE_URL: postgresql+psycopg://supertrends:supertrends@postgres:5432/supertrends
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
 
   postgres:
     image: postgres:17-bookworm@sha256:40865bc877a289da75963d97d72b59633f639fc5af7a4e856bfa3714cae5b536

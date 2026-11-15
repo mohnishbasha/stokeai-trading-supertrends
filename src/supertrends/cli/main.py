@@ -3,11 +3,13 @@
 """`supertrends` entry point (ARCHITECTURE section 6, CLI).
 
 Sprint 0 commands: --version, serve, healthcheck, config show | validate | export-schema.
-Sprint 1 adds db migrate and ingest.
+Sprint 1 adds db migrate, ingest, and watchlist.
 """
 
 import json
 import re
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from enum import IntEnum
 from pathlib import Path
 from typing import Annotated
@@ -15,6 +17,7 @@ from typing import Annotated
 import httpx
 import typer
 import yaml
+from sqlalchemy.orm import Session
 
 from supertrends.errors import ConfigError
 from supertrends.scoring.config import config_hash, json_schema, load_scoring_config
@@ -30,6 +33,8 @@ config_app = typer.Typer(help="Show, validate, and export the scoring config.")
 app.add_typer(config_app, name="config")
 db_app = typer.Typer(help="Database operations (local mode only).")
 app.add_typer(db_app, name="db")
+watchlist_app = typer.Typer(help="Watchlist operations (local mode only).")
+app.add_typer(watchlist_app, name="watchlist")
 
 
 class HealthExit(IntEnum):
@@ -72,6 +77,7 @@ def serve(
     import uvicorn  # noqa: PLC0415 (keeps CLI start-up fast for other commands)
 
     settings = load_settings()
+    _seed_on_first_start()
     host, _, port = (bind or settings.bind).rpartition(":")
     uvicorn.run(
         "supertrends.api.app:create_app",
@@ -81,6 +87,21 @@ def serve(
         log_level=settings.effective_log_level,
         proxy_headers=False,
     )
+
+
+def _seed_on_first_start() -> None:
+    """Seed the default watchlist when it does not exist; never blocks the server start."""
+    from sqlalchemy.exc import SQLAlchemyError  # noqa: PLC0415 (keeps CLI start-up fast)
+
+    from supertrends.data import watchlist as wl  # noqa: PLC0415
+
+    try:
+        result = wl.seed_if_empty(wl.PermissiveResolver())
+    except (SQLAlchemyError, ConfigError) as exc:
+        typer.echo(f"watchlist seed skipped: {type(exc).__name__}", err=True)
+        return
+    if result is not None:
+        typer.echo(f"seeded watchlist: {result.groups} groups, {result.symbols} symbols", err=True)
 
 
 @app.command()
@@ -165,6 +186,93 @@ def db_migrate(
     finally:
         engine.dispose()
     typer.echo(f"revision {applied}")
+
+
+@contextmanager
+def _watchlist_session() -> Iterator[Session]:
+    from sqlalchemy.exc import SQLAlchemyError  # noqa: PLC0415 (keeps CLI start-up fast)
+
+    from supertrends.data import db  # noqa: PLC0415
+
+    engine = db.create_db_engine()
+    try:
+        with db.session_scope(engine) as session:
+            yield session
+    except SQLAlchemyError as exc:
+        typer.echo(f"database error: {type(exc).__name__}", err=True)
+        raise typer.Exit(HealthExit.NOT_READY) from exc
+    finally:
+        engine.dispose()
+
+
+def _watchlist_call[T](action: Callable[[Session], T]) -> T:
+    from supertrends.data.watchlist import WatchlistError  # noqa: PLC0415
+
+    try:
+        with _watchlist_session() as session:
+            return action(session)
+    except WatchlistError as exc:
+        typer.echo(exc.detail, err=True)
+        raise typer.Exit(CONFIG_INVALID_EXIT) from exc
+
+
+@watchlist_app.command("seed")
+def watchlist_seed() -> None:
+    """Load config/watchlist.seed.yaml if the default watchlist does not exist yet."""
+    from supertrends.data import watchlist as wl  # noqa: PLC0415
+
+    result = _watchlist_call(lambda s: wl.seed_default_watchlist(s, wl.PermissiveResolver()))
+    if result is None:
+        typer.echo("watchlist already exists; not reseeded")
+        return
+    typer.echo(
+        f"seeded {result.groups} groups and {result.symbols} symbols "
+        f"({len(result.unresolved)} unresolved, {len(result.needs_review)} needs review, "
+        f"{len(result.rejected)} not storable)"
+    )
+
+
+@watchlist_app.command("list")
+def watchlist_list(
+    as_json: Annotated[bool, typer.Option("--json", help="Print one JSON document.")] = False,
+) -> None:
+    """List groups and items."""
+    from supertrends.api.schemas.watchlist import WatchlistResponse  # noqa: PLC0415
+    from supertrends.data import watchlist as wl  # noqa: PLC0415
+
+    view = _watchlist_call(wl.read_watchlist)
+    if as_json:
+        typer.echo(WatchlistResponse.model_validate(view, from_attributes=True).model_dump_json())
+        return
+    typer.echo(f"watchlist {view.name}: {view.count} of {view.max} tickers")
+    for group in view.groups:
+        typer.echo(f"{group.slug} ({group.name}): {' '.join(group.symbols)}")
+    for item in view.items:
+        if item.resolution != "resolved":
+            typer.echo(f"{item.symbol}: {item.resolution} - {item.resolution_reason}")
+
+
+@watchlist_app.command("add")
+def watchlist_add(
+    symbol: Annotated[str, typer.Argument(help="Ticker symbol.")],
+    group: Annotated[list[str] | None, typer.Option(help="Group slug (repeatable).")] = None,
+) -> None:
+    """Add a symbol to the watchlist."""
+    from supertrends.data import watchlist as wl  # noqa: PLC0415
+
+    item = _watchlist_call(
+        lambda s: wl.add_item(s, symbol, group or [], wl.PermissiveResolver(), source="cli")
+    )
+    typer.echo(f"added {item.symbol}")
+
+
+@watchlist_app.command("remove")
+def watchlist_remove(symbol: Annotated[str, typer.Argument(help="Ticker symbol.")]) -> None:
+    """Remove a symbol from the watchlist."""
+    from supertrends.data import watchlist as wl  # noqa: PLC0415
+
+    _watchlist_call(lambda s: wl.remove_item(s, symbol))
+    typer.echo(f"removed {symbol.upper()}")
 
 
 @app.command()

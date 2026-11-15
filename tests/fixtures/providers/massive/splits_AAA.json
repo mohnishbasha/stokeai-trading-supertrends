@@ -1,0 +1,12 @@
+{
+ "status": "OK",
+ "request_id": "scrubbed",
+ "results": [
+  {
+   "ticker": "AAA",
+   "execution_date": "2026-02-10",
+   "split_from": 1,
+   "split_to": 4
+  }
+ ]
+}
