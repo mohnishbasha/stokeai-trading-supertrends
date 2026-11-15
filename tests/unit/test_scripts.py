@@ -97,6 +97,47 @@ def test_changelog_has_unreleased_section() -> None:
     assert "## [Unreleased]" in (REPO / "CHANGELOG.md").read_text()
 
 
+def test_scripts_stoke_inventory_no_kubeconfig_writes_unknown_rows_exit_0(tmp_path: Path) -> None:
+    """TS-DEP-039."""
+    out = tmp_path / "inv.md"
+    env = {**os.environ, "KUBECONFIG": str(tmp_path / "missing"), "HOME": str(tmp_path)}
+    result = _run([str(SCRIPTS / "stoke-inventory.sh"), str(out)], REPO, env)
+    assert result.returncode == 0, result.stderr
+    rows = [line for line in out.read_text().splitlines() if line.startswith("| ")][1:]
+    assert len(rows) == 10
+    assert all("UNKNOWN: run against the cluster" in row for row in rows)
+
+
+def test_scripts_stoke_inventory_is_read_only_only_get_commands_issued(tmp_path: Path) -> None:
+    """TS-DEP-040: against a reachable (fake) cluster every kubectl and flux call is a get."""
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    log = tmp_path / "calls.log"
+    for tool in ("kubectl", "flux"):
+        fake = bin_dir / tool
+        fake.write_text(
+            "#!/usr/bin/env bash\n"
+            f'echo "{tool} $*" >> "{log}"\n'
+            'case "$*" in\n'
+            '  *"--raw /version"*) echo \'{"gitVersion":"v1.31.0+k3s1"}\' ;;\n'
+            '  *"-o json"*) echo \'{"items":[]}\' ;;\n'
+            "esac\n"
+        )
+        fake.chmod(0o755)
+    kubeconfig = tmp_path / "kubeconfig"
+    kubeconfig.write_text("apiVersion: v1\n")
+    out = tmp_path / "inv.md"
+    env = {**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}", "KUBECONFIG": str(kubeconfig)}
+    result = _run([str(SCRIPTS / "stoke-inventory.sh"), str(out)], REPO, env)
+    assert result.returncode == 0, result.stderr
+    calls = log.read_text().splitlines()
+    assert calls
+    assert all(c.split()[1] == "get" for c in calls), calls
+    text = out.read_text()
+    assert "v1.31.0+k3s1" in text
+    assert "UNKNOWN" not in text
+
+
 def test_repo_private_directory_and_logs_are_git_ignored_and_untracked() -> None:
     """TS-DEP-041."""
     for path in ("private/STOKE_INVENTORY.md", "logs/run.log"):
@@ -110,6 +151,15 @@ def test_repo_operator_files_runner_mk_and_run_scripts_not_ignored_and_untouched
     for name in RUNNER_FILES:
         assert _run(["git", "check-ignore", "-q", name], REPO).returncode == 1, name
         assert _run(["git", "ls-files", "--error-unmatch", name], REPO).returncode != 0, name
+
+
+@pytest.mark.skipif(shutil.which("shellcheck") is None, reason="shellcheck not installed")
+def test_scripts_shellcheck_passes_for_all_scripts() -> None:
+    """TS-DEP-038."""
+    scripts = [str(p) for p in SCRIPTS.glob("*.sh")]
+    scripts += [str(p) for p in (REPO / ".agent" / "skills").glob("*/run.sh")]
+    result = _run(["shellcheck", *scripts], REPO)
+    assert result.returncode == 0, result.stdout
 
 
 def test_shell_scripts_use_strict_mode() -> None:
