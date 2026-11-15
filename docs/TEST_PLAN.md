@@ -420,20 +420,20 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 | TS-ING-010 | `unit_provider_rate_limiter_token_bucket_respects_calls_per_minute` | The token bucket never exceeds the configured calls per minute (fake clock) | FR-1xx, S1-T04 | Deferred |
 | TS-ING-011 | `it_provider_massive_5xx_exponential_backoff_with_jitter_bounded` | 5xx retries are bounded in count and backoff | FR-1xx | Deferred |
 | TS-ING-012 | `it_provider_massive_response_cache_same_endpoint_params_one_call` | Responses are cached by (endpoint, params) | FR-1xx | Deferred |
-| TS-ING-013 | `it_provider_calls_recorded_without_api_key_in_path_or_params` | Every call is stored in `provider_calls` with no secret | FR-1xx, NFR-009 | Deferred |
+| TS-ING-013 | `it_provider_calls_recorded_without_api_key_in_path_or_params` | Every call is stored in `provider_calls` with no secret | FR-1xx, NFR-009 | Automated |
 | TS-ING-014 | `unit_provider_massive_no_key_reports_unconfigured_app_starts_on_fixture` | No key means `unconfigured` and fixture fallback | FR-1xx, S1-T04 | Deferred |
 | TS-ING-015 | `unit_provider_massive_base_url_configurable_legacy_host_accepted` | Base URL setting accepts `api.massive.com` and `api.polygon.io` | FR-1xx | Deferred |
-| TS-ING-016 | `it_ingest_second_run_is_idempotent_no_row_changes` | Re-running ingestion changes nothing | FR-1xx, S1-T06 | Deferred |
-| TS-ING-017 | `it_ingest_incremental_fetch_starts_from_last_stored_bar` | Only bars after the last stored bar are requested | FR-1xx | Deferred |
-| TS-ING-018 | `it_ingest_split_detected_triggers_full_adjusted_history_refetch` | A new split refetches the full history for that ticker | FR-1xx, S1-T06 | Deferred |
-| TS-ING-019 | `unit_ingest_holiday_does_not_mark_tickers_stale` | A market holiday never produces `stale` | FR-1xx | Deferred |
-| TS-ING-020 | `unit_ingest_half_day_session_treated_as_complete_session` | Half days (for example the day after Thanksgiving) are valid sessions | FR-1xx, S9-T02 | Deferred |
-| TS-ING-021 | `unit_quality_gap_more_than_3_sessions_marks_degraded` | A gap above 3 sessions is `degraded` | FR-1xx | Deferred |
-| TS-ING-022 | `unit_quality_latest_bar_older_than_last_session_marks_stale` | Latest daily bar older than the last completed session is `stale` | FR-1xx, US-020 | Deferred |
-| TS-ING-023 | `unit_quality_fewer_than_250_bars_marks_insufficient_history` | Below 250 daily bars the ticker is excluded | FR-1xx | Deferred |
-| TS-ING-024 | `unit_quality_exactly_250_bars_is_scoreable` | Boundary: 250 bars scores | FR-1xx | Deferred |
-| TS-ING-025 | `unit_resample_weekly_week_ending_friday_ohlcv_correct` | Weekly bars: open first, high max, low min, close last, volume sum | FR-1xx, FR-2xx | Deferred |
-| TS-ING-026 | `unit_resample_weekly_holiday_friday_uses_last_session_of_week` | A holiday Friday closes the week on Thursday | FR-1xx | Deferred |
+| TS-ING-016 | `it_ingest_second_run_is_idempotent_no_row_changes` | Re-running ingestion changes nothing | FR-1xx, S1-T06 | Automated |
+| TS-ING-017 | `it_ingest_incremental_fetch_starts_from_last_stored_bar` | Only bars after the last stored bar are requested | FR-1xx | Automated |
+| TS-ING-018 | `it_ingest_split_detected_triggers_full_adjusted_history_refetch` | A new split refetches the full history for that ticker | FR-1xx, S1-T06 | Automated |
+| TS-ING-019 | `unit_ingest_holiday_does_not_mark_tickers_stale` | A market holiday never produces `stale` | FR-1xx | Automated |
+| TS-ING-020 | `unit_ingest_half_day_session_treated_as_complete_session` | Half days (for example the day after Thanksgiving) are valid sessions | FR-1xx, S9-T02 | Automated |
+| TS-ING-021 | `unit_quality_gap_more_than_3_sessions_marks_degraded` | A gap above 3 sessions is `degraded` | FR-1xx | Automated |
+| TS-ING-022 | `unit_quality_latest_bar_older_than_last_session_marks_stale` | Latest daily bar older than the last completed session is `stale` | FR-1xx, US-020 | Automated |
+| TS-ING-023 | `unit_quality_fewer_than_250_bars_marks_insufficient_history` | Below 250 daily bars the ticker is excluded | FR-1xx | Automated |
+| TS-ING-024 | `unit_quality_exactly_250_bars_is_scoreable` | Boundary: 250 bars scores | FR-1xx | Automated |
+| TS-ING-025 | `unit_resample_weekly_week_ending_friday_ohlcv_correct` | Weekly bars: open first, high max, low min, close last, volume sum | FR-1xx, FR-2xx | Automated |
+| TS-ING-026 | `unit_resample_weekly_holiday_friday_uses_last_session_of_week` | A holiday Friday closes the week on Thursday | FR-1xx | Automated |
 | TS-ING-027 | `unit_calendar_xnys_session_times_dst_boundaries_correct` | Exchange time handling across DST in America/New_York | FR-1xx | Deferred |
 | TS-ING-028 | `it_ingest_grouped_daily_one_call_per_date_for_whole_watchlist` | Daily updates use the grouped endpoint, per-ticker calls only for backfill | FR-1xx, S1-T04 | Deferred |
 | TS-ING-029 | `it_schema_migrations_upgrade_head_and_downgrade_base_succeed` | Alembic up and down on an empty database | A§5, S1-T01 | Automated |
@@ -467,6 +467,23 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 | TS-ING-057 | `it_schema_migrations_at_head_false_when_behind_and_true_after_migrate` | `migrations_at_head` for `/readyz`; `migrate` is idempotent | A§5.4, S1-T01 | Automated |
 | TS-ING-058 | `unit_models_define_every_live_and_backtest_table` | Table set, primary keys, partial unique indexes, ULID checks, named constraints | A§5.1, A§5.2, S1-T01 | Automated |
 | TS-ING-059 | `unit_db_session_scope_rolls_back_on_error` | Engine from settings, URL normalization, session commit and rollback, advisory-locked `migrate` | A§5.4, S1-T01 | Automated |
+| TS-ING-060 | `unit_ingest_daily_window_backfill_when_no_bars_or_full` | Empty store or `--full` requests the 1130-day backfill window | FR-1xx, S1-T06 | Automated |
+| TS-ING-061 | `unit_ingest_window_skipped_when_only_weekend_or_holiday_follows` | No fetch when no session lies after the last stored bar | FR-1xx, S1-T06 | Automated |
+| TS-ING-062 | `unit_ingest_regular_session_only_drops_pre_and_after_hours` | Intraday bars outside 09:30 to the close (early close aware) are dropped | FR-1xx, S1-T06 | Automated |
+| TS-ING-063 | `unit_ingest_new_splits_ignores_known_and_dividends` | Only unseen split actions trigger a refetch | FR-1xx, S1-T06 | Automated |
+| TS-ING-064 | `unit_ingest_fundamentals_due_policy` | Refresh when empty, first session of ISO week, after earnings, or `--full` | FR-1xx, S1-T06 | Automated |
+| TS-ING-065 | `unit_ingest_resolve_as_of` | A date resolves to the latest session not after it and never past the last completed session | FR-1xx, S1-T06 | Automated |
+| TS-ING-066 | `unit_provider_calls_sanitize_strips_query_string_and_credential_params` | Endpoint query string and credential params never reach a row | FR-1xx, S1-T06 | Automated |
+| TS-ING-067 | `unit_cli_ingest_prints_per_ticker_summary_and_quality_counts` | `supertrends ingest` summary output and argument passing | FR-1xx, S1-T06 | Automated |
+| TS-ING-068 | `unit_cli_ingest_provider_outage_exits_1` | `IngestError` exits 1 | FR-1xx, S1-T06 | Automated |
+| TS-ING-069 | `unit_cli_ingest_unreachable_database_exits_3` | Database error exits 3 without leaking the password | FR-1xx, S1-T06 | Automated |
+| TS-ING-070 | `unit_cli_ingest_invalid_date_exits_2` | Invalid `--date` or `--symbols` exits 2 | FR-1xx, S1-T06 | Automated |
+| TS-ING-071 | `it_ingest_provider_error_isolated_per_ticker_and_marks_stale` | One ticker failing does not abort the others | FR-1xx, S1-T06 | Automated |
+| TS-ING-072 | `it_ingest_all_tickers_failing_raises_provider_unavailable` | Every ticker failing raises `IngestError(provider_unavailable)` | FR-1xx, S1-T06 | Automated |
+| TS-ING-073 | `it_ingest_unresolved_symbol_is_reported_not_stored` | Unknown symbol is reported `unresolved` and writes nothing | FR-1xx, S1-T06 | Automated |
+| TS-ING-074 | `it_ingest_intraday_keeps_regular_session_bars_only` | Stored 5-minute bars are regular session only | FR-1xx, S1-T06 | Automated |
+| TS-ING-075 | `it_ingest_default_symbols_exclude_unresolved_and_crypto_and_add_benchmarks` | Default universe is the resolved equity watchlist plus SPY and QQQ | FR-1xx, S1-T06 | Automated |
+| TS-ING-076 | `it_cli_ingest_fills_database_and_second_run_changes_nothing` | CLI end to end on the fixture provider: fill, idempotent rerun, `--full` | FR-1xx, S1-T06 | Automated |
 
 ### 10.3 Indicators (TS-IND)
 

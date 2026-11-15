@@ -3,10 +3,11 @@
 """`supertrends` entry point (ARCHITECTURE section 6, CLI).
 
 Sprint 0 commands: --version, serve, healthcheck, config show | validate | export-schema.
-Sprint 1 adds db migrate.
+Sprint 1 adds db migrate and ingest.
 """
 
 import json
+import re
 from enum import IntEnum
 from pathlib import Path
 from typing import Annotated
@@ -22,6 +23,7 @@ from supertrends.version import LICENSE_NOTICE, get_commit, get_version, source_
 
 DEFAULT_HEALTHCHECK_TIMEOUT_SECONDS = 3.0
 CONFIG_INVALID_EXIT = 2
+SYMBOL_RE = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
 
 app = typer.Typer(name="supertrends", no_args_is_help=True, add_completion=False)
 config_app = typer.Typer(help="Show, validate, and export the scoring config.")
@@ -163,6 +165,83 @@ def db_migrate(
     finally:
         engine.dispose()
     typer.echo(f"revision {applied}")
+
+
+@app.command()
+def ingest(
+    date_: Annotated[
+        str | None,
+        typer.Option("--date", help="Target session YYYY-MM-DD (default: last completed)."),
+    ] = None,
+    symbols: Annotated[
+        str | None,
+        typer.Option(help="Comma separated symbols (default: watchlist plus SPY and QQQ)."),
+    ] = None,
+    full: Annotated[
+        bool, typer.Option("--full", help="Refetch the full adjusted history.")
+    ] = False,
+) -> None:
+    """Ingest bars, corporate actions, fundamentals, and earnings; print quality counts.
+
+    Local mode only. Idempotent: a second run for the same date changes nothing. Exit 2 on an
+    invalid date or symbol, 3 when the database is unreachable, 1 on a provider outage.
+    """
+    from datetime import date  # noqa: PLC0415 (keeps CLI start-up fast)
+
+    from sqlalchemy.exc import SQLAlchemyError  # noqa: PLC0415
+
+    from supertrends.data import db  # noqa: PLC0415
+    from supertrends.data.ingest import default_symbols  # noqa: PLC0415
+    from supertrends.data.ingest import ingest as run_ingest  # noqa: PLC0415
+    from supertrends.data.providers.registry import (  # noqa: PLC0415
+        fundamentals_provider,
+        market_provider,
+    )
+    from supertrends.errors import IngestError  # noqa: PLC0415
+
+    try:
+        target = date.fromisoformat(date_) if date_ else None
+    except ValueError as exc:
+        typer.echo(f"invalid --date: {date_}", err=True)
+        raise typer.Exit(CONFIG_INVALID_EXIT) from exc
+    wanted = [s.strip().upper() for s in symbols.split(",") if s.strip()] if symbols else None
+    bad = [s for s in wanted or [] if not SYMBOL_RE.fullmatch(s)]
+    if bad:
+        typer.echo(f"invalid symbol: {', '.join(bad)}", err=True)
+        raise typer.Exit(CONFIG_INVALID_EXIT)
+    settings = load_settings()
+    engine = db.create_db_engine(settings)
+    try:
+        if wanted is None:
+            with db.session_scope(engine) as session:
+                wanted = default_symbols(session)
+        summary = run_ingest(
+            engine,
+            market_provider(settings),
+            fundamentals_provider(settings),
+            wanted,
+            as_of=target,
+            full=full,
+        )
+    except IngestError as exc:
+        typer.echo(f"ingest failed ({exc.code}): {exc}", err=True)
+        raise typer.Exit(1) from exc
+    except SQLAlchemyError as exc:
+        typer.echo(f"database error: {type(exc).__name__}", err=True)
+        raise typer.Exit(HealthExit.NOT_READY) from exc
+    finally:
+        engine.dispose()
+    typer.echo(f"ingest {summary.as_of} provider={summary.provider}")
+    for r in summary.results:
+        flags = " split-refetch" if r.split_refetch else ""
+        detail = f" ({'; '.join(r.errors)})" if r.errors else ""
+        typer.echo(
+            f"{r.symbol:<6} {r.status:<10} quality={r.quality:<20} daily={r.daily_rows} "
+            f"intraday={r.intraday_rows} actions={r.actions_recorded} "
+            f"fundamentals={r.fundamentals_rows} earnings={r.earnings_rows}{flags}{detail}"
+        )
+    counts = " ".join(f"{k}={v}" for k, v in sorted(summary.quality_counts.items()))
+    typer.echo(f"quality: {counts or 'none'}")
 
 
 def main() -> None:

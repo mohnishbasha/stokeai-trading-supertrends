@@ -20,6 +20,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - SQLAlchemy 2 models and Alembic migrations for the complete live schema and the `backtests` schema, append-only triggers, run state guard, `supertrends db migrate`, and `supertrends.data.db` helpers (S1-T01).
 - `scripts/stoke-inventory.sh`, a read-only Stoke cluster inventory written to git-ignored `private/` (S0-T10).
 - Provider interfaces: `MarketDataProvider` and `FundamentalsProvider` Protocols with typed results, provider error types, a registry that selects providers from settings, and a shared provider contract test suite (S1-T02).
+- Ingestion service and `supertrends ingest [--date] [--symbols] [--full]`: idempotent incremental daily, 5-minute, and fundamentals ingest, split-triggered full refetch, data quality classification, and `provider_calls` recording (S1-T06).
 - Unit tests run with outbound network blocked via `pytest-socket` (loopback only).
 
 ### Scoring
