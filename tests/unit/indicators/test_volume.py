@@ -38,8 +38,8 @@ def test_ts_ind_120_volume_oscillator_matches_loop() -> None:
     assert np.isnan(got[:9]).all()
     for i in range(9, len(VOL)):
         assert got[i] == pytest.approx(100.0 * (e5[i] - e10[i]) / e10[i], abs=TOL)
-    # Hand check at index 9: EMA5 = ?, EMA10 = SMA of first 10 = 1265 / 10 = 126.5.
-    assert e10[9] == pytest.approx(126.5)
+    # Hand check at index 9: EMA5 = ?, EMA10 = SMA of first 10 = 1305 / 10 = 130.5.
+    assert e10[9] == pytest.approx(130.5)
 
 
 def test_ts_ind_121_relative_volume_is_volume_over_sma20() -> None:
@@ -114,7 +114,7 @@ def test_ts_ind_230_volume_oscillator_zero_ema_is_nan_and_rejects_bad_windows() 
     got = v.volume_oscillator(np.zeros(15))
     assert np.isnan(got).all()
     with pytest.raises(ValueError, match="window"):
-        v.volume_oscillator(np.ones(15), short=10, long=5)
+        v.volume_oscillator(np.ones(15), short=0, long=5)
 
 
 def test_ts_ind_231_obv_slope_sign_up_down_flat() -> None:

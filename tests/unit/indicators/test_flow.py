@@ -16,7 +16,19 @@ from supertrends.indicators import flow as f
 
 TOL = 1e-12
 N_SESS = 10
-_DAYS = np.arange(np.datetime64("2026-03-02"), np.datetime64("2026-03-02") + 30, dtype="datetime64[D]")
+OPEN = np.timedelta64(570, "m")
+FIVE = np.timedelta64(5, "m")
+
+
+def _m(x: int) -> np.timedelta64:
+    return np.timedelta64(x, "m")
+
+
+_DAYS = np.arange(
+    np.datetime64("2026-03-02"),
+    np.datetime64("2026-03-02") + np.timedelta64(30, "D"),
+    dtype="datetime64[D]",
+)
 # Weekdays only: 1970-01-01 was a Thursday, so (days + 3) % 7 is 0 for Monday .. 4 for Friday.
 SESSIONS = _DAYS[(_DAYS.astype("int64") + 3) % 7 < 5][:12]
 
@@ -41,7 +53,7 @@ def _world(
         "d_volume": np.full(n_sessions, 1000.0),
     }
     keep = sorted(range(n_sessions) if intraday is None else intraday)
-    start = np.array([sess[k].astype("datetime64[m]") + 570 for k in keep], dtype="datetime64[m]")
+    start = np.array([sess[k].astype("datetime64[m]") + OPEN for k in keep], dtype="datetime64[m]")
     intra: dict[str, NDArray[np.generic]] = {
         "bar_start": start,
         "high": np.full(len(keep), 10.0),
@@ -108,10 +120,12 @@ def test_ts_ind_126_daily_delta_and_delta_pct_from_5m_bars() -> None:
     Sessions 2..9: one flat bar at 4.5 each, equal to the previous close: all buy, pct 1.
     """
     sess = SESSIONS[:N_SESS]
-    t0 = sess[0].astype("datetime64[m]") + 570
-    t1 = sess[1].astype("datetime64[m]") + 570
-    rest = np.array([s.astype("datetime64[m]") + 570 for s in sess[2:]], dtype="datetime64[m]")
-    bar_start = np.concatenate([np.array([t0, t0 + 5, t1, t1 + 5], dtype="datetime64[m]"), rest])
+    t0 = sess[0].astype("datetime64[m]") + OPEN
+    t1 = sess[1].astype("datetime64[m]") + OPEN
+    rest = np.array([s.astype("datetime64[m]") + OPEN for s in sess[2:]], dtype="datetime64[m]")
+    bar_start = np.concatenate(
+        [np.array([t0, t0 + FIVE, t1, t1 + FIVE], dtype="datetime64[m]"), rest]
+    )
     k = len(rest)
     hi = np.concatenate([_arr([10, 10, 5, 6]), np.full(k, 4.5)])
     lo = np.concatenate([_arr([8, 10, 5, 4]), np.full(k, 4.5)])
@@ -217,7 +231,7 @@ def test_ts_ind_132_regular_session_only() -> None:
     """
     sess = SESSIONS[:1]
     day = sess[0].astype("datetime64[m]")
-    bar_start = np.array([day + 565, day + 570, day + 955, day + 960, day + 1080])
+    bar_start = np.array([day + _m(565), day + OPEN, day + _m(955), day + _m(960), day + _m(1080)])
     hi = np.full(5, 10.0)
     lo = np.full(5, 8.0)
     cl = _arr([8.0, 10.0, 8.0, 10.0, 10.0])

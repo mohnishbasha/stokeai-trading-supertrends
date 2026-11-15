@@ -11,6 +11,8 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
+from supertrends.indicators.primitives import ema, linreg_slope, obv, sma
+
 __all__ = [
     "AccDistDays",
     "accumulation_distribution_days",
@@ -21,6 +23,12 @@ __all__ = [
 ]
 
 FloatArray = NDArray[np.float64]
+
+
+def _check_lengths(*arrays: FloatArray) -> None:
+    if len({len(a) for a in arrays}) > 1:
+        msg = "input arrays must have the same length"
+        raise ValueError(msg)
 
 
 @dataclass(frozen=True)
@@ -36,7 +44,13 @@ def volume_oscillator(volume: FloatArray, short: int = 5, long: int = 10) -> Flo
 
     Warm-up: NaN for the first `long - 1` bars. NaN where EMA_long is 0.
     """
-    raise NotImplementedError
+    if short < 1 or long < 1:
+        msg = f"window must be >= 1, got short={short}, long={long}"
+        raise ValueError(msg)
+    e_long = ema(volume, long)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        out = 100.0 * (ema(volume, short) - e_long) / e_long
+    return np.where(e_long == 0.0, np.nan, out)
 
 
 def relative_volume(volume: FloatArray, n: int = 20) -> FloatArray:
@@ -44,7 +58,10 @@ def relative_volume(volume: FloatArray, n: int = 20) -> FloatArray:
 
     Warm-up: NaN for the first `n - 1` bars. NaN where the SMA is 0.
     """
-    raise NotImplementedError
+    avg = sma(volume, n)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        out = volume / avg
+    return np.where(avg == 0.0, np.nan, out)
 
 
 def obv_slope_sign(close: FloatArray, volume: FloatArray, n: int = 20) -> FloatArray:
@@ -52,7 +69,9 @@ def obv_slope_sign(close: FloatArray, volume: FloatArray, n: int = 20) -> FloatA
 
     Warm-up: NaN for the first `n - 1` bars.
     """
-    raise NotImplementedError
+    _check_lengths(close, volume)
+    slope = linreg_slope(obv(close, volume), n)
+    return np.sign(slope)
 
 
 def cmf(
@@ -63,7 +82,14 @@ def cmf(
     The money-flow multiplier is `((close - low) - (high - close)) / (high - low)`, and 0 on a
     zero-range bar. Warm-up: NaN for the first `n - 1` bars. NaN where the volume sum is 0.
     """
-    raise NotImplementedError
+    _check_lengths(high, low, close, volume)
+    rng = high - low
+    with np.errstate(divide="ignore", invalid="ignore"):
+        mfm = np.where(rng > 0.0, ((close - low) - (high - close)) / rng, 0.0)
+    total = sma(volume, n)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        out = sma(mfm * volume, n) / total
+    return np.where(total == 0.0, np.nan, out)
 
 
 def accumulation_distribution_days(
@@ -80,4 +106,18 @@ def accumulation_distribution_days(
     Warm-up: NaN until every bar in the window has a relative volume, that is for the first
     `rel_vol_n + window - 2` bars.
     """
-    raise NotImplementedError
+    _check_lengths(close, volume)
+    rel = relative_volume(volume, rel_vol_n)
+    change = np.zeros(len(close), dtype=np.float64)
+    change[1:] = np.diff(close)
+    with np.errstate(invalid="ignore"):
+        heavy = rel >= threshold  # NaN compares False
+        acc = (heavy & (change > 0.0)).astype(np.float64)
+        dist = (heavy & (change < 0.0)).astype(np.float64)
+    first_valid = rel_vol_n + window - 2
+    out = []
+    for flags in (acc, dist):
+        counts = sma(flags, window) * window
+        counts[:first_valid] = np.nan
+        out.append(np.round(counts))
+    return AccDistDays(accumulation=out[0], distribution=out[1])
