@@ -513,6 +513,15 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** The number may need renumbering at merge. A new indicator module needs a one-line change here.
 - **Status:** Accepted.
 
+### ADR-054: Support and resistance clustering, strength, and Fibonacci projection
+
+- **Context:** Factors 6 and 7 leave the clustering rule, the strength weighting, the "intact yesterday" test, and the extension anchor open.
+- **Decision:** Pivot prices are sorted and clusters are anchored on their lowest price (a pivot joins while within `0.5 * atr14` of the anchor); the level is the mean price. Strength is the sum of per-touch weights `1 - 0.7 * age / 250` (identical to `touches * mean weight`). The 52-week high and low are extra levels (touches 1) on top of the 4 strongest per side. Breakout and breakdown use the levels computed as of the previous bar, so the flag appears only on the crossing bar. Fibonacci extensions are `A + ratio * (B - A)`; the ZigZag threshold is the scalar at the as-of bar. Both functions are as-of-last-bar: callers pass `bars[:t+1]`.
+- **Alternatives rejected:** Single-linkage chaining (clusters can grow without bound); per-cluster mean weight times touches (same value, less clear).
+- **Consequences:** The number may need renumbering at merge. See PRD A-26.
+- **Status:** Accepted.
+
+
 ---
 
 ## 4. Data Flows

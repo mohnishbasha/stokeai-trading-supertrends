@@ -8,6 +8,8 @@ width-5 pivot and the flat bars are not pivots. Expected ATR comes from `atr_ref
 Wilder ATR written here, not from the code under test.
 """
 
+import itertools
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -93,7 +95,7 @@ def test_keep_4_strongest_above_and_4_below() -> None:
     arrays = tape(100, up=up, down=down)
     tol = 0.5 * atr_ref(arrays[0], arrays[1], arrays[2])
     prices = sorted([*up.values(), *down.values()])
-    assert min(b - a for a, b in zip(prices, prices[1:], strict=False)) > tol  # no merging
+    assert min(b - a for a, b in itertools.pairwise(prices)) > tol  # no merging
     res = run(arrays)
     assert sorted(x.price for x in pivot_levels(res.resistances)) == [109.0, 115.0, 118.0, 121.0]
     assert sorted(x.price for x in pivot_levels(res.supports)) == [79.0, 82.0, 85.0, 91.0]
