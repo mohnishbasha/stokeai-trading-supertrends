@@ -817,7 +817,7 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-REG-003 | `unit_regime_classify_adx_20_is_transitional` | Boundary: ranging is `< 20` | FR-3xx | Deferred |
 | TS-REG-004 | `unit_regime_classify_adx_19_99_is_ranging` | Just below 20 | FR-3xx | Deferred |
 | TS-REG-005 | `unit_weights_base_sum_equals_100` | Eleven base weights sum to 100 | FR-3xx, A§13 | Deferred |
-| TS-REG-006 | `unit_config_weights_not_summing_to_100_fails_validation_naming_key` | Schema rejects | FR-3xx, S0-T09 | Deferred |
+| TS-REG-006 | `unit_config_weights_not_summing_to_100_fails_validation_naming_key` | Schema rejects | FR-3xx, S0-T09 | Automated |
 | TS-REG-007 | `unit_weights_multiplier_table_every_cell_trending_matches_spec` | One parametrized row per cell, trending column (11 cells) | FR-3xx, S5-T05 | Deferred |
 | TS-REG-008 | `unit_weights_multiplier_table_every_cell_ranging_matches_spec` | Ranging column (11 cells) | FR-3xx, S5-T05 | Deferred |
 | TS-REG-009 | `unit_weights_multiplier_table_every_cell_transitional_all_1_0` | Transitional column (11 cells) | FR-3xx, S5-T05 | Deferred |
@@ -1132,7 +1132,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-CLI-017 | `unit_cli_runtime_error_exits_1` | Generic error | FR-8xx | Deferred |
 | TS-CLI-018 | `unit_cli_remote_mode_api_url_and_token_env_used` | `--api-url`, `SUPERTRENDS_API_TOKEN` | FR-8xx | Deferred |
 | TS-CLI-019 | `unit_cli_remote_mode_write_without_token_exits_1_with_message` | Auth failure | FR-8xx | Deferred |
-| TS-CLI-020 | `unit_cli_config_show_and_validate_unknown_key_fails_naming_key` | Config commands | FR-8xx, S0-T09 | Deferred |
+| TS-CLI-020 | `unit_cli_config_show_and_validate_unknown_key_fails_naming_key` | Config commands | FR-8xx, S0-T09 | Automated |
 | TS-CLI-021 | `unit_cli_db_migrate_and_backup_invoke_expected_operations` | DB commands | FR-8xx | Deferred |
 | TS-CLI-022 | `unit_cli_output_never_prints_secrets_token_redacted_in_errors` | Secret hygiene | NFR-009 | Deferred |
 | TS-CLI-023 | `it_cli_serve_binds_address_and_healthcheck_passes` | `serve` | FR-8xx | Deferred |
