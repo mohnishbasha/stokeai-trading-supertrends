@@ -3,6 +3,7 @@
 """`supertrends` entry point (ARCHITECTURE section 6, CLI).
 
 Sprint 0 commands: --version, serve, healthcheck, config show | validate | export-schema.
+Sprint 1 adds db migrate.
 """
 
 import json
@@ -25,6 +26,8 @@ CONFIG_INVALID_EXIT = 2
 app = typer.Typer(name="supertrends", no_args_is_help=True, add_completion=False)
 config_app = typer.Typer(help="Show, validate, and export the scoring config.")
 app.add_typer(config_app, name="config")
+db_app = typer.Typer(help="Database operations (local mode only).")
+app.add_typer(db_app, name="db")
 
 
 class HealthExit(IntEnum):
@@ -140,6 +143,26 @@ def config_export_schema(
         typer.echo(text, nl=False)
     else:
         output.write_text(text, encoding="utf-8")
+
+
+@db_app.command("migrate")
+def db_migrate(
+    revision: Annotated[str, typer.Option(help="Target Alembic revision.")] = "head",
+) -> None:
+    """Apply migrations under an advisory lock and print the revision. Exit 3 if unreachable."""
+    from sqlalchemy.exc import SQLAlchemyError  # noqa: PLC0415 (keeps CLI start-up fast)
+
+    from supertrends.data import db  # noqa: PLC0415
+
+    engine = db.create_db_engine()
+    try:
+        applied = db.migrate(engine, revision)
+    except SQLAlchemyError as exc:
+        typer.echo(f"database error: {type(exc).__name__}", err=True)
+        raise typer.Exit(HealthExit.NOT_READY) from exc
+    finally:
+        engine.dispose()
+    typer.echo(f"revision {applied}")
 
 
 def main() -> None:

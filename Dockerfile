@@ -2,8 +2,7 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright 2026 Serverless Ventures LLC
 #
-# Shape from ARCHITECTURE section 10.5. Sprint 0 omits alembic.ini and migrations/;
-# S1-T01 adds them back. Every base image is pinned by digest (Dependabot keeps them fresh).
+# Shape from ARCHITECTURE section 10.5. Every base image is pinned by digest (Dependabot keeps them fresh).
 
 # ---- stage 1: UI dependencies and build ----
 FROM --platform=$BUILDPLATFORM node:26-bookworm-slim@sha256:5df79989ed685e09f0a98019db4cebfb22fb9df1a53c0161664a011f7ff6b0f1 AS ui
@@ -26,6 +25,8 @@ FROM deps AS build
 COPY README.md ./
 COPY src/ ./src/
 COPY config/ ./config/
+COPY alembic.ini ./
+COPY migrations/ ./migrations/
 RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --no-dev --no-editable
 
 # ---- stage 4: minimal runtime ----
@@ -48,6 +49,8 @@ WORKDIR /app
 COPY --from=build /opt/venv /opt/venv
 COPY --from=build /app/src /app/src
 COPY --from=build /app/config /app/config
+COPY --from=build /app/alembic.ini /app/alembic.ini
+COPY --from=build /app/migrations /app/migrations
 COPY --from=ui /ui/dist /app/ui
 USER 10001:10001
 EXPOSE 8080

@@ -8,6 +8,7 @@ or the UI bundle; `dev` dependencies are build, test, and lint tools only.
 
 | Package | Version | License | Scope |
 |---|---|---|---|
+| alembic | 1.20.1 | MIT | runtime |
 | annotated-doc | 0.0.6 | MIT | runtime |
 | annotated-types | 0.8.0 | MIT | runtime |
 | anyio | 4.16.0 | MIT | runtime |
@@ -31,7 +32,9 @@ or the UI bundle; `dev` dependencies are build, test, and lint tools only.
 | iniconfig | 2.3.1 | MIT | dev |
 | librt | 0.16.0 | MIT | dev |
 | license-expression | 30.4.4 | Apache-2.0 | dev |
+| Mako | 1.4.3 | MIT | runtime |
 | markdown-it-py | 4.3.0 | MIT License | runtime |
+| MarkupSafe | 3.0.4 | BSD-3-Clause | runtime |
 | mdurl | 0.1.2 | MIT License | runtime |
 | msgpack | 1.2.4 | Apache-2.0 | dev |
 | mypy | 2.4.1 | MIT | dev |
@@ -45,6 +48,8 @@ or the UI bundle; `dev` dependencies are build, test, and lint tools only.
 | pip_audit | 2.10.1 | Apache Software License | dev |
 | platformdirs | 4.14.5 | MIT | dev |
 | pluggy | 1.7.0 | MIT License | dev |
+| psycopg | 3.3.9 | LGPL-3.0-only | runtime |
+| psycopg-binary | 3.3.9 | LGPL-3.0-only | runtime |
 | py-serializable | 2.2.0 | Apache Software License | dev |
 | pydantic | 2.14.3 | MIT | runtime |
 | pydantic-settings | 2.16.3 | MIT | runtime |
@@ -62,6 +67,7 @@ or the UI bundle; `dev` dependencies are build, test, and lint tools only.
 | ruff | 0.17.5 | MIT | dev |
 | shellingham | 1.5.4 | ISC License (ISCL) | runtime |
 | sortedcontainers | 2.4.0 | Apache Software License | dev |
+| SQLAlchemy | 2.1.8 | MIT | runtime |
 | starlette | 1.10.0 | BSD-3-Clause | runtime |
 | structlog | 26.1.0 | MIT OR Apache-2.0 | runtime |
 | tomli | 2.5.0 | MIT | dev |

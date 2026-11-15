@@ -436,10 +436,10 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 | TS-ING-026 | `unit_resample_weekly_holiday_friday_uses_last_session_of_week` | A holiday Friday closes the week on Thursday | FR-1xx | Deferred |
 | TS-ING-027 | `unit_calendar_xnys_session_times_dst_boundaries_correct` | Exchange time handling across DST in America/New_York | FR-1xx | Deferred |
 | TS-ING-028 | `it_ingest_grouped_daily_one_call_per_date_for_whole_watchlist` | Daily updates use the grouped endpoint, per-ticker calls only for backfill | FR-1xx, S1-T04 | Deferred |
-| TS-ING-029 | `it_schema_migrations_upgrade_head_and_downgrade_base_succeed` | Alembic up and down on an empty database | A§5, S1-T01 | Deferred |
-| TS-ING-030 | `it_schema_recommendations_update_rejected_by_append_only_trigger` | UPDATE on `recommendations` is rejected | A§5, NFR-006 | Deferred |
-| TS-ING-031 | `it_schema_factor_scores_delete_rejected_by_append_only_trigger` | DELETE on `factor_scores` is rejected | A§5 | Deferred |
-| TS-ING-032 | `it_schema_bars_composite_primary_key_rejects_duplicate_ticker_ts` | Bars have a (ticker, ts) primary key | A§5 | Deferred |
+| TS-ING-029 | `it_schema_migrations_upgrade_head_and_downgrade_base_succeed` | Alembic up and down on an empty database | A§5, S1-T01 | Automated |
+| TS-ING-030 | `it_schema_recommendations_update_rejected_by_append_only_trigger` | UPDATE on `recommendations` is rejected | A§5, NFR-006 | Automated |
+| TS-ING-031 | `it_schema_factor_scores_delete_rejected_by_append_only_trigger` | DELETE on `factor_scores` is rejected | A§5 | Automated |
+| TS-ING-032 | `it_schema_bars_composite_primary_key_rejects_duplicate_ticker_ts` | Bars have a (ticker, ts) primary key | A§5 | Automated |
 | TS-ING-033 | `it_retention_intraday_older_than_90_days_deleted_daily_kept` | Retention deletes old intraday, never daily bars | FR-9xx, S6-T06 | Deferred |
 | TS-ING-034 | `it_retention_never_deletes_rows_in_a_recommendation_evidence_window` | Evidence-window rows are protected | FR-9xx, S6-T06 | Deferred |
 | TS-ING-035 | `it_backup_pg_dump_restore_roundtrip_preserves_recommendations` | `supertrends db backup` then restore round-trips | FR-9xx, S6-T06 | Deferred |
@@ -452,6 +452,15 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 | TS-ING-042 | `unit_provider_contract_suite_violating_provider_detected_assertion_fails` | The suite fails a provider with unsorted bars, out-of-range bars, or a missing `CapabilityNotSupported` | A§7, S1-T02 | Automated |
 | TS-ING-043 | `unit_provider_registry_mixed_vendors_market_and_fundamentals_selected_independently` | Market and fundamentals providers from different vendors can be combined; a registered name with no implementation fails with a clear `ConfigError` | A§7.4, S1-T02 | Automated |
 | TS-ING-044 | `unit_provider_errors_derive_from_provider_error_and_validate_bar_rejects_invalid_rows` | Error hierarchy (A§7.3) and OHLC validation raising `ProviderDataError` | A§7.2, A§7.3, S1-T02 | Automated |
+| TS-ING-045 | `it_schema_recommendations_delete_rejected_by_append_only_trigger` | DELETE on `recommendations` is rejected; `entry_price` may be set once from NULL | A§5.3, S1-T01 | Automated |
+| TS-ING-046 | `it_schema_factor_scores_update_rejected_by_append_only_trigger` | UPDATE on `factor_scores` is rejected with SQLSTATE `P0001` naming the table | A§5.3, S1-T01 | Automated |
+| TS-ING-047 | `it_schema_every_append_only_table_has_the_reject_trigger` | The seven append-only tables, `recommendations`, and `runs` carry their triggers | A§5.3, S1-T01 | Automated |
+| TS-ING-048 | `it_schema_runs_forward_transition_allowed_and_backward_rejected` | The `runs` trigger allows only section 8 edges; terminal runs are immutable except `superseded_by` once; DELETE rejected; one active run | A§5.1, A§8, S1-T01 | Automated |
+| TS-ING-049 | `it_schema_watchlist_cap_rejects_301st_item_at_commit` | The 300-item cap trigger; a symbol in three groups is stored once | A§5.1, ADR-019, S1-T01 | Automated |
+| TS-ING-050 | `it_schema_models_match_migrated_database` | Model metadata equals the migrated schema (no drift), including the `backtests` schema | A§5.4, S1-T01 | Automated |
+| TS-ING-051 | `it_schema_migrations_at_head_false_when_behind_and_true_after_migrate` | `migrations_at_head` for `/readyz`; `migrate` is idempotent | A§5.4, S1-T01 | Automated |
+| TS-ING-052 | `unit_models_define_every_live_and_backtest_table` | Table set, primary keys, partial unique indexes, ULID checks, named constraints | A§5.1, A§5.2, S1-T01 | Automated |
+| TS-ING-053 | `unit_db_session_scope_rolls_back_on_error` | Engine from settings, URL normalization, session commit and rollback, advisory-locked `migrate` | A§5.4, S1-T01 | Automated |
 
 ### 10.3 Indicators (TS-IND)
 
@@ -1137,9 +1146,10 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-CLI-018 | `unit_cli_remote_mode_api_url_and_token_env_used` | `--api-url`, `SUPERTRENDS_API_TOKEN` | FR-8xx | Deferred |
 | TS-CLI-019 | `unit_cli_remote_mode_write_without_token_exits_1_with_message` | Auth failure | FR-8xx | Deferred |
 | TS-CLI-020 | `unit_cli_config_show_and_validate_unknown_key_fails_naming_key` | Config commands | FR-8xx, S0-T09 | Automated |
-| TS-CLI-021 | `unit_cli_db_migrate_and_backup_invoke_expected_operations` | DB commands | FR-8xx | Deferred |
+| TS-CLI-021 | `unit_cli_db_migrate_and_backup_invoke_expected_operations` | DB commands | FR-8xx | Deferred: `db migrate` automated by TS-CLI-024, `db backup` in S6-T06 |
 | TS-CLI-022 | `unit_cli_output_never_prints_secrets_token_redacted_in_errors` | Secret hygiene | NFR-009 | Deferred |
 | TS-CLI-023 | `it_cli_serve_binds_address_and_healthcheck_passes` | `serve` | FR-8xx | Deferred |
+| TS-CLI-024 | `unit_cli_db_migrate_prints_applied_revision_and_exits_3_when_unreachable` | `supertrends db migrate [--revision]` | A§6.2, S1-T01 | Automated |
 
 ### 10.14 MCP and harnesses (TS-MCP)
 
