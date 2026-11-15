@@ -1268,8 +1268,8 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-SEC-014 | `unit_security_app_never_stores_holdings_account_size_or_risk_tolerance_fields` | Schema scan | A§9 | Deferred |
 | TS-SEC-015 | `it_security_gitleaks_full_history_scan_reports_no_findings` | CI gate | A§9, S9-T01 | Deferred |
 | TS-SEC-016 | `it_security_pip_audit_and_npm_audit_no_high_or_critical` | Dependency audit | A§9, S0-T05 | Automated |
-| TS-SEC-017 | `it_security_license_script_fails_on_gpl_agpl_sspl_or_unknown` | Dependency licenses | A§9, S0-T08 | Deferred |
-| TS-SEC-018 | `it_security_spdx_header_check_fails_on_source_file_without_header` | SPDX | A§9, S0-T08 | Deferred |
+| TS-SEC-017 | `it_security_license_script_fails_on_gpl_agpl_sspl_or_unknown` | Dependency licenses | A§9, S0-T08 | Automated |
+| TS-SEC-018 | `it_security_spdx_header_check_fails_on_source_file_without_header` | SPDX | A§9, S0-T08 | Automated |
 | TS-SEC-019 | `it_security_cla_check_blocks_pr_from_non_owner_without_signed_cla` | CLA | A§9, S0-T08 | Skipped: needs a real fork PR from a second GitHub account; manual: open a PR from a test account with no CLA and confirm the check blocks, then sign and confirm it passes |
 | TS-SEC-020 | `unit_security_docs_and_package_metadata_never_say_open_source` | Wording scan for README, docs, UI, package metadata, topics | A§9 | Deferred |
 | TS-SEC-021 | `unit_security_docs_contain_no_em_dash_or_hype_words` | Style lint for files written by the agent | Impl. Notes 19 | Deferred |
