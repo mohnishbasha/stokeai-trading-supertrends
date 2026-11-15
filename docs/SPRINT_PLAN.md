@@ -133,9 +133,9 @@ Indicator and scoring thresholds are high on purpose: a silent math error here p
 Create the tree in Appendix B. `pyproject.toml` with uv, package `supertrends` under `src/`, Python 3.12, ruff, mypy strict, pytest, pytest-cov, hypothesis. A `supertrends` console entry point that prints version and commit.
 
 **Acceptance criteria:**
-- [ ] `uv sync --locked` works on a clean clone
-- [ ] `supertrends --version` prints `supertrends {VERSION} ({commit})`
-- [ ] `mypy --strict src` passes on the empty package
+- [x] `uv sync --locked` works on a clean clone
+- [x] `supertrends --version` prints `supertrends {VERSION} ({commit})`
+- [x] `mypy --strict src` passes on the empty package
 
 ### S0-T02: UI project
 

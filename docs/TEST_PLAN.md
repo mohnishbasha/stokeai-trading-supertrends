@@ -1113,7 +1113,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-CLI-001 | `unit_cli_version_prints_version_and_commit_and_license_notice` | `supertrends {VERSION} ({commit})` | FR-8xx, S0-T01 | Deferred |
+| TS-CLI-001 | `unit_cli_version_prints_version_and_commit_and_license_notice` | `supertrends {VERSION} ({commit})` | FR-8xx, S0-T01 | Automated |
 | TS-CLI-002 | `unit_cli_every_command_has_help_text` | `--help` for each command | FR-8xx, S7-T01 | Deferred |
 | TS-CLI-003 | `unit_cli_today_json_validates_against_api_schema` | `--json` | FR-8xx | Deferred |
 | TS-CLI-004 | `unit_cli_today_json_matches_api_payload` | Same answers as API | FR-8xx, S7 checklist | Deferred |
