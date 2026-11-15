@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- `database_call_recorder()` returns the Postgres-backed `DbCallRecorder`, and the shared Massive client uses it, so every Massive call writes a sanitized `provider_calls` row; `call_recorder` reuses the adapters' `CallRecord` type (S1-T04, S1-T06 follow-up).
 - Deterministic fixture provider (synthetic bars, fundamentals, split) and XNYS calendar helpers (S1-T03).
 - Python package and the `supertrends` CLI with `--version`, `serve`, and `healthcheck`; `/healthz` and `/readyz` (S0-T01).
 - `supertrends config show | validate | export-schema` (S0-T09).

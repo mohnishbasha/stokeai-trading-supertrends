@@ -472,6 +472,7 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 | TS-ING-108 | `unit_fixture_provider_unknown_symbol_none_unless_permissive` | Unknown symbols resolve to `None`; permissive mode generates bars from a hash of the symbol | FR-1xx, A§7.5, S1-T03 | Automated |
 | TS-ING-109 | `unit_fixture_provider_etf_has_no_financials_and_stocks_do` | Stocks have quarterly financials with `known_at` 30 days after period end; ETFs have none; earnings dates include one 3 sessions out | FR-1xx, A§7.5, S1-T03 | Automated |
 | TS-ING-110 | `unit_calendar_half_day_closes_early` | XNYS sessions skip holidays, half days close early, last completed session is computed from the clock | ADR-028, S1-T03 | Automated |
+| TS-ING-111 | `unit_provider_database_call_recorder_returns_db_call_recorder` | `database_call_recorder()` writes sanitized `provider_calls` rows through `DbCallRecorder`, and the shared Massive client uses it | FR-112, NFR-009, S1-T04, S1-T06 | Automated |
 | TS-ING-060 | `unit_ingest_daily_window_backfill_when_no_bars_or_full` | Empty store or `--full` requests the 1130-day backfill window | FR-1xx, S1-T06 | Automated |
 | TS-ING-061 | `unit_ingest_window_skipped_when_only_weekend_or_holiday_follows` | No fetch when no session lies after the last stored bar | FR-1xx, S1-T06 | Automated |
 | TS-ING-062 | `unit_ingest_regular_session_only_drops_pre_and_after_hours` | Intraday bars outside 09:30 to the close (early close aware) are dropped | FR-1xx, S1-T06 | Automated |

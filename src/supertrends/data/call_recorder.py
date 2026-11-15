@@ -2,10 +2,8 @@
 # Copyright 2026 Serverless Ventures LLC
 """Database-backed provider call recorder (PRD FR-112, NFR-009; ARCHITECTURE section 5).
 
-`CallRecord` and `CallRecorder` mirror `supertrends.data.providers.recording` from S1-T04
-(PR #121) field for field, so `DbCallRecorder` satisfies the adapters' Protocol.
-TODO(#16): once #121 lands, import `CallRecord` and `CallRecorder` from there and have
-`database_call_recorder()` return `DbCallRecorder(get_engine())`.
+`DbCallRecorder` implements the adapters' `CallRecorder` Protocol from
+`supertrends.data.providers.recording`; `database_call_recorder()` there returns one.
 
 `sanitize` removes anything secret shaped before a row is written: query strings are dropped
 from the endpoint and parameters whose name looks like a credential are removed, so an API key
@@ -15,37 +13,19 @@ of surrounding work does not erase the audit trail.
 
 import re
 from collections.abc import Mapping
-from dataclasses import dataclass
-from typing import Protocol
 
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from supertrends.data.models import ProviderCall
+from supertrends.data.providers.recording import CallRecord, CallRecorder
 
 _SECRET_NAME = re.compile(r"(api[-_]?key|token|secret|passw|authorization|auth|key)", re.I)
 _BEARER = re.compile(r"\b(bearer|basic)\s+\S+", re.I)
+__all__ = ["CallRecord", "CallRecorder", "DbCallRecorder", "sanitize"]
+
 REDACTED = "[redacted]"
 TRANSPORT_ERROR = "error"
-
-
-@dataclass(frozen=True)
-class CallRecord:
-    """One `provider_calls` row."""
-
-    provider: str
-    endpoint: str  # path template, for example /v2/aggs/ticker/{symbol}/range/1/day/{start}/{end}
-    params: dict[str, str]  # non-secret parameters, path parameters included
-    status: int | None  # HTTP status; None for a transport error
-    duration_ms: float
-    cache_hit: bool
-    run_id: str | None = None
-
-
-class CallRecorder(Protocol):
-    """Sink for provider call rows."""
-
-    def record(self, call: CallRecord) -> None: ...
 
 
 def sanitize(endpoint: str, params: Mapping[str, str]) -> tuple[str, dict[str, str]]:
