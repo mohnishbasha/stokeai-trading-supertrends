@@ -18,6 +18,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - License and community files, SPDX header check, dependency license check, and the CLA check (S0-T08).
 - `scripts/stoke-inventory.sh`, a read-only Stoke cluster inventory written to git-ignored `private/` (S0-T10).
 - Provider interfaces: `MarketDataProvider` and `FundamentalsProvider` Protocols with typed results, provider error types, a registry that selects providers from settings, and a shared provider contract test suite (S1-T02).
+- Massive (formerly Polygon.io) market data and fundamentals adapter with header auth, a token-bucket rate limiter, retries with jittered backoff, response caching, and call recording (S1-T04).
 - Unit tests run with outbound network blocked via `pytest-socket` (loopback only).
 
 ### Scoring

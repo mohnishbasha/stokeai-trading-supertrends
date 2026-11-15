@@ -412,17 +412,17 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 | TS-ING-002 | `unit_fixture_provider_dataset_has_trending_ranging_reversing_tickers` | By construction the dataset includes one trending, one ranging, one reversing ticker (asserted via ADX and flips) | FR-1xx, S1-T03 | Deferred |
 | TS-ING-003 | `golden_fixture_provider_dataset_hash_matches_committed_hash` | Synthetic dataset hash equals `tests/golden/synthetic_dataset.sha256` | FR-1xx, A§12 | Deferred |
 | TS-ING-004 | `contract_provider_fixture_passes_shared_contract_suite` | Fixture provider passes the provider contract suite | FR-1xx, A§7 | Deferred |
-| TS-ING-005 | `contract_provider_massive_recorded_passes_shared_contract_suite` | Massive adapter passes the contract suite on recorded scrubbed responses | FR-1xx, A§7 | Deferred |
+| TS-ING-005 | `contract_provider_massive_recorded_passes_shared_contract_suite` | Massive adapter passes the contract suite on recorded scrubbed responses | FR-1xx, A§7 | Automated |
 | TS-ING-006 | `contract_provider_alternate_recorded_passes_shared_contract_suite` | Alternate provider adapter passes the contract suite | FR-1xx, S1-T05 | Deferred |
 | TS-ING-007 | `unit_provider_registry_unknown_name_fails_startup_with_clear_message` | An unknown provider name fails at startup | FR-1xx, A§7 | Automated |
 | TS-ING-008 | `unit_provider_registry_env_switch_changes_active_provider_without_code_change` | `SUPERTRENDS_MARKET_PROVIDER` selects the provider | FR-1xx, S1-T05 | Automated |
-| TS-ING-009 | `it_provider_massive_429_sequence_retried_then_succeeds` | A 429 sequence backs off with jitter and succeeds | FR-1xx, S1-T04 | Deferred |
-| TS-ING-010 | `unit_provider_rate_limiter_token_bucket_respects_calls_per_minute` | The token bucket never exceeds the configured calls per minute (fake clock) | FR-1xx, S1-T04 | Deferred |
-| TS-ING-011 | `it_provider_massive_5xx_exponential_backoff_with_jitter_bounded` | 5xx retries are bounded in count and backoff | FR-1xx | Deferred |
-| TS-ING-012 | `it_provider_massive_response_cache_same_endpoint_params_one_call` | Responses are cached by (endpoint, params) | FR-1xx | Deferred |
-| TS-ING-013 | `it_provider_calls_recorded_without_api_key_in_path_or_params` | Every call is stored in `provider_calls` with no secret | FR-1xx, NFR-009 | Deferred |
-| TS-ING-014 | `unit_provider_massive_no_key_reports_unconfigured_app_starts_on_fixture` | No key means `unconfigured` and fixture fallback | FR-1xx, S1-T04 | Deferred |
-| TS-ING-015 | `unit_provider_massive_base_url_configurable_legacy_host_accepted` | Base URL setting accepts `api.massive.com` and `api.polygon.io` | FR-1xx | Deferred |
+| TS-ING-009 | `it_provider_massive_429_sequence_retried_then_succeeds` | A 429 sequence backs off with jitter and succeeds | FR-1xx, S1-T04 | Automated |
+| TS-ING-010 | `unit_provider_rate_limiter_token_bucket_respects_calls_per_minute` | The token bucket never exceeds the configured calls per minute (fake clock) | FR-1xx, S1-T04 | Automated |
+| TS-ING-011 | `it_provider_massive_5xx_exponential_backoff_with_jitter_bounded` | 5xx retries are bounded in count and backoff | FR-1xx | Automated |
+| TS-ING-012 | `it_provider_massive_response_cache_same_endpoint_params_one_call` | Responses are cached by (endpoint, params) | FR-1xx | Automated |
+| TS-ING-013 | `it_provider_calls_recorded_without_api_key_in_path_or_params` | Every call is stored in `provider_calls` with no secret | FR-1xx, NFR-009 | Automated |
+| TS-ING-014 | `unit_provider_massive_no_key_reports_unconfigured_app_starts_on_fixture` | No key means `unconfigured` and fixture fallback | FR-1xx, S1-T04 | Automated |
+| TS-ING-015 | `unit_provider_massive_base_url_configurable_legacy_host_accepted` | Base URL setting accepts `api.massive.com` and `api.polygon.io` | FR-1xx | Automated |
 | TS-ING-016 | `it_ingest_second_run_is_idempotent_no_row_changes` | Re-running ingestion changes nothing | FR-1xx, S1-T06 | Deferred |
 | TS-ING-017 | `it_ingest_incremental_fetch_starts_from_last_stored_bar` | Only bars after the last stored bar are requested | FR-1xx | Deferred |
 | TS-ING-018 | `it_ingest_split_detected_triggers_full_adjusted_history_refetch` | A new split refetches the full history for that ticker | FR-1xx, S1-T06 | Deferred |
@@ -435,7 +435,7 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 | TS-ING-025 | `unit_resample_weekly_week_ending_friday_ohlcv_correct` | Weekly bars: open first, high max, low min, close last, volume sum | FR-1xx, FR-2xx | Deferred |
 | TS-ING-026 | `unit_resample_weekly_holiday_friday_uses_last_session_of_week` | A holiday Friday closes the week on Thursday | FR-1xx | Deferred |
 | TS-ING-027 | `unit_calendar_xnys_session_times_dst_boundaries_correct` | Exchange time handling across DST in America/New_York | FR-1xx | Deferred |
-| TS-ING-028 | `it_ingest_grouped_daily_one_call_per_date_for_whole_watchlist` | Daily updates use the grouped endpoint, per-ticker calls only for backfill | FR-1xx, S1-T04 | Deferred |
+| TS-ING-028 | `it_ingest_grouped_daily_one_call_per_date_for_whole_watchlist` | Daily updates use the grouped endpoint, per-ticker calls only for backfill | FR-1xx, S1-T04 | Automated |
 | TS-ING-029 | `it_schema_migrations_upgrade_head_and_downgrade_base_succeed` | Alembic up and down on an empty database | A§5, S1-T01 | Deferred |
 | TS-ING-030 | `it_schema_recommendations_update_rejected_by_append_only_trigger` | UPDATE on `recommendations` is rejected | A§5, NFR-006 | Deferred |
 | TS-ING-031 | `it_schema_factor_scores_delete_rejected_by_append_only_trigger` | DELETE on `factor_scores` is rejected | A§5 | Deferred |
