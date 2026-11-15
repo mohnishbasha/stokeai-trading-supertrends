@@ -124,7 +124,9 @@ def default_symbols(session: Session) -> list[str]:
     """Symbols to ingest by default: resolved, non-crypto, non-index watchlist items plus
     the SPY and QQQ benchmarks.
 
-    TODO(#17): switch to the watchlist service's `symbols_to_ingest(session)` once it lands.
+    Differs from `watchlist.symbols_to_ingest` only in excluding index symbols such as VIX,
+    following ARCHITECTURE section 6 "Exclusions"; PRD FR-009 allows ingesting VIX when the
+    provider offers it. Unify once that conflict is decided (docs/GATE_DEBT.md GD-013).
     """
     rows = session.scalars(
         sa.select(WatchlistItem.symbol)

@@ -38,7 +38,12 @@ from supertrends.data.providers.base import (
     validate_bar,
 )
 from supertrends.data.providers.ratelimit import TokenBucket
-from supertrends.data.providers.recording import CallRecord, CallRecorder, InMemoryCallRecorder
+from supertrends.data.providers.recording import (
+    CallRecord,
+    CallRecorder,
+    InMemoryCallRecorder,
+    database_call_recorder,
+)
 from supertrends.errors import (
     CapabilityNotSupported,
     ConfigError,
@@ -537,7 +542,10 @@ _SHARED_LOCK = threading.Lock()
 
 
 def shared_client(settings: Settings) -> MassiveClient:
-    """One client (and so one token bucket and cache) per process for these settings."""
+    """One client (and so one token bucket and cache) per process for these settings.
+
+    Calls are recorded to `provider_calls` through the process database engine.
+    """
     key = (
         settings.massive_base_url,
         settings.massive_api_key.get_secret_value(),
@@ -546,7 +554,12 @@ def shared_client(settings: Settings) -> MassiveClient:
     with _SHARED_LOCK:
         client = _SHARED.get(key)
         if client is None:
-            client = MassiveClient(base_url=key[0], api_key=key[1], rate_per_min=key[2])
+            client = MassiveClient(
+                base_url=key[0],
+                api_key=key[1],
+                rate_per_min=key[2],
+                recorder=database_call_recorder(),
+            )
             _SHARED[key] = client
         return client
 

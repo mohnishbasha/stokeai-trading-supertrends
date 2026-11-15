@@ -14,6 +14,7 @@ import structlog
 from fastapi.testclient import TestClient
 
 from supertrends.api.app import create_app
+from supertrends.data.call_recorder import DbCallRecorder
 from supertrends.data.providers import registry
 from supertrends.data.providers.massive import (
     ENDPOINTS,
@@ -376,9 +377,13 @@ def test_unit_provider_massive_malformed_status_detail_has_no_secret() -> None:
     _assert_no_secret(exc.value, client.status())
 
 
-def test_unit_provider_massive_database_recorder_is_a_todo_for_s1_t06() -> None:
-    with pytest.raises(NotImplementedError, match="S1-T06"):
-        database_call_recorder()
+def test_unit_provider_database_call_recorder_returns_db_call_recorder(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sentinel = object()
+    monkeypatch.setattr("supertrends.data.db.get_engine", lambda: sentinel)
+    recorder = database_call_recorder()
+    assert isinstance(recorder, DbCallRecorder)
 
 
 # ------------------------------------------------------------- unconfigured
@@ -430,3 +435,4 @@ def test_unit_provider_massive_shared_client_is_process_wide_per_settings() -> N
     b = MassiveFundamentals.from_settings(settings)
     assert a._client is b._client
     assert isinstance(a._client, MassiveClient)
+    assert isinstance(a._client.recorder, DbCallRecorder)

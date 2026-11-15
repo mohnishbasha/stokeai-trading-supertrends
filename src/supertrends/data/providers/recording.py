@@ -43,9 +43,8 @@ class InMemoryCallRecorder:
 
 
 def database_call_recorder() -> CallRecorder:
-    """Recorder that writes `provider_calls` rows to Postgres.
+    """Recorder that writes sanitized `provider_calls` rows through the process engine."""
+    from supertrends.data.call_recorder import DbCallRecorder  # noqa: PLC0415 (import cycle)
+    from supertrends.data.db import get_engine  # noqa: PLC0415
 
-    TODO(#16): S1-T06 adds the repository and wires this in once the S1-T01 table is merged.
-    """
-    msg = "database call recorder arrives with S1-T06 (#16)"
-    raise NotImplementedError(msg)
+    return DbCallRecorder(get_engine())
