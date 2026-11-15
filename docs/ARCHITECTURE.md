@@ -528,6 +528,14 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** The number may need renumbering at merge. See PRD A-22.
 - **Status:** Accepted.
 
+### ADR-056: Indicator registry and the determinism harness
+
+- **Context:** NFR-007 needs every public indicator under the no-look-ahead property, and NFR-002 needs a committed determinism hash.
+- **Decision:** `supertrends.indicators.registry` lists every public indicator with an adapter, its kind (series or as-of) and `confirm_lag`; non-indicator public names are exempt with a reason, and a test fails on any name in `indicators.__all__` that is neither. Hypothesis draws only generator parameters and numpy builds the bars. Weekly values are checked as of completed weeks (ADR-033). Hashes of the synthetic dataset and of all indicator outputs (canonical JSON, NaN as null) live in `tests/golden/*.sha256` and change only through `scripts/regen-golden.sh --reason`. The package aggregator imports modules under `_m_` aliases so the `supertrend` function can be exported next to the module of the same name.
+- **Alternatives rejected:** Registry under `tests/` (the snapshot task needs it too); drawing raw floats in hypothesis (slow shrinking).
+- **Consequences:** `indicators.supertrend` is the function, so use `importlib` for the module. Profiles `ci` (100, derandomized) and `nightly` (1000) come from `HYPOTHESIS_PROFILE`.
+- **Status:** Accepted.
+
 
 ---
 

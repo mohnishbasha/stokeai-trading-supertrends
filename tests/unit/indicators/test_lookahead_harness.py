@@ -139,7 +139,7 @@ def test_prop_indicators_real_indicator_made_leaky_is_detected(
 def test_unit_indicators_series_outputs_match_input_length_and_warm_up_is_nan() -> None:
     """TS-IND-097: series outputs have the input length and start with NaN where warm-up applies."""
     bundle = make_bundle(11, 400)
-    warm = {"sma": 19, "ema": 19, "rma": 19, "atr": 13, "rsi": 14, "bbw_rank": 125, "zscore": 19}
+    warm = {"sma": 19, "ema": 19, "rma": 13, "atr": 13, "rsi": 14, "bbw_rank": 125, "zscore": 19}
     for name, entry in reg.REGISTRY.items():
         if entry.series is None:
             continue

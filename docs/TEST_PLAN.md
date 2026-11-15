@@ -257,7 +257,7 @@ For each of the 11 factors, `factor.compute(snapshot_at(t), ctx_at(t))` must equ
 
 ### 6.3 Registry rule
 
-All public indicator functions are registered in `tests/unit/lookahead_registry.py` with their `confirm_lag`. A test enumerates `supertrends.indicators.__all__` and fails if any public function is not registered. Adding an indicator without registering it fails CI.
+All public indicator functions are registered in `src/supertrends/indicators/registry.py` with their `confirm_lag` (public non-indicator names are listed in `EXEMPT` with a reason). A test enumerates `supertrends.indicators.__all__` and fails if any public function is not registered. Adding an indicator without registering it fails CI.
 
 ### 6.4 Negative control (the judge must be able to fail)
 
@@ -410,7 +410,7 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 |---|---|---|---|---|
 | TS-ING-001 | `unit_fixture_provider_generate_same_seed_identical_bars` | Same seed gives byte-identical bars | FR-1xx, S1-T03 | Automated |
 | TS-ING-002 | `unit_fixture_provider_dataset_has_trending_ranging_reversing_tickers` | By construction the dataset includes one trending, one ranging, one reversing ticker (asserted via ADX and flips) | FR-1xx, S1-T03 | Automated |
-| TS-ING-003 | `golden_fixture_provider_dataset_hash_matches_committed_hash` | Synthetic dataset hash equals `tests/golden/synthetic_dataset.sha256` | FR-1xx, A§12 | Deferred |
+| TS-ING-003 | `golden_fixture_provider_dataset_hash_matches_committed_hash` | Synthetic dataset hash equals `tests/golden/synthetic_dataset.sha256` | FR-1xx, A§12 | Automated |
 | TS-ING-004 | `contract_provider_fixture_passes_shared_contract_suite` | Fixture provider passes the provider contract suite | FR-1xx, A§7 | Automated |
 | TS-ING-005 | `contract_provider_massive_recorded_passes_shared_contract_suite` | Massive adapter passes the contract suite on recorded scrubbed responses | FR-1xx, A§7 | Automated |
 | TS-ING-006 | `contract_provider_alternate_recorded_passes_shared_contract_suite` | Alternate provider adapter passes the contract suite | FR-1xx, S1-T05 | Automated |
@@ -674,13 +674,25 @@ Golden and property tests apply to every indicator. Tolerances are in section 5.
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-090 | `prop_indicators_all_truncation_does_not_change_past_values` | The section 6 property for every registered indicator | NFR-007, S2-T08 | Deferred |
-| TS-IND-091 | `unit_indicators_registry_missing_public_function_fails_test` | A public indicator not in the registry fails CI | NFR-007, S2-T08 | Deferred |
-| TS-IND-092 | `prop_indicators_leaky_negative_control_is_detected` | An injected leaky indicator is flagged | NFR-007, S2-T08 | Deferred |
-| TS-IND-093 | `golden_indicators_determinism_hash_matches_committed_hash` | Hash of all outputs on the synthetic dataset | NFR-002, S2-T08 | Deferred |
-| TS-IND-094 | `unit_perf_budget_200_tickers_3y_daily_compute_under_60s_on_2_cores` | Benchmark for NFR-001 compute budget | NFR-001, S2-T08 | Deferred |
+| TS-IND-090 | `prop_indicators_all_truncation_does_not_change_past_values` | The section 6 property for every registered indicator | NFR-007, S2-T08 | Automated |
+| TS-IND-091 | `unit_indicators_registry_missing_public_function_fails_test` | A public indicator not in the registry fails CI | NFR-007, S2-T08 | Automated |
+| TS-IND-092 | `prop_indicators_leaky_negative_control_is_detected` | An injected leaky indicator is flagged | NFR-007, S2-T08 | Automated |
+| TS-IND-093 | `golden_indicators_determinism_hash_matches_committed_hash` | Hash of all outputs on the synthetic dataset | NFR-002, S2-T08 | Automated |
+| TS-IND-094 | `unit_perf_budget_200_tickers_3y_daily_compute_under_60s_on_2_cores` | Benchmark for NFR-001 compute budget | NFR-001, S2-T08 | Automated |
 | TS-IND-095 | `it_snapshots_persist_roundtrip_identical_json_for_same_inputs` | `indicator_snapshots` round trip and stable recompute | FR-2xx, S2-T09 | Deferred |
 | TS-IND-096 | `unit_indicators_nan_warmup_never_leaks_as_zero_into_snapshot` | NaN is stored as null, not zero | FR-2xx | Deferred |
+| TS-IND-097 | `unit_indicators_series_outputs_match_input_length_and_warm_up_is_nan` | Series outputs have the input length, float64, NaN warm-up | NFR-007, S2-T08 | Automated |
+| TS-IND-098 | `prop_pivots_confirm_width_bars_late` | A pivot is absent before `p + w` bars exist and present one bar later | NFR-007, S2-T08 | Automated |
+| TS-IND-099 | `prop_weekly_values_use_only_bars_up_to_t` | Weekly resample and weekly divergences use bars up to t; a partial week revised on completion is not look-ahead (6.1 item 6, ADR-033) | NFR-007, S2-T08 | Automated |
+| TS-IND-240 | `unit_indicators_function_may_share_its_module_name` | `supertrend` the function is exported next to the module of the same name | S2-T08 | Automated |
+| TS-IND-241 | `unit_divergence_private_macd_hist_equals_momentum_macd_hist` | `divergence._macd_hist` equals `momentum.macd().hist` to 1e-12 | S2-T08 | Automated |
+| TS-IND-242 | `golden_indicators_double_run_in_subprocess_with_other_environment` | Same hashes in one process twice and in subprocesses with other PYTHONHASHSEED, TZ, LC_ALL | NFR-002, S2-T08 | Automated |
+| TS-IND-243 | `unit_regen_golden_refuses_without_reason` | `scripts/regen-golden.sh` needs `--reason`, `--check` writes nothing and spares TradingView and hand-computed files | S2-T08 | Automated |
+| TS-IND-244 | `unit_spec_test_plan_scenario_ids_are_unique` | No scenario ID repeats in TEST_PLAN | GD-009, S2-T08 | Automated |
+| TS-IND-245 | `unit_spec_prd_ambiguity_ids_are_unique` | PRD section 17 A-ids are unique | GD-009, S2-T08 | Automated |
+| TS-IND-246 | `unit_spec_architecture_adr_headings_are_unique` | ADR heading numbers are unique | GD-009, S2-T08 | Automated |
+| TS-IND-247 | `unit_indicators_registry_exemptions_are_not_plain_functions` | Exempt names exist in `__all__`, have a reason, and are not functions | S2-T08 | Automated |
+| TS-IND-248 | `unit_validate_fixtures_checks_the_synthetic_dataset_hash` | `scripts/validate-fixtures.sh` passes on the committed hash | S2-T08 | Automated |
 
 ### 10.4 Scoring, per factor (TS-SCR)
 

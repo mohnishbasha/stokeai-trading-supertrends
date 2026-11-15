@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- No-look-ahead and determinism harness: indicator registry, truncation and perturbation property tests with a negative control, determinism and synthetic dataset hashes, `scripts/regen-golden.sh`, `scripts/validate-fixtures.sh`, the 200-ticker compute benchmark, and unique-ID checks for specs; `supertrends.indicators.supertrend` is now the function (S2-T08).
 - Volume indicators (`volume_oscillator`, `relative_volume`, `obv_slope_sign`, `cmf`, `accumulation_distribution_days`) and estimated order flow (`split_volume`, `estimate_order_flow` with `intraday`, `daily_estimate`, and `trades` quality) (S2-T07).
 - Mean reversion and volatility indicators: Bollinger (20, 2), %B, z-score, bandwidth and rank, ATR% and rank, HV20, squeeze and expansion flags (S2-T05).
 - Divergence detector: regular and hidden, bullish and bearish divergences for RSI, MACD histogram, and OBV on confirmed pivots (daily width 5, weekly width 3), with typed records and a per-bar series form (S2-T04).

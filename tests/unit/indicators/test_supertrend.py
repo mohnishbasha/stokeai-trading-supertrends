@@ -7,6 +7,7 @@ Expected values come from tests/golden/handcomputed/supertrend_40bar.json, deriv
 independent plain-Python script next to it, or are checked by hand in comments here.
 """
 
+import importlib
 import itertools
 import json
 import math
@@ -21,10 +22,11 @@ from hypothesis import strategies as st
 from numpy.typing import NDArray
 
 from supertrends.indicators import primitives as p
-from supertrends.indicators import supertrend as m
-from supertrends.indicators.supertrend import supertrend
+from supertrends.indicators.supertrend import SupertrendResult, supertrend
 from tests.golden.tradingview_support import parse_export, tv_direction_to_internal
 
+# the package attribute `supertrend` is the function, so import the module explicitly
+m = importlib.import_module("supertrends.indicators.supertrend")
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = ROOT / "tests" / "golden" / "handcomputed" / "supertrend_40bar.json"
 TOL = 1e-9
@@ -41,7 +43,7 @@ def load_fixture() -> dict[str, Any]:
     return data
 
 
-def run_fixture() -> tuple[dict[str, Any], m.SupertrendResult]:
+def run_fixture() -> tuple[dict[str, Any], SupertrendResult]:
     fx = load_fixture()
     res = supertrend(
         arr(fx["high"]), arr(fx["low"]), arr(fx["close"]), fx["atr_length"], fx["factor"]

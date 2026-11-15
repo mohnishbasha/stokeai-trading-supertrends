@@ -13,6 +13,9 @@ index. On that first defined bar `atr[t-1]` is undefined, so the direction is -1
 line is `final_upper`, as in TradingView. A NaN in high, low or close poisons the ATR and so every
 output from that bar on (the same policy as `rma`). The line is final_lower when up and
 final_upper when down; the value at bar t uses only bars at or before t (no look-ahead).
+
+The function `supertrend` is exported in `__all__` even though it shares the module's name (see
+the note below `__all__`).
 """
 
 import math
@@ -26,12 +29,13 @@ __all__ = [
     "SupertrendResult",
     "bars_since_flip",
     "distance_atr",
+    "supertrend",
     "supertrend_weekly_direction",
 ]
-# `supertrend` (the function) is deliberately not in `__all__`: the package aggregator star-imports
-# every module's `__all__`, and a function named like its module would replace the submodule
-# attribute `supertrends.indicators.supertrend` and break the aggregation. Import it as
-# `from supertrends.indicators.supertrend import supertrend`.
+# `supertrend` (the function) shares this module's name. The package aggregator imports each module
+# under a private alias before its star imports, so the function is in `__all__`; as a result
+# `supertrends.indicators.supertrend` (the package attribute) is the function. Import the module
+# with `from supertrends.indicators.supertrend import ...` or `importlib.import_module`.
 
 _NAN = float("nan")
 
