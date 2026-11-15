@@ -190,9 +190,9 @@ Root `VERSION` file containing `0.1.0`. `scripts/check-versions.sh`, `scripts/ex
 `.github/workflows/ci.yml` with jobs `lint-and-typecheck`, `unit-tests`, `coverage`, `integration-tests` (Postgres service container), `e2e-tests` (placeholder until Sprint 4), `build-image` (buildx, amd64 and arm64, no push on PRs). Dependabot for pip, npm, GitHub Actions, and Docker. `pip-audit` and `npm audit --audit-level=high` in CI.
 
 **Acceptance criteria:**
-- [ ] CI is green on `develop`
-- [ ] a PR with a lint error fails `lint-and-typecheck`
-- [ ] the image job builds both architectures
+- [x] CI is green on `develop`
+- [x] a PR with a lint error fails `lint-and-typecheck`
+- [x] the image job builds both architectures
 
 ### S0-T06: Dockerfile skeleton and Compose
 
