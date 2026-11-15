@@ -66,7 +66,7 @@ def cfg() -> ScoringConfig:
     return load_scoring_config(CONFIG)
 
 
-def _add_run(session: Session, run_id: str, cfg: ScoringConfig) -> None:
+def _add_run(session: Session, run_id: str, cfg: ScoringConfig, state: str = "computing") -> None:
     digest = config_hash(cfg)
     if session.get(ConfigVersion, digest) is None:
         session.add(
@@ -79,7 +79,7 @@ def _add_run(session: Session, run_id: str, cfg: ScoringConfig) -> None:
         Run(
             id=run_id,
             trade_date=END,
-            state="computing",
+            state=state,
             trigger="cli",
             config_hash=digest,
             code_version="test",
@@ -109,9 +109,14 @@ def test_it_snapshots_persist_roundtrip_identical_json_for_same_inputs(
         assert doc["as_of"] == END.isoformat()
         assert doc["flow"]["quality"] == "intraday"
         assert doc["daily"]["sma_200"] is not None
+    # an identical recompute into the same run is recognised as already stored
+    with Session(engine) as session, session.begin():
+        again = compute_and_store(session, RUN_A, SYMBOLS, cfg, END)
+    assert again.stored == []
+    assert again.unchanged == SYMBOLS
     # recompute into a second run: the documents are identical to the stored ones
     with Session(engine) as session, session.begin():
-        _add_run(session, RUN_B, cfg)
+        _add_run(session, RUN_B, cfg, "failed")  # one active run at a time (ADR-021)
         compute_and_store(session, RUN_B, SYMBOLS, cfg, END)
     with Session(engine) as session:
         for symbol in SYMBOLS:

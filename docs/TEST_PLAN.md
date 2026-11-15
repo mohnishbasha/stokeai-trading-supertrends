@@ -679,8 +679,8 @@ Golden and property tests apply to every indicator. Tolerances are in section 5.
 | TS-IND-092 | `prop_indicators_leaky_negative_control_is_detected` | An injected leaky indicator is flagged | NFR-007, S2-T08 | Automated |
 | TS-IND-093 | `golden_indicators_determinism_hash_matches_committed_hash` | Hash of all outputs on the synthetic dataset | NFR-002, S2-T08 | Automated |
 | TS-IND-094 | `unit_perf_budget_200_tickers_3y_daily_compute_under_60s_on_2_cores` | Benchmark for NFR-001 compute budget | NFR-001, S2-T08 | Automated |
-| TS-IND-095 | `it_snapshots_persist_roundtrip_identical_json_for_same_inputs` | `indicator_snapshots` round trip and stable recompute | FR-2xx, S2-T09 | Deferred |
-| TS-IND-096 | `unit_indicators_nan_warmup_never_leaks_as_zero_into_snapshot` | NaN is stored as null, not zero | FR-2xx | Deferred |
+| TS-IND-095 | `it_snapshots_persist_roundtrip_identical_json_for_same_inputs` | `indicator_snapshots` round trip and stable recompute | FR-2xx, S2-T09 | Automated |
+| TS-IND-096 | `unit_indicators_nan_warmup_never_leaks_as_zero_into_snapshot` | NaN is stored as null, not zero | FR-2xx | Automated |
 | TS-IND-097 | `unit_indicators_series_outputs_match_input_length_and_warm_up_is_nan` | Series outputs have the input length, float64, NaN warm-up | NFR-007, S2-T08 | Automated |
 | TS-IND-098 | `prop_pivots_confirm_width_bars_late` | A pivot is absent before `p + w` bars exist and present one bar later | NFR-007, S2-T08 | Automated |
 | TS-IND-099 | `prop_weekly_values_use_only_bars_up_to_t` | Weekly resample and weekly divergences use bars up to t; a partial week revised on completion is not look-ahead (6.1 item 6, ADR-033) | NFR-007, S2-T08 | Automated |
@@ -693,6 +693,16 @@ Golden and property tests apply to every indicator. Tolerances are in section 5.
 | TS-IND-246 | `unit_spec_architecture_adr_headings_are_unique` | ADR heading numbers are unique | GD-009, S2-T08 | Automated |
 | TS-IND-247 | `unit_indicators_registry_exemptions_are_not_plain_functions` | Exempt names exist in `__all__`, have a reason, and are not functions | S2-T08 | Automated |
 | TS-IND-248 | `unit_validate_fixtures_checks_the_synthetic_dataset_hash` | `scripts/validate-fixtures.sh` passes on the committed hash | S2-T08 | Automated |
+| TS-IND-250 | `unit_snapshot_has_daily_weekly_levels_fib_divergence_flow_sections` | The document carries daily and weekly values, levels (52-week extremes, Supertrend invalidation), Fibonacci, divergences, flow and the config hash | FR-2xx, S2-T09 | Automated |
+| TS-IND-251 | `unit_snapshot_as_of_t_is_identical_with_or_without_later_bars` | Snapshot bytes at t equal on truncated, full and future-perturbed bundles | NFR-007, S2-T09 | Automated |
+| TS-IND-252 | `unit_snapshot_json_bytes_are_deterministic_sorted_and_rounded` | Same inputs give the same bytes; sorted keys; floats at 10 significant digits (ADR-056) | NFR-002, S2-T09 | Automated |
+| TS-IND-253 | `unit_snapshot_covers_every_registered_series_indicator` | Each registered series indicator is in the snapshot or listed as a building block | FR-2xx, S2-T09 | Automated |
+| TS-IND-254 | `unit_snapshot_uses_parameters_from_the_config` | A changed config value changes the values and the config hash | FR-2xx, S2-T09 | Automated |
+| TS-IND-255 | `unit_snapshot_rejects_dates_without_bars` | No bar on or before the as-of date is an error; a later date uses the last bar | S2-T09 | Automated |
+| TS-IND-256 | `it_snapshots_write_same_document_twice_is_skipped` | An identical second write leaves one row and reports `unchanged` | FR-2xx, S2-T09 | Automated |
+| TS-IND-257 | `it_snapshots_write_different_document_for_same_key_raises` | A different document for the same run and symbol raises `SnapshotConflictError`; the stored row is untouched | FR-2xx, S2-T09 | Automated |
+| TS-IND-258 | `it_snapshots_update_and_delete_rejected_by_append_only_trigger` | UPDATE and DELETE on `indicator_snapshots` fail with `append_only_violation` | FR-2xx, S2-T09 | Automated |
+| TS-IND-259 | `it_snapshots_compute_and_store_skips_unknown_symbols_and_checks_config_hash` | Symbols without bars are skipped as `no_data`; a config whose hash differs from the run's is refused | FR-2xx, S2-T09 | Automated |
 
 ### 10.4 Scoring, per factor (TS-SCR)
 

@@ -536,6 +536,13 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** `indicators.supertrend` is the function, so use `importlib` for the module. Profiles `ci` (100, derandomized) and `nightly` (1000) come from `HYPOTHESIS_PROFILE`.
 - **Status:** Accepted.
 
+### ADR-057: Indicator snapshot document and persistence
+
+- **Context:** S2-T09 stores the `computing` output per ticker. The table key is (`run_id`, `symbol`) and has no date or hash column.
+- **Decision:** `scoring.snapshot.compute_snapshot(bundle, cfg, as_of)` is pure: it drops bars after `as_of`, computes every registered per-bar indicator at the last bar with parameters from the config (registry defaults where the config has none: BBW rank window 126, ATR% rank window 252, relative volume 20, HV20), and returns canonical JSON (NaN null, floats to 10 significant digits via `indicators.registry.round_significant`, sorted keys in `snapshot_bytes`). It lives in `scoring/` because it reads the config; `indicators/` stays free of it. `data.snapshots.write_snapshot` is `INSERT ... ON CONFLICT DO NOTHING`; on conflict it compares the stored document and returns `unchanged` when equal, else raises `SnapshotConflictError`. `compute_and_store` refuses a config whose hash differs from `runs.config_hash`. No migration: date and hash come from the run row.
+- **Alternatives rejected:** Adding `trade_date` and `config_hash` columns (duplicates `runs`, needs a migration); upsert (the table is append-only).
+- **Consequences:** The number may need renumbering at merge. A retry of `computing` is safe. Changing bars or config means a new run.
+- **Status:** Accepted.
 
 ---
 
@@ -804,7 +811,7 @@ PK (`run_id`, `seq`). Append-only.
 | `symbol` | `text` | no | | FK `tickers(symbol)` |
 | `values` | `jsonb` | no | | values at bar t for every registered indicator, daily and weekly |
 
-PK (`run_id`, `symbol`). Append-only.
+PK (`run_id`, `symbol`). Append-only. The trade date and config hash are those of the `runs` row (the document repeats them as `as_of` and `config_hash`). `values` is the canonical snapshot of ADR-057: `daily`, `weekly`, `levels`, `fib`, `divergences`, `flow`. A write of an equal document for an existing key is skipped; a different one raises (no UPDATE ever).
 
 #### `ticker_scores`
 | Column | Type | Null | Default | Notes |

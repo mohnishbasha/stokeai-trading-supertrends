@@ -95,9 +95,9 @@ AsofAdapter = Callable[["Bundle", int], object]
 __all__ = [
     "EXEMPT",
     "REGISTRY",
+    "SIGNIFICANT_DIGITS",
     "Bundle",
     "Entry",
-    "SIGNIFICANT_DIGITS",
     "canonical",
     "compute_all",
     "round_significant",
