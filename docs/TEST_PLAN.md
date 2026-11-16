@@ -708,20 +708,20 @@ Golden and property tests apply to every indicator. Tolerances are in section 5.
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-133 | `golden_ripster_clouds_handcomputed_fixture_top_bot_dir_pos_stack_match_every_bar` | Hand-computed case: stack flip in each direction, close inside a cloud, held and failed 8/9 pullback | FR-224, S2-T10 | Deferred |
-| TS-IND-134 | `unit_ripster_clouds_stack_flip_bars_since_stack_flip_counts_from_last_change_to_nonzero` | `rc_bars_since_stack_flip` is 0 on the flip bar, both directions | FR-224, S2-T10 | Deferred |
-| TS-IND-135 | `unit_ripster_clouds_ema_computed_on_hl2_for_all_ten_periods` | EMAs 8, 9, 5, 12, 34, 50, 72, 89, 180, 200 on `hl2` | FR-224, S2-T10 | Deferred |
-| TS-IND-136 | `unit_ripster_clouds_close_inside_cloud_pos_is_zero` | `pos` is 0 when close is inside the cloud, +1 above, -1 below | FR-224 | Deferred |
-| TS-IND-137 | `unit_ripster_pullback_held_low_tests_c1_within_3_bars_and_close_above_bot_flag_true` | Bullish held test of the 8/9 cloud | FR-224, S2-T10 | Deferred |
-| TS-IND-138 | `unit_ripster_pullback_failed_close_at_or_below_bot_c1_flag_false` | Bullish failed test | FR-224, S2-T10 | Deferred |
-| TS-IND-139 | `unit_ripster_pullback_stale_test_4_bars_ago_flag_false` | Boundary: 3 bars counts, 4 bars does not | FR-224 | Deferred |
-| TS-IND-140 | `unit_ripster_clouds_weekly_34_50_direction_uses_resampled_weekly_bars` | `rc_dir_w` computed on weekly bars, evidence only | FR-224 | Deferred |
+| TS-IND-133 | `golden_ripster_clouds_handcomputed_fixture_top_bot_dir_pos_stack_match_every_bar` | Hand-computed case: stack flip in each direction, close inside a cloud, held and failed 8/9 pullback | FR-224, S2-T10 | Automated |
+| TS-IND-134 | `unit_ripster_clouds_stack_flip_bars_since_stack_flip_counts_from_last_change_to_nonzero` | `rc_bars_since_stack_flip` is 0 on the flip bar, both directions | FR-224, S2-T10 | Automated |
+| TS-IND-135 | `unit_ripster_clouds_ema_computed_on_hl2_for_all_ten_periods` | EMAs 8, 9, 5, 12, 34, 50, 72, 89, 180, 200 on `hl2` | FR-224, S2-T10 | Automated |
+| TS-IND-136 | `unit_ripster_clouds_close_inside_cloud_pos_is_zero` | `pos` is 0 when close is inside the cloud, +1 above, -1 below | FR-224 | Automated |
+| TS-IND-137 | `unit_ripster_pullback_held_low_tests_c1_within_3_bars_and_close_above_bot_flag_true` | Bullish held test of the 8/9 cloud | FR-224, S2-T10 | Automated |
+| TS-IND-138 | `unit_ripster_pullback_failed_close_at_or_below_bot_c1_flag_false` | Bullish failed test | FR-224, S2-T10 | Automated |
+| TS-IND-139 | `unit_ripster_pullback_stale_test_4_bars_ago_flag_false` | Boundary: 3 bars counts, 4 bars does not | FR-224 | Automated |
+| TS-IND-140 | `unit_ripster_clouds_weekly_34_50_direction_uses_resampled_weekly_bars` | `rc_dir_w` computed on weekly bars, evidence only | FR-224 | Automated |
 | TS-IND-141 | `golden_ripster_clouds_tradingview_parity_each_ema_within_0_01_after_200_bar_warmup` | All ten EMAs within 0.01 per bar versus the TradingView export, computed on the export's own bars, two tickers | FR-224, S2-T10 | Skipped: TradingView CSV exports with the Ripster EMA Clouds plots not yet provided by the owner (owner checklist item 3); manual: export the Ripster EMA Clouds indicator at default settings with OHLCV for the same two tickers on the daily chart to `tests/golden/tradingview/` and run `pytest tests/golden -k tradingview`. Release blocker at S9-T04 |
 | TS-IND-142 | `golden_ripster_clouds_tradingview_parity_cloud_direction_matches_every_bar_after_warmup` | Every cloud direction identical on every bar after the first 200 | FR-224, S2-T10 | Skipped: same owner files as TS-IND-141; manual: same step |
-| TS-IND-143 | `prop_ripster_clouds_top_ge_bot_for_every_cloud_after_warmup` | Property: `top >= bot` | FR-224, S2-T10 | Deferred |
-| TS-IND-144 | `prop_ripster_clouds_stack_nonzero_only_when_5_12_and_34_50_clouds_do_not_overlap` | Property: `stack` domain | FR-224, S2-T10 | Deferred |
-| TS-IND-145 | `unit_ripster_clouds_registered_with_no_look_ahead_harness` | The Ripster indicator is in the registry and passes the section 6 property | NFR-007, S2-T08, S2-T10 | Deferred |
-| TS-IND-146 | `unit_ripster_clouds_warmup_bars_are_nan_never_zero` | Fewer than 200 bars gives NaN for the 180/200 cloud | FR-224 | Deferred |
+| TS-IND-143 | `prop_ripster_clouds_top_ge_bot_for_every_cloud_after_warmup` | Property: `top >= bot` | FR-224, S2-T10 | Automated |
+| TS-IND-144 | `prop_ripster_clouds_stack_nonzero_only_when_5_12_and_34_50_clouds_do_not_overlap` | Property: `stack` domain | FR-224, S2-T10 | Automated |
+| TS-IND-145 | `unit_ripster_clouds_registered_with_no_look_ahead_harness` | The Ripster indicator is in the registry and passes the section 6 property | NFR-007, S2-T08, S2-T10 | Automated |
+| TS-IND-146 | `unit_ripster_clouds_warmup_bars_are_nan_never_zero` | Fewer than 200 bars gives NaN for the 180/200 cloud | FR-224 | Automated |
 
 ### 10.4 Scoring, per factor (TS-SCR)
 

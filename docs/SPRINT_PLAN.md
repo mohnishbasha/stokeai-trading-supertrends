@@ -578,22 +578,22 @@ Compute-all function producing one snapshot row per ticker per date (JSONB of in
 Implement Factor 12's clouds exactly: the five EMA pairs on `hl2`, cloud top, bottom and direction, `pos`, `stack`, `rc_bars_since_stack_flip`, the 8/9 pullback test, and the weekly 34/50 direction. Golden fixtures: (a) a hand-computed case covering a stack flip in each direction, close inside a cloud, and a held and a failed 8/9 pullback; (b) TradingView parity files. For (b), add an owner checklist entry: export, for the same two tickers as S2-T02, a daily CSV with OHLCV plus the Ripster EMA Clouds plots at default settings, into `tests/golden/tradingview/`. Until they exist the parity test is skipped with a visible reason. When present, the test computes on the export's own bars and asserts each EMA matches within 0.01 and each cloud direction matches on every bar after a 200-bar warm-up.
 
 **Acceptance criteria:**
-- [ ] hand-computed fixture passes
-- [ ] parity test passes or is skipped pending owner files
-- [ ] property test: `top >= bot` always, and `stack` is nonzero only when the 5/12 and 34/50 clouds do not overlap
+- [x] hand-computed fixture passes (#144)
+- [x] parity test passes or is skipped pending owner files (#144: skipped, docs/OWNER_CHECKLIST.md #3 open, GD-018)
+- [x] property test: `top >= bot` always, and `stack` is nonzero only when the 5/12 and 34/50 clouds do not overlap (#144)
 
 ### Sprint 2 checklist (non-blocking; unmet items go to docs/GATE_DEBT.md)
 
-Filled in at sprint end on the integrated tip of the stacked PRs (#139 branch, 67de23a). None of the PRs is merged yet: the agent's `gh pr merge` was denied (docs/OWNER_CHECKLIST.md #25, GD-015).
+First filled in at sprint end on the integrated tip of the stacked PRs (#139 branch, 67de23a). The owner then merged #131 to #140. Re-run on 2026-11-15 on the S2-T10 tip (#144, ca1a461), which is `develop` plus S2-T10. The agent's `gh pr merge` is still denied, so #144 and the promotion PR #145 wait on the owner (docs/OWNER_CHECKLIST.md #26, GD-015).
 
 - [x] Every indicator in the specification is implemented and registered with the no-look-ahead harness (#131 to #138: 56 indicators registered, 21 exempt names with reasons; TS-IND-091 fails on an unregistered public function)
 - [x] Supertrend hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open (#137: TS-IND-020 passes; TS-IND-021 and 022 skipped, docs/OWNER_CHECKLIST.md #3 open, GD-016)
-- [ ] Ripster EMA Clouds hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open (added after the Sprint 2 audit by the Ripster EMA Clouds spec change; S2-T10 not started)
+- [x] Ripster EMA Clouds hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open (#144: TS-IND-133 passes; TS-IND-141 and 142 skipped, docs/OWNER_CHECKLIST.md #3 open, GD-018)
 - [x] Determinism hash committed and checked in CI (#138: `tests/golden/determinism.sha256`, floats at 10 significant digits per ADR-056; the synthetic dataset hash is checked by `scripts/validate-fixtures.sh` in CI)
-- [x] Indicator coverage at or above 95 percent (99 percent, 1,133 statements; total 97 percent)
+- [x] Indicator coverage at or above 95 percent (99 percent, 1,264 statements with S2-T10; total 97 percent with Postgres, 712 passed)
 - [x] Compute benchmark within budget (TS-IND-094: 200 tickers x 756 bars in 2.75 s locally against the 60 s budget; passes in CI)
-- [ ] `make up && make smoke` pass; spec docs audited (spec docs audited in #140; smoke passed 3 of 3 on the integrated tip locally, but not on `develop` or `staging`, which do not have the Sprint 2 code yet: GD-015)
-- [ ] Retrospective written; tag `sprint-2-complete` pushed (retrospective written in #140; tag not pushed, because it must point at a `staging` build that has the merged Sprint 2 code: GD-015)
+- [ ] `make up && make smoke` pass; spec docs audited (spec docs audited in #140 and again for S2-T10 in #144; smoke passed 3 of 3 locally on the #144 tip, but not yet on a `staging` build, because #144 and #145 are not merged: GD-015)
+- [ ] Retrospective written; tag `sprint-2-complete` pushed (retrospective written in #140 and extended for S2-T10 in #144; tag not pushed, because it must point at a `staging` build that has all of Sprint 2: GD-015)
 
 ---
 

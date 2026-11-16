@@ -64,6 +64,14 @@ from supertrends.indicators.primitives import (
     zigzag,
     zigzag_threshold,
 )
+from supertrends.indicators.ripster_clouds import (
+    bars_since_stack_flip,
+    cloud_stack,
+    ema_cloud,
+    ripster_clouds,
+    ripster_pullback,
+    ripster_weekly_direction,
+)
 from supertrends.indicators.supertrend import (
     bars_since_flip,
     distance_atr,
@@ -287,6 +295,21 @@ def _st(b: Bundle) -> Any:
     return supertrend(b.high, b.low, b.close, 10, 3.0)
 
 
+def _rc(b: Bundle) -> Any:
+    return ripster_clouds(b.high, b.low, b.close)
+
+
+def _rc_series(b: Bundle) -> dict[str, FloatArray]:
+    """Every cloud field (`c1_top`, ...) plus stack, bars since the stack flip, and pullback."""
+    res = _rc(b)
+    out = {f"c{i + 1}_{k}": v for i, c in enumerate(res.clouds) for k, v in _arrays(c).items()}
+    return out | {
+        "stack": res.stack,
+        "bars_since_stack_flip": res.bars_since_stack_flip,
+        "pullback": res.pullback,
+    }
+
+
 def _flow_args(b: Bundle) -> tuple[Any, ...]:
     """Daily and (when present) 5-minute arguments of `estimate_order_flow`."""
     daily = (b.dates, b.high, b.low, b.close, b.volume)
@@ -386,6 +409,16 @@ def _entries() -> list[Entry]:
         "supertrend_weekly_direction": lambda b: _one(
             supertrend_weekly_direction(b.dates, b.open, b.high, b.low, b.close, b.volume)
         ),
+        "ema_cloud": lambda b: _arrays(ema_cloud((b.high + b.low) / 2, b.close, 34, 50)),
+        "cloud_stack": lambda b: _one(cloud_stack(_rc(b).clouds[1], _rc(b).clouds[2])),
+        "bars_since_stack_flip": lambda b: _one(bars_since_stack_flip(_rc(b).stack)),
+        "ripster_clouds": _rc_series,
+        "ripster_pullback": lambda b: _one(
+            ripster_pullback(b.high, b.low, b.close, _rc(b).clouds[0], _rc(b).stack, 3)
+        ),
+        "ripster_weekly_direction": lambda b: _one(
+            ripster_weekly_direction(b.dates, b.open, b.high, b.low, b.close, b.volume)
+        ),
         "sma_stack": lambda b: _arrays(sma_stack(b.close)),
         "sma_slope": lambda b: _one(sma_slope(sma(b.close, 20), 5)),
         "cross_events": lambda b: _one(cross_events(sma(b.close, 20), sma(b.close, 50))),
@@ -476,6 +509,7 @@ EXEMPT: dict[str, str] = {
     "Cross": "record returned by last_cross and macd_signal_cross",
     "Divergence": "record returned by the divergence detectors",
     "DivergenceSeries": "record returned by divergence_series",
+    "EmaCloud": "record returned by ema_cloud and inside RipsterClouds",
     "EXTENSION_RATIOS": "constant tuple of Fibonacci extension ratios",
     "FibLeg": "record returned by fib_leg",
     "FlowQuality": "enum describing the data path of estimate_order_flow",
@@ -483,7 +517,9 @@ EXEMPT: dict[str, str] = {
     "Level": "record inside SupportResistance",
     "Macd": "record returned by macd and macd_weekly",
     "Pivot": "record returned by pivots",
+    "RIPSTER_CLOUDS": "constant tuple of the default Ripster (short, long) EMA pairs",
     "RETRACEMENT_RATIOS": "constant tuple of Fibonacci retracement ratios",
+    "RipsterClouds": "record returned by ripster_clouds",
     "SmaStack": "record returned by sma_stack",
     "SupertrendResult": "record returned by supertrend",
     "SupportResistance": "record returned by support_resistance",
