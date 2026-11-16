@@ -30,6 +30,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Local Compose runs a one-shot `migrate` service (`supertrends db migrate`) before the app starts, so `/readyz` reports ready after `make up` (S1-T08).
 - Ingestion service and `supertrends ingest [--date] [--symbols] [--full]`: idempotent incremental daily, 5-minute, and fundamentals ingest, split-triggered full refetch, data quality classification, and `provider_calls` recording (S1-T06).
 
+### Fixed
+
+- UI: TypeScript back to ^5.9.3, since typescript-eslint 8 supports only TypeScript <6.1 and the Dependabot bump to 7.0.2 broke `npm ci`.
+
 ### Scoring
 
 - `config/scoring.yaml` seeded with every default from the Signal Engine Specification (`scoring.version` 1), with a JSON schema and a stable `config_hash`.
