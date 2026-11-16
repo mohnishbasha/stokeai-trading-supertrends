@@ -448,8 +448,8 @@ All indicator functions live in `src/supertrends/indicators/`, take a pandas Dat
 `sma`, `ema`, `rma`, `stdev`, `true_range`, `atr`, `rsi`, `obv`, `percentile_rank`, `linreg_slope`, `pivots` (confirmed, width parameter), `zigzag`, `resample_weekly`.
 
 **Acceptance criteria:**
-- [ ] each matches a hand-computed fixture to 1e-9
-- [ ] `pivots` never marks a pivot fewer than `width` bars from the end
+- [x] each matches a hand-computed fixture to 1e-9 (#131)
+- [x] `pivots` never marks a pivot fewer than `width` bars from the end (#131)
 
 ### S2-T02: Supertrend with TradingView parity
 
@@ -462,9 +462,9 @@ All indicator functions live in `src/supertrends/indicators/`, take a pandas Dat
 Implement Factor 1's formula exactly. Golden fixtures: (a) a hand-computed 40-bar case covering both flip directions and band ratcheting; (b) TradingView parity files. For (b), add an owner checklist entry: export from TradingView, for two tickers on the daily chart, a CSV with OHLCV plus the built-in Supertrend (10, 3) columns, and place them in `tests/golden/tradingview/`. Until they exist the parity test is skipped with a visible reason, and the sprint checklist records that. When present, the test asserts the line matches within 0.01 and the direction matches on every bar after a 100-bar warm-up.
 
 **Acceptance criteria:**
-- [ ] hand-computed fixture passes
-- [ ] parity test passes or is skipped pending owner files
-- [ ] property test: direction is always +1 or -1 after warm-up, and the line is below close when up and above close when down
+- [x] hand-computed fixture passes (#137)
+- [x] parity test passes or is skipped pending owner files (#137; skipped, docs/OWNER_CHECKLIST.md #3, GD-016)
+- [x] property test: direction is always +1 or -1 after warm-up, and the line is below close when up and above close when down (#137)
 
 ### S2-T03: Trend and momentum indicators
 
@@ -477,8 +477,8 @@ Implement Factor 1's formula exactly. Golden fixtures: (a) a hand-computed 40-ba
 SMA 20 / 50 / 200 with slope and cross detection, MACD (12, 26, 9) daily and weekly, ADX(14) with +DI and -DI.
 
 **Acceptance criteria:**
-- [ ] fixtures match to 1e-6
-- [ ] cross detection reports the bar index of the cross
+- [x] fixtures match to 1e-6 (#134)
+- [x] cross detection reports the bar index of the cross (#134)
 
 ### S2-T04: Divergence detector
 
@@ -491,9 +491,9 @@ SMA 20 / 50 / 200 with slope and cross detection, MACD (12, 26, 9) daily and wee
 Regular and hidden, bullish and bearish, for RSI, MACD histogram, and OBV, on daily and weekly, using confirmed pivots only. Returns typed divergence records with both pivot bars, prices, and oscillator values.
 
 **Acceptance criteria:**
-- [ ] constructed fixtures for each of the four types are detected
-- [ ] a divergence whose second pivot is not yet confirmed is not reported
-- [ ] no false detection on a monotonic series
+- [x] constructed fixtures for each of the four types are detected (#135)
+- [x] a divergence whose second pivot is not yet confirmed is not reported (#135)
+- [x] no false detection on a monotonic series (#135)
 
 ### S2-T05: Mean reversion and volatility indicators
 
@@ -506,8 +506,8 @@ Regular and hidden, bullish and bearish, for RSI, MACD histogram, and OBV, on da
 Bollinger (20, 2), %B, bandwidth and its percentile rank, z-score, ATR%, ATR% rank, HV20, squeeze and expansion flags.
 
 **Acceptance criteria:**
-- [ ] fixtures match
-- [ ] rank functions use only trailing windows
+- [x] fixtures match (#132)
+- [x] rank functions use only trailing windows (#132)
 
 ### S2-T06: Fibonacci and support / resistance
 
@@ -520,9 +520,9 @@ Bollinger (20, 2), %B, bandwidth and its percentile rank, z-score, ATR%, ATR% ra
 ZigZag leg selection, retracement and extension levels, level clustering with strength, nearest support and resistance, breakout and breakdown detection, 52-week high and low.
 
 **Acceptance criteria:**
-- [ ] on a constructed up-leg-then-pullback fixture, the 61.8 level is within 1e-6 of the expected price
-- [ ] clusters merge pivots within 0.5 ATR
-- [ ] a breakout is only flagged on the bar it happens
+- [x] on a constructed up-leg-then-pullback fixture, the 61.8 level is within 1e-6 of the expected price (#133)
+- [x] clusters merge pivots within 0.5 ATR (#133)
+- [x] a breakout is only flagged on the bar it happens (#133)
 
 ### S2-T07: Volume indicators and estimated order flow
 
@@ -535,9 +535,9 @@ ZigZag leg selection, retracement and extension levels, level clustering with st
 Volume oscillator (5, 10), relative volume, CMF(20), accumulation and distribution days, intraday buy / sell split and daily delta, with the `intraday` and `daily_estimate` quality paths.
 
 **Acceptance criteria:**
-- [ ] buy plus sell equals volume for every bar
-- [ ] the zero-range bar rule is covered
-- [ ] the daily fallback is used and flagged when intraday bars are missing
+- [x] buy plus sell equals volume for every bar (#136)
+- [x] the zero-range bar rule is covered (#136)
+- [x] the daily fallback is used and flagged when intraday bars are missing (#136)
 
 ### S2-T08: No-look-ahead and determinism harness
 
@@ -550,8 +550,8 @@ Volume oscillator (5, 10), relative volume, CMF(20), accumulation and distributi
 A hypothesis property test applied to every public indicator: computing on `bars[:t]` yields the same values for indexes below `t - confirm_lag` as computing on the full series. A determinism test hashes all outputs for the fixture dataset and compares to a committed hash. A benchmark test enforces NFR-001's compute budget.
 
 **Acceptance criteria:**
-- [ ] all indicators are registered with the harness (a test fails if a public indicator function is missing from the registry)
-- [ ] the benchmark passes in CI on 2 cores
+- [x] all indicators are registered with the harness (a test fails if a public indicator function is missing from the registry) (#138)
+- [x] the benchmark passes in CI on 2 cores (#138)
 
 ### S2-T09: Indicator snapshot persistence
 
@@ -564,18 +564,20 @@ A hypothesis property test applied to every public indicator: computing on `bars
 Compute-all function producing one snapshot row per ticker per date (JSONB of indicator values plus levels), stored in `indicator_snapshots` with the config hash.
 
 **Acceptance criteria:**
-- [ ] snapshot for the fixture dataset round-trips
-- [ ] recomputing with the same inputs produces an identical JSON document
+- [x] snapshot for the fixture dataset round-trips (#139)
+- [x] recomputing with the same inputs produces an identical JSON document (#139)
 
 ### Sprint 2 checklist (non-blocking; unmet items go to docs/GATE_DEBT.md)
 
-- [ ] Every indicator in the specification is implemented and registered with the no-look-ahead harness
-- [ ] Supertrend hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open
-- [ ] Determinism hash committed and checked in CI
-- [ ] Indicator coverage at or above 95 percent
-- [ ] Compute benchmark within budget
-- [ ] `make up && make smoke` pass; spec docs audited
-- [ ] Retrospective written; tag `sprint-2-complete` pushed
+Filled in at sprint end on the integrated tip of the stacked PRs (#139 branch, 67de23a). None of the PRs is merged yet: the agent's `gh pr merge` was denied (docs/OWNER_CHECKLIST.md #25, GD-015).
+
+- [x] Every indicator in the specification is implemented and registered with the no-look-ahead harness (#131 to #138: 56 indicators registered, 21 exempt names with reasons; TS-IND-091 fails on an unregistered public function)
+- [x] Supertrend hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open (#137: TS-IND-020 passes; TS-IND-021 and 022 skipped, docs/OWNER_CHECKLIST.md #3 open, GD-016)
+- [x] Determinism hash committed and checked in CI (#138: `tests/golden/determinism.sha256`, floats at 10 significant digits per ADR-056; the synthetic dataset hash is checked by `scripts/validate-fixtures.sh` in CI)
+- [x] Indicator coverage at or above 95 percent (99 percent, 1,133 statements; total 97 percent)
+- [x] Compute benchmark within budget (TS-IND-094: 200 tickers x 756 bars in 2.75 s locally against the 60 s budget; passes in CI)
+- [ ] `make up && make smoke` pass; spec docs audited (spec docs audited in #140; smoke passed 3 of 3 on the integrated tip locally, but not on `develop` or `staging`, which do not have the Sprint 2 code yet: GD-015)
+- [ ] Retrospective written; tag `sprint-2-complete` pushed (retrospective written in #140; tag not pushed, because it must point at a `staging` build that has the merged Sprint 2 code: GD-015)
 
 ---
 

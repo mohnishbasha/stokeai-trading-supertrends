@@ -513,6 +513,37 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** The number may need renumbering at merge. A new indicator module needs a one-line change here.
 - **Status:** Accepted.
 
+### ADR-054: Trend and momentum indicator definitions
+- **Context:** Factor 2, Factor 3, and the regime ADX leave several details open (S2-T03).
+- **Decision:** ADX uses Wilder: `+DM = up if up > down and up > 0 else 0`, `-DM = down if down > up and down > 0 else 0` (`up = high[t] - high[t-1]`, `down = low[t-1] - low[t]`), TR, +DM, and -DM smoothed with the Wilder RMA over bars 1..14, `+DI = 100 * RMA(+DM) / RMA(TR)`, `DX = 100 * |+DI - -DI| / (+DI + -DI)`, `ADX = RMA(DX, 14)`; any zero denominator yields 0, so a flat series gives DI = DX = ADX = 0. A cross at t needs the prior bar on the other side or equal (`a[t-1] <= b[t-1]` and `a[t] > b[t]` for golden); `last_cross` looks at the last N bars including the latest. Slope is `sma[t] - sma[t-5]`. Weekly MACD is evaluated as of each day from the completed weekly EMA state plus the in-progress week closed at that day's close, so it equals the finished weekly bar's MACD on the last session of a week and never uses later bars. A histogram run is 3 consecutive strict changes.
+- **Alternatives rejected:** Forward-filling the last completed weekly MACD (stale by up to 4 days); recomputing the whole weekly series per day (O(n^2)).
+- **Consequences:** The number may need renumbering at merge.
+- **Status:** Accepted.
+
+### ADR-055: Support and resistance clustering, strength, and Fibonacci projection
+
+- **Context:** Factors 6 and 7 leave the clustering rule, the strength weighting, the "intact yesterday" test, and the extension anchor open.
+- **Decision:** Pivot prices are sorted and clusters are anchored on their lowest price (a pivot joins while within `0.5 * atr14` of the anchor); the level is the mean price. Strength is the sum of per-touch weights `1 - 0.7 * age / 250` (identical to `touches * mean weight`). The 52-week high and low are extra levels (touches 1) on top of the 4 strongest per side. Breakout and breakdown use the levels computed as of the previous bar, so the flag appears only on the crossing bar. Fibonacci extensions are `A + ratio * (B - A)`; the ZigZag threshold is the scalar at the as-of bar. Both functions are as-of-last-bar: callers pass `bars[:t+1]`.
+- **Alternatives rejected:** Single-linkage chaining (clusters can grow without bound); per-cluster mean weight times touches (same value, less clear).
+- **Consequences:** The number may need renumbering at merge. See PRD A-22.
+- **Status:** Accepted.
+
+### ADR-056: Indicator registry and the determinism harness
+
+- **Context:** NFR-007 needs every public indicator under the no-look-ahead property, and NFR-002 needs a committed determinism hash.
+- **Decision:** `supertrends.indicators.registry` lists every public indicator with an adapter, its kind (series or as-of) and `confirm_lag`; non-indicator public names are exempt with a reason, and a test fails on any name in `indicators.__all__` that is neither. Hypothesis draws only generator parameters and numpy builds the bars. Weekly values are checked as of completed weeks (ADR-033). Hashes of the synthetic dataset and of all indicator outputs (canonical JSON, NaN as null, floats rounded to 10 significant digits by `round_significant`, because full-precision `repr` differed between macOS arm64 and Linux amd64 CI in the last bits of a few recursive indicators) live in `tests/golden/*.sha256` and change only through `scripts/regen-golden.sh --reason`. The package aggregator imports modules under `_m_` aliases so the `supertrend` function can be exported next to the module of the same name.
+- **Alternatives rejected:** Registry under `tests/` (the snapshot task needs it too); drawing raw floats in hypothesis (slow shrinking).
+- **Consequences:** `indicators.supertrend` is the function, so use `importlib` for the module. Profiles `ci` (100, derandomized) and `nightly` (1000) come from `HYPOTHESIS_PROFILE`.
+- **Status:** Accepted.
+
+### ADR-057: Indicator snapshot document and persistence
+
+- **Context:** S2-T09 stores the `computing` output per ticker. The table key is (`run_id`, `symbol`) and has no date or hash column.
+- **Decision:** `scoring.snapshot.compute_snapshot(bundle, cfg, as_of)` is pure: it drops bars after `as_of`, computes every registered per-bar indicator at the last bar with parameters from the config (registry defaults where the config has none: BBW rank window 126, ATR% rank window 252, relative volume 20, HV20), and returns canonical JSON (NaN null, floats to 10 significant digits via `indicators.registry.round_significant`, sorted keys in `snapshot_bytes`). It lives in `scoring/` because it reads the config; `indicators/` stays free of it. `data.snapshots.write_snapshot` is `INSERT ... ON CONFLICT DO NOTHING`; on conflict it compares the stored document and returns `unchanged` when equal, else raises `SnapshotConflictError`. `compute_and_store` refuses a config whose hash differs from `runs.config_hash`. No migration: date and hash come from the run row.
+- **Alternatives rejected:** Adding `trade_date` and `config_hash` columns (duplicates `runs`, needs a migration); upsert (the table is append-only).
+- **Consequences:** A retry of `computing` is safe. Changing bars or config means a new run.
+- **Status:** Accepted.
+
 ---
 
 ## 4. Data Flows
@@ -780,7 +811,7 @@ PK (`run_id`, `seq`). Append-only.
 | `symbol` | `text` | no | | FK `tickers(symbol)` |
 | `values` | `jsonb` | no | | values at bar t for every registered indicator, daily and weekly |
 
-PK (`run_id`, `symbol`). Append-only.
+PK (`run_id`, `symbol`). Append-only. The trade date and config hash are those of the `runs` row (the document repeats them as `as_of` and `config_hash`). `values` is the canonical snapshot of ADR-057: `daily`, `weekly`, `levels`, `fib`, `divergences`, `flow`. A write of an equal document for an existing key is skipped; a different one raises (no UPDATE ever).
 
 #### `ticker_scores`
 | Column | Type | Null | Default | Notes |
