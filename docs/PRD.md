@@ -40,7 +40,7 @@
 
 **Tagline:** *Know which way the tape is leaning.*
 
-**What it does.** Super Trends watches a list of stocks, applies the TradingView Supertrend algorithm together with ten supporting technical and fundamental factors, and turns the result into one composite score per ticker. Every trading day it publishes the three strongest buys and the two strongest sells in a web UI, each with the evidence and a plain-language justification. The same results are available through an HTTP API, a CLI, and an MCP server for AI agents.
+**What it does.** Super Trends watches a list of stocks, applies the TradingView Supertrend algorithm together with eleven supporting technical and fundamental factors, including Ripster EMA Clouds, and turns the result into one composite score per ticker. Every trading day it publishes the three strongest buys and the two strongest sells in a web UI, each with the evidence and a plain-language justification. The same results are available through an HTTP API, a CLI, and an MCP server for AI agents.
 
 **Where it runs.** The reference deployment is self-hosted on StokeAI infrastructure (k3s on NVIDIA DGX Spark, ARM64). Super Trends is a CPU-only workload. It consumes an LLM through the existing Stoke gateway (OpenAI-compatible) and deploys no models, GPUs, or cluster components. Canonical URL: `supertrends.openstoke.com`; staging: `supertrends-stage.openstoke.com`. A public DNS name does not mean public access: the default deployment is private (tailnet only).
 
@@ -72,7 +72,7 @@ The Today screen: three buy cards and two sell cards for the latest trading day,
 
 1. After the US market close, a scheduled run ingests the day's bars for every watchlist ticker and the benchmarks (SPY, QQQ).
 2. The indicator engine computes all indicators on daily and weekly bars, and buy/sell volume from intraday bars.
-3. Eleven factor scores are computed per ticker. Regime and fundamentals adjust the weights. A composite score is produced.
+3. Twelve factor scores are computed per ticker. Regime and fundamentals adjust the weights. A composite score is produced.
 4. Tickers are ranked. The top 3 qualifying buys and top 2 qualifying sells are selected.
 5. A justification is written for each pick from the computed evidence.
 6. Results are stored immutably and shown in the UI, the API, the CLI, and MCP.
@@ -384,23 +384,68 @@ ETFs and tickers with no fundamentals (QQQ, SPY) get quality `missing`; the fact
 
 Earnings proximity: `days_to_earnings` (trading days) is stored per ticker. It is not part of the fundamentals score; it drives the event-risk rules below.
 
-### 7.13 Regime detection and dynamic weights
+### 7.13 Factor 12: Ripster EMA Clouds
+
+Match Ripster47's "Ripster EMA Clouds" TradingView indicator with its default settings: MA type EMA, source `hl2`, five clouds. A cloud is the band between a short and a long EMA of `hl2`, computed on daily bars.
+
+| Cloud | Short / long EMA | Role in Super Trends |
+|---|---|---|
+| `c1` | 8 / 9 | pullback zone |
+| `c2` | 5 / 12 | short-term trend |
+| `c3` | 34 / 50 | trend bias: the line between bullish and bearish |
+| `c4` | 72 / 89 | intermediate trend (evidence and levels only, not scored) |
+| `c5` | 180 / 200 | long-term trend |
+
+```
+src             = hl2
+ema_s, ema_l    = EMA(src, short), EMA(src, long)            for each cloud, EMA as defined in Conventions
+top[t], bot[t]  = max(ema_s[t], ema_l[t]), min(ema_s[t], ema_l[t])
+cloud_dir[t]    = +1 if ema_s[t] > ema_l[t] else -1           (TradingView colors the cloud green / red)
+pos(c)[t]       = +1 if close[t] > top(c)[t], -1 if close[t] < bot(c)[t], 0 inside the cloud
+stack[t]        = +1 if bot(c2)[t] > top(c3)[t]               (5/12 cloud fully above the 34/50 cloud)
+                  -1 if top(c2)[t] < bot(c3)[t]               (5/12 cloud fully below the 34/50 cloud)
+                   0 otherwise
+```
+
+Derived values: `rc_bias = pos(c3)`, `rc_stack = stack`, `rc_bars_since_stack_flip` (bars since `stack` last changed to its current nonzero value), `rc_c3_top` and `rc_c3_bot` (the 34/50 cloud edges, reported as the trend-bias level), and `rc_dir_w` (direction of the 34/50 cloud on weekly bars, evidence only).
+
+Factor score:
+
+```
+bias      = 30 * pos(c3)               (above the 34/50 cloud is bullish, below is bearish, inside is 0)
+trend     = 20 * cloud_dir(c2)
+stacking  = 20 * stack
+mid       = 10 * cloud_dir(c3)
+long      = 10 * pos(c5)
+pullback  = 10 * stack  if stack != 0 and, within the last 3 bars, price tested the 8/9 cloud from the trend side
+                        (bullish: some low <= top(c1); bearish: some high >= bot(c1))
+                        and close[t] is still on the trend side of it (bullish: close > bot(c1); bearish: close < top(c1))
+            0 otherwise                (a held pullback into the 8/9 cloud is the preferred entry)
+score     = clip(bias + trend + stacking + mid + long + pullback, -100, 100)
+```
+
+Parity requirement: on a TradingView daily export with the Ripster EMA Clouds indicator at default settings, computed on the exact bars in the export, every one of the ten EMAs matches within 0.01 per bar after a 200-bar warm-up, and every cloud direction matches on every bar after warm-up. See S2-T10.
+
+### 7.14 Regime detection and dynamic weights
 
 Base weights (sum 100):
 
 | # | Factor | Base weight |
 |---|---|---|
 | 1 | Supertrend | 20 |
-| 2 | SMA analysis | 10 |
-| 3 | MACD | 10 |
-| 4 | Divergences | 10 |
-| 5 | Mean reversion | 8 |
-| 6 | Fibonacci retracement | 6 |
-| 7 | Support and resistance | 8 |
-| 8 | Volatility | 5 |
+| 2 | SMA analysis | 7 |
+| 3 | MACD | 8 |
+| 4 | Divergences | 9 |
+| 5 | Mean reversion | 7 |
+| 6 | Fibonacci retracement | 5 |
+| 7 | Support and resistance | 7 |
+| 8 | Volatility | 4 |
 | 9 | Volume oscillator | 6 |
 | 10 | Buy / sell volume | 9 |
 | 11 | Fundamentals | 8 |
+| 12 | Ripster EMA Clouds | 10 |
+
+Ripster EMA Clouds overlaps the moving-average and momentum factors, so its 10 points were taken mostly from SMA analysis (-3) and MACD (-2), and one point each from Divergences, Mean reversion, Fibonacci, Support and resistance, and Volatility.
 
 Per-ticker regime from ADX(14) on daily bars:
 - `trending`: ADX >= 25
@@ -422,6 +467,7 @@ Regime multipliers applied to the base weights, then renormalized to sum 100:
 | Volume oscillator | 1.00 | 1.00 | 1.00 |
 | Buy / sell volume | 1.00 | 1.00 | 1.00 |
 | Fundamentals | 1.00 | 1.00 | 1.00 |
+| Ripster EMA Clouds | 1.20 | 0.70 | 1.00 |
 
 Fundamental and event adjustments (applied after regime multipliers, before renormalizing):
 - `days_to_earnings <= 5`: fundamentals weight x 1.5, and the pick carries the `event_risk` flag.
@@ -435,7 +481,7 @@ Market regime (benchmark filter) from QQQ and SPY daily Supertrend:
 
 Every adjustment that fired is stored with the result and shown in the UI ("Weights adjusted: trending regime, earnings in 3 days").
 
-### 7.14 Composite score, confidence, and bands
+### 7.15 Composite score, confidence, and bands
 
 ```
 composite = sum(w_i * s_i) / sum(w_i)            over factors with quality != missing, range -100..100
@@ -461,15 +507,16 @@ confidence = 100 * agreement
            - 15 if atr_pct_rank > 90
            - 10 if any factor quality is degraded
            - 10 if st_dir_w != st_dir_d
+           - 10 if rc_stack == -st_dir_d          (the Ripster 5/12 vs 34/50 stack opposes the daily Supertrend)
            - 10 if event_risk
 confidence = clip(confidence, 0, 100)
 ```
 
-### 7.15 Selection rules
+### 7.16 Selection rules
 
-A ticker is a **buy candidate** when all hold: display >= 65 (plus any threshold adjustments), `st_dir_d == +1`, confidence >= 50, data quality not `stale`, average 20-day dollar volume >= 20,000,000.
+A ticker is a **buy candidate** when all hold: display >= 65 (plus any threshold adjustments), `st_dir_d == +1`, `rc_bias >= 0` (close not below the 34/50 cloud), confidence >= 50, data quality not `stale`, average 20-day dollar volume >= 20,000,000.
 
-A ticker is a **sell candidate** when all hold: display <= 35 (minus any threshold adjustments), `st_dir_d == -1`, confidence >= 50, data quality not `stale`, same liquidity floor.
+A ticker is a **sell candidate** when all hold: display <= 35 (minus any threshold adjustments), `st_dir_d == -1`, `rc_bias <= 0` (close not above the 34/50 cloud), confidence >= 50, data quality not `stale`, same liquidity floor.
 
 "Sell" means bearish: reduce, exit, or avoid. Super Trends does not recommend short selling or any specific instrument, size, or expiry.
 
@@ -479,7 +526,7 @@ Correlation guard: the watchlist contains many near-duplicates (several S&P 500 
 
 Stickiness rule: none in v1. Each day stands alone. A ticker may appear on consecutive days; the UI shows "day N on the list".
 
-### 7.16 Justification
+### 7.17 Justification
 
 For each pick, store a structured evidence document:
 
@@ -505,16 +552,16 @@ For each pick, store a structured evidence document:
 
 Narrative: 3 to 5 sentences, written by an LLM from the evidence document only, through an OpenAI-compatible endpoint (on Stoke: the existing gateway in front of vLLM). Rules:
 - The system prompt forbids any number, level, or claim not present in the evidence document, forbids price targets beyond `next_target`, forbids the words "guaranteed", "will", "can't lose", and forbids advice on position size, options, or leverage.
-- Order: lead with the Supertrend state, then the two largest positive contributions, then the largest opposing factor ("what argues against it"), then the invalidation level.
+- Order: lead with the Supertrend state and the Ripster 34/50 cloud bias, then the two largest positive contributions, then the largest opposing factor ("what argues against it"), then the invalidation level.
 - **Numeric guard:** after generation, extract every number from the narrative. Each must match a value in the evidence document within rounding. Any unmatched number rejects the narrative.
 - On rejection, timeout (8 seconds), or endpoint error: retry once at temperature 0, then fall back to the deterministic template narrative. The stored narrative records `source: llm | template` and the model name.
 - The narrative never changes a score, a rank, or a selection.
 
-### 7.17 Track record
+### 7.18 Track record
 
 For every published pick store `entry_price = next session's open`. On later runs compute forward returns at 1, 5, 10, and 20 trading days, for the pick and for SPY over the same window. A buy "hit" is a positive excess return versus SPY; a sell "hit" is a negative excess return. Report hit rate, mean and median excess return, and worst pick, per side, per horizon, overall and by band, with the sample size next to every statistic. Statistics with fewer than 20 samples are labeled "small sample".
 
-### 7.18 Backtest
+### 7.19 Backtest
 
 `supertrends backtest --from YYYY-MM-DD --to YYYY-MM-DD --config config/scoring.yaml` replays the daily loop over stored history with no look-ahead (indicators at day t use bars up to t; entries at t+1 open; fundamentals use the value known at t). Output: the same track-record statistics plus an equity curve for "equal weight the daily buys, hold 5 days", against SPY. Backtest results are labeled as hypothetical everywhere they appear.
 
@@ -744,6 +791,12 @@ Accumulation days (up close on relative volume >= 1.5) and distribution days (do
 ADX(14) with +DI and -DI on daily bars, using Wilder smoothing.
 - **Given** a reference fixture, **When** ADX runs, **Then** ADX, +DI, and -DI match within 1e-6.
 
+#### FR-224: Ripster EMA Clouds indicator and TradingView parity
+Ten EMAs on `hl2` per section 7.13 (EMA as defined in section 7.1), the cloud top, bottom and direction for each of the five clouds, `pos`, `stack`, and the derived values `rc_bias`, `rc_stack`, `rc_bars_since_stack_flip`, `rc_c3_top`, `rc_c3_bot`, and `rc_dir_w` (34/50 direction on weekly bars, evidence only). On the golden TradingView fixtures (the owner's exports with the Ripster EMA Clouds indicator at default settings, in `tests/golden/tradingview/`), computed on the export's own bars, each of the ten EMAs matches within 0.01 per bar and each cloud direction matches on every bar after a 200-bar warm-up. Until the files exist the parity test is skipped with a visible reason; before the v1.0.0 release it must pass, not skip.
+- **Given** the hand-computed fixture covering a stack flip in each direction, a close inside a cloud, and a held and a failed 8/9 pullback, **When** the clouds run, **Then** `top`, `bot`, `cloud_dir`, `pos`, `stack`, and `rc_bars_since_stack_flip` match every bar.
+- **Given** any input after warm-up, **When** the clouds run, **Then** `top >= bot` for every cloud, and `stack` is nonzero only when the 5/12 and 34/50 clouds do not overlap (property test).
+- **Given** the parity files, **When** the parity test runs, **Then** every EMA is within 0.01 and every cloud direction is equal on every bar after bar 200.
+
 #### FR-221: No look-ahead harness
 Every public indicator is registered with a property test: computing on `bars[:t]` yields the same values for indexes below `t - confirm_lag` as computing on the full series. A test fails if any public indicator function is missing from the registry.
 - **Given** a deliberately leaky indicator injected in a test, **When** the harness runs, **Then** the harness fails.
@@ -763,7 +816,7 @@ Every factor implements `id` and `compute(snapshot, context) -> FactorResult`. A
 - **Given** any factor result, **When** it is stored in `factor_scores`, **Then** score, weight, contribution, quality, and evidence are present.
 
 #### FR-302: Factor registry consistency
-The eleven factor IDs are `supertrend`, `sma`, `macd`, `divergence`, `mean_reversion`, `fibonacci`, `levels`, `volatility`, `volume_osc`, `flow`, `fundamentals`.
+The twelve factor IDs are `supertrend`, `sma`, `macd`, `divergence`, `mean_reversion`, `fibonacci`, `levels`, `volatility`, `volume_osc`, `flow`, `fundamentals`, `ripster`.
 - **Given** the registry and `config/scoring.yaml`, **When** the app starts, **Then** every weight key maps to a registered factor and every registered factor has a weight; otherwise startup fails naming the mismatch.
 
 #### FR-303: Factor 1, Supertrend score
@@ -838,20 +891,20 @@ Sub-scores, each clipped to its range: revenue growth YoY (latest quarter) +/- 2
 
 #### FR-315: Fundamentals quality and weight handling
 ETFs and tickers with no fundamentals (for example QQQ, SPY) get quality `missing`, and the factor's weight is redistributed proportionally across the other factors. Fundamentals older than 120 days (`fundamentals.stale_days`) are `degraded` and the weight is halved (`fundamentals.stale_weight_multiplier` 0.5). `days_to_earnings` is not part of the fundamentals score.
-- **Given** QQQ, **When** scored, **Then** fundamentals quality = `missing`, the fundamentals factor has weight 0, and the other ten weights sum to 100.
+- **Given** QQQ, **When** scored, **Then** fundamentals quality = `missing`, the fundamentals factor has weight 0, and the other eleven weights sum to 100.
 - **Given** fundamentals with latest `period_end` data 130 days old, **Then** quality = `degraded` and the fundamentals weight is half its pre-quality value before renormalization.
 
 #### FR-316: Base weights
-Base weights (sum 100): Supertrend 20, SMA 10, MACD 10, Divergences 10, Mean reversion 8, Fibonacci 6, Support and resistance 8, Volatility 5, Volume oscillator 6, Buy / sell volume 9, Fundamentals 8.
-- **Given** a `config/scoring.yaml` whose eleven weights do not sum to 100, **When** the config is loaded, **Then** validation fails with a message naming the weights block.
+Base weights (sum 100): Supertrend 20, SMA 7, MACD 8, Divergences 9, Mean reversion 7, Fibonacci 5, Support and resistance 7, Volatility 4, Volume oscillator 6, Buy / sell volume 9, Fundamentals 8, Ripster EMA Clouds 10.
+- **Given** a `config/scoring.yaml` whose twelve weights do not sum to 100, **When** the config is loaded, **Then** validation fails with a message naming the weights block.
 
 #### FR-317: Per-ticker regime
 From ADX(14) on daily bars: `trending` if ADX >= 25; `ranging` if ADX < 20; `transitional` otherwise.
 - **Given** ADX = 25.0, **Then** regime = `trending`. **Given** 19.99, **Then** `ranging`. **Given** 20.0 or 24.99, **Then** `transitional`.
 
 #### FR-318: Regime multipliers and renormalization
-The regime multiplier table in section 7.13 is applied to the base weights; the weights are then renormalized to sum 100. `transitional` multipliers are all 1.00; Volatility, Volume oscillator, Buy / sell volume, and Fundamentals are 1.00 in every regime.
-- **Given** a trending ticker with no other adjustments and all factors present, **When** weights are computed, **Then** pre-normalization weights are Supertrend 25, SMA 12, MACD 11, Divergences 9, Mean reversion 4, Fibonacci 6, Levels 7.2, Volatility 5, Volume oscillator 6, Flow 9, Fundamentals 8 (sum 102.2), and after renormalization they sum to 100 (Supertrend 24.46 to two decimals).
+The regime multiplier table in section 7.14 is applied to the base weights; the weights are then renormalized to sum 100. `transitional` multipliers are all 1.00; Volatility, Volume oscillator, Buy / sell volume, and Fundamentals are 1.00 in every regime, and Ripster EMA Clouds is 1.20 trending, 0.70 ranging, 1.00 transitional.
+- **Given** a trending ticker with no other adjustments and all factors present, **When** weights are computed, **Then** pre-normalization weights are Supertrend 25, SMA 8.4, MACD 8.8, Divergences 8.1, Mean reversion 3.5, Fibonacci 5, Levels 6.3, Volatility 4, Volume oscillator 6, Flow 9, Fundamentals 8, Ripster 12 (sum 104.1), and after renormalization they sum to 100 (Supertrend 24.02 to two decimals, Ripster 11.53).
 - **Given** each cell of the multiplier table, **When** tested, **Then** the applied multiplier equals the table value.
 
 #### FR-319: Earnings event adjustment
@@ -892,10 +945,10 @@ Bands on the display score: 80 to 100 Strong Buy; 65 to 79.9 Buy; 50 to 64.9 Neu
 - **Given** display 80.0, **Then** band = Strong Buy; 79.9, Buy; 65.0, Buy; 64.9, Neutral, leaning up; 50.0, Neutral, leaning up; 49.9, Neutral, leaning down; 35.1, Neutral, leaning down; 35.0, Sell; 20.1, Sell; 20.0, Strong Sell.
 
 #### FR-327: Confidence
-`agreement` = share of total weight held by factors whose score has the same sign as composite (0..1). `confidence = 100 * agreement`, minus 15 if `atr_pct_rank > 90`, minus 10 if any factor quality is degraded, minus 10 if `st_dir_w != st_dir_d`, minus 10 if `event_risk`; then `clip(confidence, 0, 100)`. The deductions that fired are stored and shown next to the confidence value.
+`agreement` = share of total weight held by factors whose score has the same sign as composite (0..1). `confidence = 100 * agreement`, minus 15 if `atr_pct_rank > 90`, minus 10 if any factor quality is degraded, minus 10 if `st_dir_w != st_dir_d`, minus 10 if `rc_stack == -st_dir_d` (FR-335), minus 10 if `event_risk`; then `clip(confidence, 0, 100)`. The deductions that fired are stored and shown next to the confidence value.
 - **Given** agreement 0.80 and no deductions, **Then** confidence = 80.
 - **Given** agreement 0.80, `atr_pct_rank` 95, and weekly disagreement, **Then** confidence = 80 - 15 - 10 = 55.
-- **Given** agreement 0.30 with all four deductions, **Then** confidence = clip(30 - 45, 0, 100) = 0.
+- **Given** agreement 0.30 with all five deductions, **Then** confidence = clip(30 - 55, 0, 100) = 0.
 
 #### FR-328: Contributions
 `contribution = weight * score / 100` per factor, so contributions sum to the composite.
@@ -918,19 +971,42 @@ Every distinct config hash is stored in `config_versions` with the full document
 Every run, factor score, indicator snapshot, recommendation, and evidence document records the config hash that produced it.
 - **Given** any past recommendation, **When** its date is browsed, **Then** the exact config document that produced it can be displayed via its hash.
 
+#### FR-333: Factor 12, Ripster EMA Clouds score
+`bias = 30 * pos(c3)`; `trend = 20 * cloud_dir(c2)`; `stacking = 20 * stack`; `mid = 10 * cloud_dir(c3)`; `long = 10 * pos(c5)`; `pullback = 10 * stack` if `stack != 0` and, within the last 3 bars (`ripster.pullback_lookback_bars`), price tested the 8/9 cloud from the trend side (bullish: some low <= `top(c1)`; bearish: some high >= `bot(c1)`) and `close[t]` is still on the trend side of it (bullish: `close > bot(c1)`; bearish: `close < top(c1)`), otherwise 0; `score = clip(bias + trend + stacking + mid + long + pullback, -100, 100)`. The 72/89 cloud is evidence only and is not scored.
+- **Given** close above the 34/50 cloud, **Then** `bias` = +30; **given** below, -30; **given** inside the cloud (`pos(c3)` = 0), **Then** `bias` = 0.
+- **Given** a bullish 5/12 cloud (`cloud_dir(c2)` = +1), **Then** `trend` = +20; **given** bearish, -20.
+- **Given** the 5/12 cloud fully above the 34/50 cloud (`stack` = +1), **Then** `stacking` = +20; **given** fully below, -20; **given** overlapping clouds, 0.
+- **Given** a bullish 34/50 cloud, **Then** `mid` = +10; **given** bearish, -10.
+- **Given** close above the 180/200 cloud, **Then** `long` = +10; **given** below, -10; **given** inside, 0.
+- **Given** `stack` = +1, a low at or below `top(c1)` 2 bars ago, and a close above `bot(c1)`, **Then** `pullback` = +10 (held). **Given** the same with a close at or below `bot(c1)` (failed), **Then** `pullback` = 0. **Given** the only test of the 8/9 cloud was 4 bars ago (stale), **Then** `pullback` = 0. **Given** `stack` = -1 and a high at or above `bot(c1)` within 3 bars with a close below `top(c1)`, **Then** `pullback` = -10.
+- **Given** all six components at their bullish maximum (30 + 20 + 20 + 10 + 10 + 10 = 100), **Then** score = 100; **given** all at their bearish maximum, -100.
+
+#### FR-334: Ripster selection gate
+A buy candidate requires `rc_bias >= 0` (close not below the 34/50 cloud) and a sell candidate requires `rc_bias <= 0` (close not above the 34/50 cloud). Close inside the 34/50 cloud (`rc_bias` = 0) passes both gates. A candidate rejected by the gate is recorded with the reason.
+- **Given** a buy candidate on every other rule with `rc_bias` = -1, **When** selection runs, **Then** it is not a buy candidate, and the recorded reason is "close below the 34/50 cloud".
+- **Given** a sell candidate on every other rule with `rc_bias` = +1, **Then** it is not a sell candidate, and the recorded reason is "close above the 34/50 cloud".
+- **Given** `rc_bias` = 0, **Then** the Ripster gate passes for both sides.
+
+#### FR-335: Ripster confidence deduction
+Confidence is reduced by 10 (`ripster.confidence_stack_conflict_penalty`) when `rc_stack == -st_dir_d`, that is, when the 5/12 vs 34/50 stack opposes the daily Supertrend. The deduction is stored and shown next to the confidence value like the others in FR-327.
+- **Given** `st_dir_d` = +1 and `rc_stack` = -1, **Then** confidence is reduced by 10. **Given** `st_dir_d` = +1 and `rc_stack` = +1 or 0, **Then** no Ripster deduction applies.
+- **Given** agreement 0.80 and `st_dir_d` = -1 with `rc_stack` = +1, **Then** confidence = 80 - 10 = 70.
+
 ### 8.5 Selection (FR-4xx)
 
 #### FR-401: Buy candidate
-A ticker is a buy candidate when all hold: display >= 65 (plus any threshold adjustments), `st_dir_d == +1`, confidence >= 50, data quality not `stale`, average 20-day dollar volume >= 20,000,000.
+A ticker is a buy candidate when all hold: display >= 65 (plus any threshold adjustments), `st_dir_d == +1`, `rc_bias >= 0` (close not below the 34/50 cloud), confidence >= 50, data quality not `stale`, average 20-day dollar volume >= 20,000,000.
 - **Given** display 70, `st_dir_d` +1, confidence 60, quality `ok`, dollar volume 25,000,000, and no threshold shifts, **When** selection runs, **Then** the ticker is a buy candidate.
 - **Given** the same with `st_dir_d` -1, **Then** it is not a buy candidate.
 - **Given** the same with confidence 49, or dollar volume 19,999,999, **Then** it is not a buy candidate.
 - **Given** display 69 under `risk_off` (threshold 70), **Then** it is not a buy candidate.
+- **Given** the same as the first case with `rc_bias` = -1, **Then** it is not a buy candidate (FR-334). **Given** `rc_bias` = 0, **Then** it is a buy candidate.
 
 #### FR-402: Sell candidate
-A ticker is a sell candidate when all hold: display <= 35 (minus any threshold adjustments), `st_dir_d == -1`, confidence >= 50, data quality not `stale`, average 20-day dollar volume >= 20,000,000.
+A ticker is a sell candidate when all hold: display <= 35 (minus any threshold adjustments), `st_dir_d == -1`, `rc_bias <= 0` (close not above the 34/50 cloud), confidence >= 50, data quality not `stale`, average 20-day dollar volume >= 20,000,000.
 - **Given** display 33, `st_dir_d` -1, confidence 55, quality `ok`, dollar volume 50,000,000, and `neutral` market regime, **Then** the ticker is a sell candidate.
 - **Given** display 33 under `risk_on` (threshold 30), **Then** it is not a sell candidate.
+- **Given** the same as the first case with `rc_bias` = +1, **Then** it is not a sell candidate (FR-334). **Given** `rc_bias` = 0, **Then** it is a sell candidate.
 
 #### FR-403: Meaning of "sell"
 "Sell" means bearish: reduce, exit, or avoid. Super Trends does not recommend short selling or any specific instrument, size, or expiry. The UI, narratives, CLI help, MCP tool descriptions, and user guide state this meaning.
@@ -954,7 +1030,7 @@ If fewer tickers qualify than the maximum on a side, Super Trends publishes fewe
 - **Given** exactly 1 qualifying buy, **When** the run publishes, **Then** the result has 1 buy, not 3.
 
 #### FR-408: Nearest miss
-For each side with fewer picks than the maximum, the result records the nearest candidate that missed (the non-qualifying ticker closest to that side's threshold among tickers that were scored) and the reason it missed (for example "score above the sell threshold of 35", "Supertrend direction is up", "confidence 44 below 50", "liquidity below the floor").
+For each side with fewer picks than the maximum, the result records the nearest candidate that missed (the non-qualifying ticker closest to that side's threshold among tickers that were scored) and the reason it missed (for example "score above the sell threshold of 35", "Supertrend direction is up", "close below the 34/50 cloud", "confidence 44 below 50", "liquidity below the floor").
 - **Given** no qualifying sells, **When** the run publishes, **Then** `nearest_miss.sell` contains a ticker, its display score, and a reason, and the Today screen shows "No qualifying sells today" with that ticker and reason.
 
 #### FR-409: Correlation guard
@@ -976,7 +1052,7 @@ There is no stickiness rule in v1: each day stands alone. A ticker may appear on
 ### 8.6 Justification (FR-5xx)
 
 #### FR-501: Evidence document
-For each pick a structured evidence document is stored with: ticker, date, side, display_score, confidence, band, regime, market_regime, supertrend (`dir_d`, `dir_w`, `bars_since_flip`, `line`, `distance_atr`), invalidation (`level`, `rule`), levels (support, resistance, fib, next_target), factors (id, score, weight, contribution, reasons), adjustments, flags, config_hash, plus `expected_1d_move` and flow quality. The shape follows section 7.16 and validates against a committed JSON schema.
+For each pick a structured evidence document is stored with: ticker, date, side, display_score, confidence, band, regime, market_regime, supertrend (`dir_d`, `dir_w`, `bars_since_flip`, `line`, `distance_atr`), ripster (`bias`, `stack`, `bars_since_stack_flip`, `c2_dir`, `c3_dir`, `c3_top`, `c3_bot`, `dir_w`), invalidation (`level`, `rule`), levels (support, resistance, fib, `cloud_34_50`, next_target), factors (id, score, weight, contribution, reasons), adjustments, flags, config_hash, plus `expected_1d_move` and flow quality. The shape follows section 7.17 and validates against a committed JSON schema.
 - **Given** any published pick, **When** its evidence document is validated against the schema, **Then** it passes, and every factor in the run appears in `factors`.
 
 #### FR-502: Deterministic reasons
@@ -988,7 +1064,7 @@ Every pick has an invalidation level equal to the daily Supertrend line: for a b
 - **Given** a buy with `st_line` 212.40, **Then** invalidation = `{"level": 212.40, "rule": "daily close below the Supertrend line"}` and the card reads, in substance, "this view is wrong if price closes below 212.40".
 
 #### FR-504: Template narrative
-A deterministic template narrative exists for every pick: it leads with the Supertrend state, then the two largest positive contributions, then the largest opposing factor ("what argues against it"), then the invalidation level. Every number in it appears in the evidence document.
+A deterministic template narrative exists for every pick: it leads with the Supertrend state and the Ripster 34/50 cloud bias, then the two largest positive contributions, then the largest opposing factor ("what argues against it"), then the invalidation level. Every number in it appears in the evidence document.
 - **Given** the narrative provider is `template`, **When** a run publishes, **Then** every pick has a 3 to 5 sentence narrative with `source: template` and passes the numeric guard.
 
 #### FR-505: LLM narrative
@@ -1000,8 +1076,8 @@ The system prompt forbids any number, level, or claim not present in the evidenc
 - **Given** the committed system prompt, **When** a test inspects it, **Then** it contains each prohibition.
 
 #### FR-507: Narrative order
-Order: lead with the Supertrend state, then the two largest positive contributions, then the largest opposing factor, then the invalidation level.
-- **Given** an evidence document, **When** the prompt is rendered, **Then** it instructs this order and supplies the Supertrend state, the top two positive contributions, the largest opposing factor, and the invalidation level in that order.
+Order: lead with the Supertrend state and the Ripster 34/50 cloud bias, then the two largest positive contributions, then the largest opposing factor, then the invalidation level.
+- **Given** an evidence document, **When** the prompt is rendered, **Then** it instructs this order and supplies the Supertrend state, the Ripster 34/50 cloud bias, the top two positive contributions, the largest opposing factor, and the invalidation level in that order.
 
 #### FR-508: Numeric guard
 After generation, every number in the narrative is extracted. Each must match a value in the evidence document within rounding (equal after rounding the evidence value to the number of decimals shown in the narrative). Any unmatched number rejects the narrative.
@@ -1106,7 +1182,7 @@ Routes: `/` (Today), `/ticker/:symbol`, `/watchlist`, `/track-record`, `/runs`, 
 - **Given** a published run, **When** the trader opens `/`, **Then** the picks are visible without any click, and the as-of date is the run's trade date.
 
 #### FR-703: Pick card contents
-Each card shows: ticker, side label with shape (up triangle and "Buy", or down triangle and "Sell"), band, ScoreDial with the display score, confidence (with deductions on hover or focus), TrendRibbon (last 60 sessions colored by Supertrend direction, flips marked), "flipped N bars ago", top factor contributions, narrative with its source tag, invalidation level, key levels (support, resistance, Fibonacci, next target), `expected_1d_move`, flags (`event_risk`, estimated order flow quality), "day N on the list", watchlist groups, and any "also qualified" duplicates.
+Each card shows: ticker, side label with shape (up triangle and "Buy", or down triangle and "Sell"), band, ScoreDial with the display score, confidence (with deductions on hover or focus), TrendRibbon (last 60 sessions colored by Supertrend direction, flips marked), "flipped N bars ago", top factor contributions, narrative with its source tag, invalidation level, key levels (support, resistance, Fibonacci, the 34/50 cloud, next target), `expected_1d_move`, flags (`event_risk`, estimated order flow quality), "day N on the list", watchlist groups, and any "also qualified" duplicates.
 - **Given** a fixture run, **When** a card renders, **Then** every listed element is present and matches the API payload.
 
 #### FR-704: Fewer cards and the empty side
@@ -1119,12 +1195,12 @@ An optional group filter re-ranks within one watchlist group without changing th
 - **Given** the group filter set to `semis`, **Then** the view shows the qualifying candidates within `semis` labeled as a group view, and the published picks returned by the API are unchanged.
 
 #### FR-706: Ticker chart
-`/ticker/:symbol` shows a candlestick chart (`lightweight-charts`) with overlays: Supertrend line colored by direction with flip markers, SMA 20 / 50 / 200, Fibonacci levels, support and resistance (strength by opacity). Sub-panels: MACD with histogram, RSI with divergence markers, volume with estimated buy / sell split. Only default overlays are on at first load; toggles persist per browser. The chart is keyboard reachable and has a data table alternative.
+`/ticker/:symbol` shows a candlestick chart (`lightweight-charts`) with overlays: Supertrend line colored by direction with flip markers, SMA 20 / 50 / 200, the Ripster 5/12 and 34/50 clouds (the 8/9, 72/89 and 180/200 clouds are toggles), Fibonacci levels, support and resistance (strength by opacity). Sub-panels: MACD with histogram, RSI with divergence markers, volume with estimated buy / sell split. Only default overlays are on at first load; toggles persist per browser. The chart is keyboard reachable and has a data table alternative.
 - **Given** a ticker, **When** the chart loads, **Then** the Supertrend series length and last value equal the bars endpoint values.
 - **Given** an overlay toggled off and the page reloaded, **Then** it stays off.
 
 #### FR-707: Ticker right rail
-The right rail shows the full factor table (score, weight, contribution, reasons, quality), regime, adjustments with before and after weights, fundamentals summary and quality, earnings countdown, Supertrend state (direction, weekly direction, bars since flip, line, distance in ATR), and the history of this ticker's scores and pick appearances.
+The right rail shows the full factor table (score, weight, contribution, reasons, quality), regime, adjustments with before and after weights, fundamentals summary and quality, earnings countdown, Supertrend state (direction, weekly direction, bars since flip, line, distance in ATR), Ripster state (34/50 bias, stack, bars since stack flip, 34/50 cloud edges), and the history of this ticker's scores and pick appearances.
 - **Given** a ticker in a ranging regime, **Then** the rail shows the regime badge and "Weights adjusted: ranging regime" with before and after weights.
 
 #### FR-708: Watchlist and ranking screen
@@ -1211,7 +1287,7 @@ Every API payload that contains picks includes the top-level `"disclaimer"` fiel
 - **Given** responses from `/recommendations/latest`, `/recommendations?date=`, `/rankings`, `/tickers/{symbol}/analysis`, `/tickers/{symbol}/history`, and `/track-record`, **Then** each contains the disclaimer string.
 
 #### FR-804: Rankings, analysis, bars, history
-`GET /api/v1/rankings?date=&limit=&offset=` returns the full ranked watchlist with scores; `GET /api/v1/tickers/{symbol}/analysis?date=` returns the factor table, evidence, levels, regime, adjustments, and narrative; `GET /api/v1/tickers/{symbol}/bars?tf=1d&from=&to=` returns bars plus overlay series (Supertrend with direction, SMAs, and levels); `GET /api/v1/tickers/{symbol}/history` returns the ticker's scores and pick appearances over time.
+`GET /api/v1/rankings?date=&limit=&offset=` returns the full ranked watchlist with scores; `GET /api/v1/tickers/{symbol}/analysis?date=` returns the factor table, evidence, levels, regime, adjustments, and narrative; `GET /api/v1/tickers/{symbol}/bars?tf=1d&from=&to=` returns bars plus overlay series (Supertrend with direction, SMAs, Ripster clouds, and levels); `GET /api/v1/tickers/{symbol}/history` returns the ticker's scores and pick appearances over time.
 - **Given** 200 scored tickers, **When** rankings are requested with `limit=50&offset=50`, **Then** ranks 51 to 100 are returned with the total count.
 
 #### FR-805: Authentication and rate limiting
@@ -1394,7 +1470,7 @@ NFR-001 to NFR-012 are reproduced verbatim from the seed. NFR-013 onward extend 
 
 ## 10. Default scoring configuration (`config/scoring.yaml`)
 
-This is the default configuration. Values match section 7. The schema requires the eleven weights to sum to 100. Any change to weights, thresholds, or formulas bumps `scoring.version` (FR-331).
+This is the default configuration. Values match section 7. The schema requires the twelve weights to sum to 100. Any change to weights, thresholds, or formulas bumps `scoring.version` (FR-331).
 
 ```yaml
 scoring:
@@ -1461,25 +1537,39 @@ flow:
 fundamentals:
   stale_days: 120
   stale_weight_multiplier: 0.5
+ripster:
+  source: hl2
+  ma_type: ema
+  clouds:
+    c1: [8, 9]
+    c2: [5, 12]
+    c3: [34, 50]
+    c4: [72, 89]
+    c5: [180, 200]
+  points: { bias: 30, trend: 20, stack: 20, mid: 10, long: 10, pullback: 10 }
+  pullback_lookback_bars: 3
+  confidence_stack_conflict_penalty: 10
+  selection_bias_gate: true
 weights:
   supertrend: 20
-  sma: 10
-  macd: 10
-  divergence: 10
-  mean_reversion: 8
-  fibonacci: 6
-  levels: 8
-  volatility: 5
+  sma: 7
+  macd: 8
+  divergence: 9
+  mean_reversion: 7
+  fibonacci: 5
+  levels: 7
+  volatility: 4
   volume_osc: 6
   flow: 9
   fundamentals: 8
+  ripster: 10
 regime:
   adx_length: 14
   trending_min: 25
   ranging_max: 20
   multipliers:
-    trending:     { supertrend: 1.25, sma: 1.20, macd: 1.10, divergence: 0.90, mean_reversion: 0.50, fibonacci: 1.00, levels: 0.90 }
-    ranging:      { supertrend: 0.70, sma: 0.70, macd: 0.90, divergence: 1.20, mean_reversion: 1.60, fibonacci: 1.10, levels: 1.40 }
+    trending:     { supertrend: 1.25, sma: 1.20, macd: 1.10, divergence: 0.90, mean_reversion: 0.50, fibonacci: 1.00, levels: 0.90, ripster: 1.20 }
+    ranging:      { supertrend: 0.70, sma: 0.70, macd: 0.90, divergence: 1.20, mean_reversion: 1.60, fibonacci: 1.10, levels: 1.40, ripster: 0.70 }
     transitional: {}
 events:
   earnings_window_days: 5
@@ -1648,7 +1738,7 @@ All responses are JSON. Errors follow RFC 9457. Every payload containing picks i
 | GET | `/api/v1/recommendations?date=YYYY-MM-DD` | none | Published picks for a date |
 | GET | `/api/v1/rankings?date=&limit=&offset=` | none | Full ranked watchlist for a date |
 | GET | `/api/v1/tickers/{symbol}/analysis?date=` | none | Factor table, evidence, levels, regime, narrative |
-| GET | `/api/v1/tickers/{symbol}/bars?tf=1d&from=&to=` | none | Bars plus overlay series (Supertrend, SMAs) |
+| GET | `/api/v1/tickers/{symbol}/bars?tf=1d&from=&to=` | none | Bars plus overlay series (Supertrend, SMAs, Ripster clouds) |
 | GET | `/api/v1/tickers/{symbol}/history` | none | This ticker's scores and pick appearances over time |
 | GET | `/api/v1/watchlist` | none | Watchlist and groups |
 | POST | `/api/v1/watchlist/items` | token | Add a ticker |
@@ -1772,20 +1862,21 @@ On Stoke, stage and prod are two namespaces on the same cluster. Super Trends is
 | RMA | Wilder's smoothing: seeded with the SMA of the first n values, then `rma[t] = (rma[t-1] * (n-1) + x[t]) / n`. |
 | EMA | Exponential moving average with alpha = 2/(n+1), seeded with the SMA of the first n values. |
 | SMA | Simple moving average: the arithmetic mean of the last n values. |
-| Factor | One of the eleven scoring components (Supertrend, SMA, MACD, Divergences, Mean reversion, Fibonacci, Support and resistance, Volatility, Volume oscillator, Buy / sell volume, Fundamentals). Each returns a factor score from -100 to +100, evidence items, and a quality flag. |
+| Factor | One of the twelve scoring components (Supertrend, SMA, MACD, Divergences, Mean reversion, Fibonacci, Support and resistance, Volatility, Volume oscillator, Buy / sell volume, Fundamentals, Ripster EMA Clouds). Each returns a factor score from -100 to +100, evidence items, and a quality flag. |
 | Factor score | A factor's output in the closed range -100 (max bearish) to +100 (max bullish). |
 | Quality | Per-factor data quality: `ok`, `degraded`, or `missing`. Missing factors are excluded from the composite; degraded factors lower confidence. |
 | Data quality status | Per-ticker ingestion status: `ok`, `degraded`, `stale`, or `insufficient_history`. Stale and insufficient-history tickers are excluded. |
+| Ripster EMA Clouds | Ripster47's TradingView indicator: five bands, each between a short and a long EMA of `hl2` (8/9, 5/12, 34/50, 72/89, 180/200). Super Trends uses the 34/50 cloud as the trend bias and the 8/9 cloud as the pullback zone. Section 7.13. |
 | Regime | The per-ticker market character from ADX(14): `trending` (ADX >= 25), `ranging` (ADX < 20), or `transitional`. It changes factor weights. |
 | Market regime | The benchmark filter from the daily Supertrend of SPY and QQQ: `risk_on` (both up), `risk_off` (both down), or `neutral` (mixed). It shifts selection thresholds. |
 | Weight | A factor's share of the composite after base weights, regime multipliers, event and quality adjustments, and renormalization to 100. |
 | Composite | `sum(w_i * s_i) / sum(w_i)` over factors with quality other than missing; range -100 to 100. |
 | Contribution | `weight * score / 100` for one factor; contributions sum to the composite. |
 | Display score | `round((composite + 100) / 2, 1)`, range 0 to 100; the score shown to the user and used for bands and thresholds. |
-| Band | The label for a display score range: Strong Buy, Buy, Neutral leaning up, Neutral leaning down, Sell, Strong Sell (section 7.14). Aligned with TastyStocks. |
+| Band | The label for a display score range: Strong Buy, Buy, Neutral leaning up, Neutral leaning down, Sell, Strong Sell (section 7.15). Aligned with TastyStocks. |
 | Confidence | A 0 to 100 measure of how much of the weight agrees with the composite's sign, reduced for extreme volatility, degraded data, weekly Supertrend conflict, and event risk. It is not a probability. |
 | Threshold | The display score a ticker must reach to be a candidate: 65 for buys and 35 for sells by default, shifted by fundamentals and market regime. |
-| Candidate | A ticker meeting all selection rules for a side (section 7.15). |
+| Candidate | A ticker meeting all selection rules for a side (section 7.16). |
 | Pick | A candidate selected for publication on a side after ranking and the correlation guard. |
 | Also qualified | A candidate skipped by the correlation guard because it duplicates an already selected pick. |
 | Nearest miss | For a side with fewer picks than the maximum, the scored ticker closest to qualifying, with the reason it missed. |
@@ -1799,7 +1890,7 @@ On Stoke, stage and prod are two namespaces on the same cluster. Super Trends is
 | Hit | A buy with positive excess return, or a sell with negative excess return, at a given horizon. |
 | Hit rate | Hits divided by the number of outcomes at that horizon, reported with the sample size. |
 | Small sample | A label on any statistic computed from fewer than 20 outcomes. |
-| Evidence document | The structured JSON record stored for each pick with scores, weights, contributions, reasons, levels, invalidation, adjustments, flags, and config hash (section 7.16). The only input to the narrative. |
+| Evidence document | The structured JSON record stored for each pick with scores, weights, contributions, reasons, levels, invalidation, adjustments, flags, and config hash (section 7.17). The only input to the narrative. |
 | Narrative | The 3 to 5 sentence justification for a pick, written by an LLM from the evidence document (checked by the numeric guard) or by a deterministic template. |
 | Numeric guard | The post-generation check that every number in an LLM narrative matches a value in the evidence document within rounding. |
 | Config hash | `sha256:` plus the sha256 of the canonical JSON of `config/scoring.yaml`; recorded with every result to identify the exact config that produced it. |
@@ -1848,11 +1939,11 @@ Additional v1 boundaries that follow from the list: no public sharing features o
 
 | Story | Functional requirements | NFRs |
 |---|---|---|
-| US-001 | FR-401, FR-402, FR-404, FR-406, FR-702, FR-703, FR-802, FR-902, FR-905 | NFR-003, NFR-006 |
-| US-002 | FR-501, FR-502, FR-504, FR-505, FR-507, FR-703, FR-707 | NFR-012 |
+| US-001 | FR-334, FR-401, FR-402, FR-404, FR-406, FR-702, FR-703, FR-802, FR-902, FR-905 | NFR-003, NFR-006 |
+| US-002 | FR-333, FR-501, FR-502, FR-504, FR-505, FR-507, FR-703, FR-707 | NFR-012 |
 | US-003 | FR-204, FR-205, FR-206, FR-703, FR-706, FR-804 | NFR-007 |
 | US-004 | FR-001 to FR-012, FR-708, FR-810, FR-813 | |
-| US-005 | FR-207, FR-213, FR-214, FR-706, FR-804 | NFR-011 |
+| US-005 | FR-207, FR-224, FR-213, FR-214, FR-706, FR-804 | NFR-011 |
 | US-006 | FR-404, FR-708, FR-804 | NFR-004 |
 | US-007 | FR-503, FR-703 | |
 | US-008 | FR-601 to FR-608, FR-709 | |
@@ -1889,7 +1980,7 @@ Additional v1 boundaries that follow from the list: no public sharing features o
 | US-039 | FR-604, FR-605, FR-612, FR-709 | |
 | US-040 | FR-902, FR-903, FR-904 | NFR-006 |
 
-Every FR in section 8 derives from at least one story, a Signal Engine rule in section 7, or a compliance and security control in section 5. Signal Engine coverage: section 7.1 (FR-101 to FR-103, FR-108, FR-201, FR-203, FR-301), 7.2 (FR-204 to FR-206, FR-303), 7.3 (FR-207, FR-304), 7.4 (FR-208, FR-305), 7.5 (FR-209 to FR-211, FR-306), 7.6 (FR-212, FR-307), 7.7 (FR-213, FR-308, FR-309), 7.8 (FR-214, FR-215, FR-310), 7.9 (FR-212, FR-311), 7.10 (FR-216, FR-312), 7.11 (FR-217 to FR-219, FR-313), 7.12 (FR-115, FR-116, FR-314, FR-315), 7.13 (FR-220, FR-316 to FR-323), 7.14 (FR-324 to FR-328), 7.15 (FR-401 to FR-412), 7.16 (FR-501 to FR-515), 7.17 (FR-601 to FR-608), 7.18 (FR-609 to FR-613).
+Every FR in section 8 derives from at least one story, a Signal Engine rule in section 7, or a compliance and security control in section 5. Signal Engine coverage: section 7.1 (FR-101 to FR-103, FR-108, FR-201, FR-203, FR-301), 7.2 (FR-204 to FR-206, FR-303), 7.3 (FR-207, FR-304), 7.4 (FR-208, FR-305), 7.5 (FR-209 to FR-211, FR-306), 7.6 (FR-212, FR-307), 7.7 (FR-213, FR-308, FR-309), 7.8 (FR-214, FR-215, FR-310), 7.9 (FR-212, FR-311), 7.10 (FR-216, FR-312), 7.11 (FR-217 to FR-219, FR-313), 7.12 (FR-115, FR-116, FR-314, FR-315), 7.13 (FR-224, FR-333), 7.14 (FR-220, FR-316 to FR-323), 7.15 (FR-324 to FR-328, FR-335), 7.16 (FR-334, FR-401 to FR-412), 7.17 (FR-501 to FR-515), 7.18 (FR-601 to FR-608), 7.19 (FR-609 to FR-613).
 
 ---
 
@@ -1934,3 +2025,4 @@ The literal reading of section 7 is implemented. Where it leaves a choice open, 
 | A-21 | Expansion "bbw rising 3 bars" | Could mean 3 consecutive rises or a net rise over 3 bars. | Literal chain of 3 consecutive rises: bbw[t] > bbw[t-1] > bbw[t-2] > bbw[t-3]. Squeeze and expansion are float flags (1.0 or 0.0, NaN while ranks are in warm-up). | none |
 | A-22 | S/R clustering and strength | "Cluster pivots within 0.5 ATR" does not say whether clusters chain (single linkage) or are bounded, and "touches * recency_weight" does not say whether the weight is per touch or per cluster. | Clusters are anchored on their lowest pivot price: a pivot joins while `price - anchor <= 0.5 * atr14`, so all members are within 0.5 ATR of each other; the level is the mean price. Strength is the sum of per-touch recency weights (equal to `touches * mean weight`), weight `1 - 0.7 * age / 250`. Breakout and breakdown compare today's close to the levels as of yesterday. Fibonacci extensions project from A: `A + ratio * (B - A)`. | ADR-055 |
 | A-23 | Order flow edge cases | The spec leaves open `prev_close` for a session's first 5-minute bar or the first bar of the data, the delta percent of a zero-volume session, and the clock handling for "regular session 09:30 to 16:00 ET". | The zero-range rule compares with the previous regular-session bar in the input (a session's first bar uses the prior session's last bar); with no previous bar, `close >= prev_close` is taken as true (all buy). A zero-volume session has `delta_pct` NaN and is left out of the 10-session mean. The indicator is clock-free: the caller passes session-local ET bar start times, and bars starting outside [09:30, 16:00) are ignored. `intraday` needs 5-minute bars on at least 8 of the last 10 daily sessions, and the mean is over the finite values of those sessions. | None |
+| A-24 | Ripster EMA Clouds fidelity | The seed says to match Ripster47's indicator at default settings but not which price source or EMA seeding, or which bars parity is computed on. | `hl2` and EMA match the TradingView defaults; EMA seeded per section 7.1; parity is computed on the export's own bars; the 72/89 cloud is evidence only. | ADR-051 |

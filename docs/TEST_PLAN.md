@@ -185,7 +185,7 @@ Rules:
 
 | Kind | Source | Location | Committed |
 |---|---|---|---|
-| Hand-computed | Written by hand from the formulas (for example the 40-bar Supertrend case with both flip directions and band ratcheting) | `tests/golden/handcomputed/` | Yes |
+| Hand-computed | Written by hand from the formulas (for example the 40-bar Supertrend case with both flip directions and band ratcheting, and the Ripster EMA Clouds case with a stack flip in each direction) | `tests/golden/handcomputed/` | Yes |
 | Synthetic dataset | Output of the fixture provider with a fixed seed | generated at test time; hash in `tests/golden/synthetic_dataset.sha256` | Hash only |
 | Expected-output files | Indicator and factor outputs for the synthetic dataset | `tests/golden/expected/` | Yes |
 | TradingView parity | CSV exports provided by the owner: OHLCV plus the built-in Supertrend (10, 3) columns, two tickers, daily chart | `tests/golden/tradingview/` | Owner decision (see 1.1 item 5) |
@@ -222,7 +222,7 @@ TradingView's `ta.supertrend` returns direction with the opposite sign (negative
 
 ### 5.6 TradingView parity file status
 
-Until the owner supplies the CSV files, the parity test is `Skipped` with the visible reason "TradingView export not yet provided (owner checklist item open)". It is a release blocker at S9-T04: it must be passing, not skipped, for v1.0.0.
+Until the owner supplies the CSV files, the parity test is `Skipped` with the visible reason "TradingView export not yet provided (owner checklist item open)". It is a release blocker at S9-T04: it must be passing, not skipped, for v1.0.0. The same applies to the Ripster EMA Clouds parity test (TS-IND-141, TS-IND-142), which uses the same owner export (the export also carries the Ripster EMA Clouds plots at default settings).
 
 ---
 
@@ -253,7 +253,7 @@ Properties that must hold for all registered functions:
 
 ### 6.2 Factor level
 
-For each of the 11 factors, `factor.compute(snapshot_at(t), ctx_at(t))` must equal the same call made on data truncated to bars up to t. The test builds the snapshot from `bars[:t]` and from `bars` followed by slicing at t, and compares score, evidence, and quality byte for byte.
+For each of the 12 factors, `factor.compute(snapshot_at(t), ctx_at(t))` must equal the same call made on data truncated to bars up to t. The test builds the snapshot from `bars[:t]` and from `bars` followed by slicing at t, and compares score, evidence, and quality byte for byte.
 
 ### 6.3 Registry rule
 
@@ -326,7 +326,7 @@ The smoke suite lives in `tests/smoke/`, is driven by `SMOKE_BASE_URL`, and is t
 |---|---|---|---|
 | 1 | Health and readiness | `/healthz` and `/readyz` return 200; reported version equals the deployed version | `curl -fsS $BASE/healthz`, `curl -fsS $BASE/readyz`, `curl -fsS $BASE/api/v1/status \| jq .version` |
 | 2 | Latest recommendations | At most 3 buys and at most 2 sells; each pick has evidence, narrative, invalidation, and the disclaimer | `curl -fsS $BASE/api/v1/recommendations/latest \| jq '(.buys\|length), (.sells\|length)'` |
-| 3 | One ticker analysis | 11 factors (or fewer with a stated reason); contributions sum to the composite within 1e-6 | `curl -fsS $BASE/api/v1/tickers/AAA/analysis` (fixture ticker; use a real watchlist ticker on a real provider) |
+| 3 | One ticker analysis | 12 factors (or fewer with a stated reason); contributions sum to the composite within 1e-6 | `curl -fsS $BASE/api/v1/tickers/AAA/analysis` (fixture ticker; use a real watchlist ticker on a real provider) |
 | 4 | Watchlist round trip | Add then remove with the token succeeds; the same calls without the token are rejected (401) | `curl -X POST -H "Authorization: Bearer $T" $BASE/api/v1/watchlist/items`, then `curl -X DELETE -H "Authorization: Bearer $T" $BASE/api/v1/watchlist/items/{symbol}` |
 | 5 | Triggered run | `POST /api/v1/runs` reaches `published`, or reports "market closed" on a non-trading day | `curl -X POST -H "Authorization: Bearer $T" $BASE/api/v1/runs`, then poll `GET /api/v1/runs/{id}` |
 | 6 | Track record | `GET /api/v1/track-record` responds with sample sizes | `curl -fsS $BASE/api/v1/track-record \| jq .` |
@@ -704,6 +704,25 @@ Golden and property tests apply to every indicator. Tolerances are in section 5.
 | TS-IND-258 | `it_snapshots_update_and_delete_rejected_by_append_only_trigger` | UPDATE and DELETE on `indicator_snapshots` fail with `append_only_violation` | FR-2xx, S2-T09 | Automated |
 | TS-IND-259 | `it_snapshots_compute_and_store_skips_unknown_symbols_and_checks_config_hash` | Symbols without bars are skipped as `no_data`; a config whose hash differs from the run's is refused | FR-2xx, S2-T09 | Automated |
 
+#### 10.3.12 Ripster EMA Clouds
+
+| ID | Scenario name | Description | Spec ref | Status |
+|---|---|---|---|---|
+| TS-IND-133 | `golden_ripster_clouds_handcomputed_fixture_top_bot_dir_pos_stack_match_every_bar` | Hand-computed case: stack flip in each direction, close inside a cloud, held and failed 8/9 pullback | FR-224, S2-T10 | Deferred |
+| TS-IND-134 | `unit_ripster_clouds_stack_flip_bars_since_stack_flip_counts_from_last_change_to_nonzero` | `rc_bars_since_stack_flip` is 0 on the flip bar, both directions | FR-224, S2-T10 | Deferred |
+| TS-IND-135 | `unit_ripster_clouds_ema_computed_on_hl2_for_all_ten_periods` | EMAs 8, 9, 5, 12, 34, 50, 72, 89, 180, 200 on `hl2` | FR-224, S2-T10 | Deferred |
+| TS-IND-136 | `unit_ripster_clouds_close_inside_cloud_pos_is_zero` | `pos` is 0 when close is inside the cloud, +1 above, -1 below | FR-224 | Deferred |
+| TS-IND-137 | `unit_ripster_pullback_held_low_tests_c1_within_3_bars_and_close_above_bot_flag_true` | Bullish held test of the 8/9 cloud | FR-224, S2-T10 | Deferred |
+| TS-IND-138 | `unit_ripster_pullback_failed_close_at_or_below_bot_c1_flag_false` | Bullish failed test | FR-224, S2-T10 | Deferred |
+| TS-IND-139 | `unit_ripster_pullback_stale_test_4_bars_ago_flag_false` | Boundary: 3 bars counts, 4 bars does not | FR-224 | Deferred |
+| TS-IND-140 | `unit_ripster_clouds_weekly_34_50_direction_uses_resampled_weekly_bars` | `rc_dir_w` computed on weekly bars, evidence only | FR-224 | Deferred |
+| TS-IND-141 | `golden_ripster_clouds_tradingview_parity_each_ema_within_0_01_after_200_bar_warmup` | All ten EMAs within 0.01 per bar versus the TradingView export, computed on the export's own bars, two tickers | FR-224, S2-T10 | Skipped: TradingView CSV exports with the Ripster EMA Clouds plots not yet provided by the owner (owner checklist item 3); manual: export the Ripster EMA Clouds indicator at default settings with OHLCV for the same two tickers on the daily chart to `tests/golden/tradingview/` and run `pytest tests/golden -k tradingview`. Release blocker at S9-T04 |
+| TS-IND-142 | `golden_ripster_clouds_tradingview_parity_cloud_direction_matches_every_bar_after_warmup` | Every cloud direction identical on every bar after the first 200 | FR-224, S2-T10 | Skipped: same owner files as TS-IND-141; manual: same step |
+| TS-IND-143 | `prop_ripster_clouds_top_ge_bot_for_every_cloud_after_warmup` | Property: `top >= bot` | FR-224, S2-T10 | Deferred |
+| TS-IND-144 | `prop_ripster_clouds_stack_nonzero_only_when_5_12_and_34_50_clouds_do_not_overlap` | Property: `stack` domain | FR-224, S2-T10 | Deferred |
+| TS-IND-145 | `unit_ripster_clouds_registered_with_no_look_ahead_harness` | The Ripster indicator is in the registry and passes the section 6 property | NFR-007, S2-T08, S2-T10 | Deferred |
+| TS-IND-146 | `unit_ripster_clouds_warmup_bars_are_nan_never_zero` | Fewer than 200 bars gives NaN for the 180/200 cloud | FR-224 | Deferred |
+
 ### 10.4 Scoring, per factor (TS-SCR)
 
 Each rule line in the Signal Engine Specification has one table-driven row. Boundary values are listed explicitly. All factor scores are validated to be in -100 to 100.
@@ -716,7 +735,7 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-SCR-002 | `unit_factor_result_score_minus_101_raises_validation_error` | A factor returning -101 raises | FR-3xx, S3-T01 | Deferred |
 | TS-SCR-003 | `unit_factor_registry_every_config_factor_id_registered_and_reverse` | Config ids and registered factors match both ways | FR-3xx, S3-T01 | Deferred |
 | TS-SCR-004 | `unit_factor_result_contains_evidence_items_name_value_unit_reason_and_quality` | FactorResult shape | FR-3xx | Deferred |
-| TS-SCR-005 | `prop_factors_all_scores_within_minus_100_and_100_for_random_snapshots` | Range property for all 11 factors | FR-3xx | Deferred |
+| TS-SCR-005 | `prop_factors_all_scores_within_minus_100_and_100_for_random_snapshots` | Range property for all 12 factors | FR-3xx | Deferred |
 | TS-SCR-006 | `unit_factor_reasons_one_deterministic_template_per_rule_that_fired` | Reasons come from templates, one per fired rule | FR-5xx | Deferred |
 | TS-SCR-007 | `prop_factors_all_truncation_does_not_change_score_at_t` | Factor-level no-look-ahead (section 6.2) | NFR-007 | Deferred |
 
@@ -908,6 +927,36 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-SCR-178 | `unit_fundamentals_days_to_earnings_stored_in_trading_days_not_in_score` | Event-risk input, excluded from score | FR-3xx | Deferred |
 | TS-SCR-179 | `unit_fundamentals_refresh_weekly_and_day_after_earnings` | Refresh schedule logic | FR-3xx, FR-1xx | Deferred |
 
+#### 10.4.12 Factor 12: Ripster EMA Clouds
+
+| ID | Scenario name | Description | Spec ref | Status |
+|---|---|---|---|---|
+| TS-SCR-180 | `unit_ripster_score_close_above_c3_bias_adds_30` | `bias` = +30 | FR-333 | Deferred |
+| TS-SCR-181 | `unit_ripster_score_close_below_c3_bias_subtracts_30` | `bias` = -30 | FR-333 | Deferred |
+| TS-SCR-182 | `unit_ripster_score_close_inside_c3_pos_0_bias_is_0` | `pos(c3)` = 0 scores 0 for `bias` | FR-333, S3-T14 | Deferred |
+| TS-SCR-183 | `unit_ripster_score_c2_bullish_trend_adds_20` | `trend` = +20 | FR-333 | Deferred |
+| TS-SCR-184 | `unit_ripster_score_c2_bearish_trend_subtracts_20` | `trend` = -20 | FR-333 | Deferred |
+| TS-SCR-185 | `unit_ripster_score_c2_fully_above_c3_stacking_adds_20` | `stack` = +1 | FR-333 | Deferred |
+| TS-SCR-186 | `unit_ripster_score_c2_fully_below_c3_stacking_subtracts_20` | `stack` = -1 | FR-333 | Deferred |
+| TS-SCR-187 | `unit_ripster_score_c2_overlapping_c3_stacking_is_0` | Overlapping clouds give 0 | FR-333 | Deferred |
+| TS-SCR-188 | `unit_ripster_score_c3_bullish_mid_adds_10` | `mid` = +10 | FR-333 | Deferred |
+| TS-SCR-189 | `unit_ripster_score_c3_bearish_mid_subtracts_10` | `mid` = -10 | FR-333 | Deferred |
+| TS-SCR-190 | `unit_ripster_score_close_above_c5_long_adds_10` | `long` = +10 | FR-333 | Deferred |
+| TS-SCR-191 | `unit_ripster_score_close_below_c5_long_subtracts_10` | `long` = -10 | FR-333 | Deferred |
+| TS-SCR-192 | `unit_ripster_score_close_inside_c5_long_is_0` | `pos(c5)` = 0 | FR-333 | Deferred |
+| TS-SCR-193 | `unit_ripster_score_pullback_held_stack_plus_1_low_2_bars_ago_close_above_bot_c1_adds_10` | Held bullish pullback | FR-333, S3-T14 | Deferred |
+| TS-SCR-194 | `unit_ripster_score_pullback_failed_close_at_or_below_bot_c1_is_0` | Failed bullish pullback | FR-333, S3-T14 | Deferred |
+| TS-SCR-195 | `unit_ripster_score_pullback_stale_test_4_bars_ago_is_0` | Stale test (4 bars ago) does not count | FR-333, S3-T14 | Deferred |
+| TS-SCR-196 | `unit_ripster_score_pullback_test_3_bars_ago_counts` | Boundary: `pullback_lookback_bars` = 3 is inclusive | FR-333 | Deferred |
+| TS-SCR-197 | `unit_ripster_score_pullback_bearish_held_stack_minus_1_high_at_or_above_bot_c1_close_below_top_c1_subtracts_10` | Held bearish pullback | FR-333 | Deferred |
+| TS-SCR-198 | `unit_ripster_score_pullback_bearish_failed_close_at_or_above_top_c1_is_0` | Failed bearish pullback | FR-333 | Deferred |
+| TS-SCR-199 | `unit_ripster_score_pullback_stack_0_is_0_even_when_c1_tested` | Pullback requires `stack != 0` | FR-333 | Deferred |
+| TS-SCR-200 | `unit_ripster_score_all_components_bullish_maximum_30_20_20_10_10_10_is_100` | Upper bound | FR-333 | Deferred |
+| TS-SCR-201 | `unit_ripster_score_all_components_bearish_maximum_is_minus_100` | Lower bound | FR-333 | Deferred |
+| TS-SCR-202 | `unit_ripster_score_c4_72_89_cloud_is_evidence_only_not_scored` | Changing the 72/89 cloud leaves the score unchanged | FR-333 | Deferred |
+| TS-SCR-203 | `unit_ripster_score_pullback_lookback_read_from_config_ripster_key` | `ripster.pullback_lookback_bars` | FR-333, A§13 | Deferred |
+| TS-SCR-204 | `unit_ripster_score_evidence_lists_six_components_and_derived_rc_values` | Components and `rc_*` values in the evidence | FR-333, FR-5xx | Deferred |
+
 ### 10.5 Regime and weights (TS-REG)
 
 | ID | Scenario name | Description | Spec ref | Status |
@@ -916,11 +965,11 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-REG-002 | `unit_regime_classify_adx_24_99_is_transitional` | Just below 25 | FR-3xx | Deferred |
 | TS-REG-003 | `unit_regime_classify_adx_20_is_transitional` | Boundary: ranging is `< 20` | FR-3xx | Deferred |
 | TS-REG-004 | `unit_regime_classify_adx_19_99_is_ranging` | Just below 20 | FR-3xx | Deferred |
-| TS-REG-005 | `unit_weights_base_sum_equals_100` | Eleven base weights sum to 100 | FR-3xx, A§13 | Deferred |
+| TS-REG-005 | `unit_weights_base_sum_equals_100` | Twelve base weights sum to 100 | FR-3xx, A§13 | Deferred |
 | TS-REG-006 | `unit_config_weights_not_summing_to_100_fails_validation_naming_key` | Schema rejects | FR-3xx, S0-T09 | Automated |
-| TS-REG-007 | `unit_weights_multiplier_table_every_cell_trending_matches_spec` | One parametrized row per cell, trending column (11 cells) | FR-3xx, S5-T05 | Deferred |
-| TS-REG-008 | `unit_weights_multiplier_table_every_cell_ranging_matches_spec` | Ranging column (11 cells) | FR-3xx, S5-T05 | Deferred |
-| TS-REG-009 | `unit_weights_multiplier_table_every_cell_transitional_all_1_0` | Transitional column (11 cells) | FR-3xx, S5-T05 | Deferred |
+| TS-REG-007 | `unit_weights_multiplier_table_every_cell_trending_matches_spec` | One parametrized row per cell, trending column (12 cells) | FR-3xx, S5-T05 | Deferred |
+| TS-REG-008 | `unit_weights_multiplier_table_every_cell_ranging_matches_spec` | Ranging column (12 cells) | FR-3xx, S5-T05 | Deferred |
+| TS-REG-009 | `unit_weights_multiplier_table_every_cell_transitional_all_1_0` | Transitional column (12 cells) | FR-3xx, S5-T05 | Deferred |
 | TS-REG-010 | `unit_weights_renormalize_after_regime_multipliers_sum_exactly_100` | Renormalization | FR-3xx | Deferred |
 | TS-REG-011 | `unit_weights_event_adjust_days_to_earnings_5_multiplies_fundamentals_1_5` | Boundary: 5 trading days | FR-3xx | Deferred |
 | TS-REG-012 | `unit_weights_event_adjust_days_to_earnings_6_no_change` | Boundary: 6 | FR-3xx | Deferred |
@@ -942,6 +991,9 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-REG-028 | `unit_weights_all_but_one_factor_missing_remaining_weight_100` | Extreme redistribution | FR-3xx | Deferred |
 | TS-REG-029 | `unit_weights_sprint3_defaults_all_multipliers_1_fundamentals_missing_paths_exist` | Code paths exist with injected values | FR-3xx, S3-T05 | Deferred |
 | TS-REG-030 | `it_regime_benchmarks_spy_qqq_used_even_when_not_on_watchlist` | Market regime source | FR-3xx, FR-0xx | Deferred |
+| TS-REG-031 | `unit_weights_base_ripster_is_10_and_supertrend_is_20` | New base weights: supertrend 20, sma 7, macd 8, divergence 9, mean_reversion 7, fibonacci 5, levels 7, volatility 4, volume_osc 6, flow 9, fundamentals 8, ripster 10 | FR-3xx, A§13, S3-T14 | Deferred |
+| TS-REG-032 | `unit_weights_multiplier_ripster_trending_1_20_ranging_0_70_transitional_1_00` | Ripster row of the regime table | FR-3xx, S5-T05 | Deferred |
+| TS-REG-033 | `unit_config_ripster_block_missing_key_fails_validation_naming_key` | `ripster` block keys validated by the schema (twelve weights) | FR-3xx, S0-T09 | Deferred |
 
 ### 10.6 Composite, display, bands, confidence (TS-CMP)
 
@@ -972,11 +1024,14 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-CMP-023 | `unit_confidence_any_factor_degraded_subtracts_10` | Penalty | FR-3xx | Deferred |
 | TS-CMP-024 | `unit_confidence_weekly_direction_differs_from_daily_subtracts_10` | Penalty | FR-3xx | Deferred |
 | TS-CMP-025 | `unit_confidence_event_risk_subtracts_10` | Penalty | FR-3xx | Deferred |
-| TS-CMP-026 | `unit_confidence_all_penalties_stack_subtracts_45` | Sum of penalties | FR-3xx | Deferred |
+| TS-CMP-026 | `unit_confidence_all_penalties_stack_subtracts_55` | Sum of penalties (15 + 10 + 10 + 10 + 10) | FR-3xx | Deferred |
 | TS-CMP-027 | `unit_confidence_clipped_to_0_when_penalties_exceed_agreement` | Lower clip | FR-3xx | Deferred |
 | TS-CMP-028 | `unit_confidence_zero_composite_sign_handling_defined` | A composite of exactly 0 has a defined agreement rule | FR-3xx | Deferred |
 | TS-CMP-029 | `unit_confidence_missing_factors_excluded_from_agreement_denominator` | Weight base is over non-missing factors | FR-3xx | Deferred |
 | TS-CMP-030 | `prop_composite_all_stages_outputs_in_range_for_random_factor_scores` | Composite -100..100, display 0..100, confidence 0..100 | FR-3xx | Deferred |
+| TS-CMP-031 | `unit_confidence_ripster_stack_opposes_daily_supertrend_subtracts_10` | `rc_stack == -st_dir_d`: confidence reduced by 10 and the deduction is shown | FR-335, S3-T14 | Deferred |
+| TS-CMP-032 | `unit_confidence_ripster_stack_same_sign_or_zero_no_deduction` | `st_dir_d` = +1 with `rc_stack` = +1 or 0 gives no Ripster deduction | FR-335 | Deferred |
+| TS-CMP-033 | `unit_confidence_ripster_worked_example_agreement_0_80_gives_70` | Agreement 0.80, `st_dir_d` = -1, `rc_stack` = +1 gives 80 - 10 = 70 | FR-335 | Deferred |
 
 ### 10.7 Selection (TS-SEL)
 
@@ -1020,6 +1075,13 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-SEL-036 | `unit_selection_stickiness_none_ticker_may_repeat_consecutive_days` | No stickiness rule | FR-4xx | Deferred |
 | TS-SEL-037 | `unit_selection_day_n_on_list_counter_counts_consecutive_days` | "day N on the list" | FR-4xx, FR-7xx | Deferred |
 | TS-SEL-038 | `unit_selection_sell_is_bearish_label_no_short_instruction_in_output` | No shorting, sizing, instrument advice in payload text | FR-4xx, FR-5xx | Deferred |
+| TS-SEL-039 | `unit_selection_buy_candidate_rc_bias_minus_1_not_qualified_reason_close_below_34_50_cloud` | Close below the 34/50 cloud rejects a buy and records the reason | FR-334, S3-T14 | Deferred |
+| TS-SEL-040 | `unit_selection_buy_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the buy gate | FR-334, S3-T14 | Deferred |
+| TS-SEL-041 | `unit_selection_buy_candidate_rc_bias_plus_1_passes_ripster_gate` | Close above the cloud passes the buy gate | FR-334 | Deferred |
+| TS-SEL-042 | `unit_selection_sell_candidate_rc_bias_plus_1_not_qualified_reason_close_above_34_50_cloud` | Close above the 34/50 cloud rejects a sell and records the reason | FR-334, S3-T14 | Deferred |
+| TS-SEL-043 | `unit_selection_sell_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the sell gate | FR-334, S3-T14 | Deferred |
+| TS-SEL-044 | `unit_selection_sell_candidate_rc_bias_minus_1_passes_ripster_gate` | Close below the cloud passes the sell gate | FR-334 | Deferred |
+| TS-SEL-045 | `unit_selection_ripster_gate_rejection_listed_in_nearest_miss_reasons` | A gate rejection appears as the nearest-miss reason when a side is empty | FR-334, FR-4xx | Deferred |
 
 ### 10.8 Justification and narrative (TS-NAR)
 
@@ -1030,7 +1092,7 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-NAR-003 | `unit_evidence_build_includes_invalidation_level_and_rule` | Supertrend line and rule text | FR-5xx, US-007 | Deferred |
 | TS-NAR-004 | `unit_evidence_build_includes_levels_support_resistance_fib_next_target` | Levels block | FR-5xx | Deferred |
 | TS-NAR-005 | `unit_evidence_build_includes_adjustments_flags_and_config_hash` | Adjustments, flags, `config_hash` | FR-5xx | Deferred |
-| TS-NAR-006 | `unit_narrative_template_leads_with_supertrend_then_top_two_then_opposing_then_invalidation` | Order | FR-5xx | Deferred |
+| TS-NAR-006 | `unit_narrative_template_leads_with_supertrend_and_34_50_cloud_bias_then_top_two_then_opposing_then_invalidation` | Order: Supertrend state and the 34/50 cloud bias first | FR-5xx | Deferred |
 | TS-NAR-007 | `unit_narrative_template_every_number_appears_in_evidence_document` | Template passes its own guard | FR-5xx, S3-T08 | Deferred |
 | TS-NAR-008 | `unit_narrative_template_three_to_five_sentences` | Length | FR-5xx | Deferred |
 | TS-NAR-009 | `unit_narrative_template_no_opposing_factor_omits_line_without_inventing` | No factor argues against | FR-5xx | Deferred |
@@ -1063,6 +1125,7 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-NAR-036 | `it_narrative_mock_endpoint_run_publishes_llm_narratives` | Sprint 5 checklist item | FR-5xx | Deferred |
 | TS-NAR-037 | `unit_narrative_prompt_versioned_in_prompts_directory_version_in_record` | Prompt versioning | FR-5xx | Deferred |
 | TS-NAR-038 | `unit_narrative_disclaimer_present_in_every_narrative_payload` | Disclaimer attached | FR-5xx, A§9 | Deferred |
+| TS-NAR-039 | `unit_evidence_build_includes_ripster_block_and_levels_cloud_34_50` | `ripster` block and `levels.cloud_34_50` validate against the committed schema | FR-5xx, S3-T14 | Deferred |
 
 ### 10.9 Track record (TS-TRK)
 
@@ -1422,12 +1485,12 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 |---|---|---|
 | Watchlist | TS-WL | 15 |
 | Ingestion and data | TS-ING | 44 |
-| Indicators | TS-IND | 96 |
-| Scoring (11 factors plus framework) | TS-SCR | 140 |
-| Regime and weights | TS-REG | 30 |
-| Composite and confidence | TS-CMP | 30 |
-| Selection | TS-SEL | 38 |
-| Justification and narrative | TS-NAR | 38 |
+| Indicators | TS-IND | 110 |
+| Scoring (12 factors plus framework) | TS-SCR | 165 |
+| Regime and weights | TS-REG | 33 |
+| Composite and confidence | TS-CMP | 33 |
+| Selection | TS-SEL | 45 |
+| Justification and narrative | TS-NAR | 39 |
 | Track record | TS-TRK | 23 |
 | Backtest | TS-BKT | 14 |
 | API | TS-API | 35 |
@@ -1486,7 +1549,7 @@ Regression tests are never deleted.
 
 1. **Scenario ownership.** The PR that adds or changes behavior adds or updates scenario rows in this file (PR template checkbox "TEST_PLAN.md scenarios added or updated"). The status moves `Deferred` to `Automated` in the PR that adds the test.
 2. **Sprint end audit.** At the end of each sprint, the spec doc audit includes this file: every row for a feature shipped in the sprint is `Automated` or `Skipped` with a reason; none are silently dropped.
-3. **Skipped rows.** Every `Skipped` row carries a written reason and a manual step. At S9-T04 each `Skipped` row has a recorded manual result in the release PR. The TradingView parity rows (TS-IND-021, TS-IND-022) may not remain skipped for v1.0.0.
+3. **Skipped rows.** Every `Skipped` row carries a written reason and a manual step. At S9-T04 each `Skipped` row has a recorded manual result in the release PR. The TradingView parity rows (TS-IND-021, TS-IND-022, TS-IND-141, TS-IND-142) may not remain skipped for v1.0.0.
 4. **Golden files.** Changed only under the policy in section 5.5; `scripts/validate-fixtures.sh` runs in CI.
 5. **Flaky tests.** A flaky test is a bug with `type:bug` and `priority:p1`. It is fixed or quarantined within one sprint with the reason recorded; retries are not used to hide non-determinism in scoring tests.
 6. **Time and randomness.** Tests inject clocks and seeds. No test depends on the wall clock, the machine time zone, or locale.
@@ -1514,7 +1577,7 @@ Run against the staging build (and, for items marked P, again on production afte
 
 - [ ] `docs/GATE_DEBT.md` is empty and every sprint checklist is checked
 - [ ] No `Deferred` rows remain in section 10; every `Skipped` row has a recorded manual result
-- [ ] TradingView parity tests (TS-IND-021, TS-IND-022) are passing, not skipped (release blocker otherwise)
+- [ ] TradingView parity tests (TS-IND-021, TS-IND-022, TS-IND-141, TS-IND-142) are passing, not skipped (release blocker otherwise)
 - [ ] `make coverage` meets every threshold in section 3
 - [ ] `scripts/check-versions.sh` passes and the changelog section for the version, including a "Scoring" heading if `scoring.version` changed, is written
 

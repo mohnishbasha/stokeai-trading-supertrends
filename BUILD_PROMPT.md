@@ -1,8 +1,9 @@
 # SUPER TRENDS MARKET AGENT: Master Build Prompt
 ## Supertrend market agent for StokeAI infra. Tracks a watchlist, scores every ticker, publishes the top 3 buys and top 2 sells each day, and explains why.
 
-Prompt version: 1.0.0
+Prompt version: 1.1.0
 Generated: 2026-11-14
+Updated: 2026-11-15 (1.1.0: added Factor 12, Ripster EMA Clouds, with reweighting, a selection gate, and a confidence rule)
 Owner: Mohinish Shaikh, Serverless Ventures LLC
 
 ---
@@ -22,7 +23,7 @@ Owner: Mohinish Shaikh, Serverless Ventures LLC
 **Repository visibility:** Public. Source-available under a community license. Not "open source": never use that phrase for this project in any file, because the license forbids commercial use.
 **Distribution model:** Source-available, free for noncommercial use. Public source, public signed images and Helm chart on GHCR. The reference deployment is self-hosted on StokeAI infra (k3s on NVIDIA DGX Spark, ARM64), and that running instance stays private to its owner.
 **License:** Super Trends Community License, which is the PolyForm Noncommercial License 1.0.0 (SPDX `PolyForm-Noncommercial-1.0.0`), unmodified. Copyright 2026 Serverless Ventures LLC, a Delaware limited liability company formed on November 26, 2024. All rights not expressly granted are reserved by Serverless Ventures LLC. Governing law for the CLA, commercial licenses, and any other legal terms the project writes itself is the State of Delaware (the PolyForm license text is used unmodified and is not edited to add this). Anyone may read, run, modify, and share the software for noncommercial purposes (personal use, study, research, hobby projects, and use by charitable, educational, and government organizations). Any commercial use, including selling it, offering it as a paid or hosted service, or using it inside a for-profit business, requires a separate written commercial license from Serverless Ventures LLC (legal@serverlessvc.com). Outside contributors sign a Contributor License Agreement so all rights to license the project commercially stay with Serverless Ventures LLC.
-**Long description (README opening):** Super Trends watches a list of stocks, applies the TradingView Supertrend algorithm together with ten supporting technical and fundamental factors, and turns the result into one composite score per ticker. Every trading day it publishes the three strongest buys and the two strongest sells in a web UI, each with the evidence and a plain-language justification.
+**Long description (README opening):** Super Trends watches a list of stocks, applies the TradingView Supertrend algorithm together with eleven supporting technical and fundamental factors, including Ripster EMA Clouds,, and turns the result into one composite score per ticker. Every trading day it publishes the three strongest buys and the two strongest sells in a web UI, each with the evidence and a plain-language justification.
 
 **Why this name:** It says what the product does. Supertrend is the lead signal, "market agent" is the job. The full name is used in titles and the README; "Super Trends" is the short form in prose and the UI, and `supertrends` is the slug for the CLI, package, namespaces, and metrics.
 
@@ -70,7 +71,7 @@ The sections "Product Definition" and "Signal Engine Specification" below are th
 **The daily loop.**
 1. After the US market close, a scheduled run ingests the day's bars for every watchlist ticker and the benchmarks (SPY, QQQ).
 2. The indicator engine computes all indicators on daily and weekly bars, and buy/sell volume from intraday bars.
-3. Eleven factor scores are computed per ticker. Regime and fundamentals adjust the weights. A composite score is produced.
+3. Twelve factor scores are computed per ticker. Regime and fundamentals adjust the weights. A composite score is produced.
 4. Tickers are ranked. The top 3 qualifying buys and top 2 qualifying sells are selected.
 5. A justification is written for each pick from the computed evidence.
 6. Results are stored immutably and shown in the UI, the API, the CLI, and MCP.
@@ -349,6 +350,48 @@ ETFs and tickers with no fundamentals (QQQ, SPY) get quality `missing`; the fact
 
 Earnings proximity: `days_to_earnings` (trading days) is stored per ticker. It is not part of the fundamentals score; it drives the event-risk rules below.
 
+#### Factor 12: Ripster EMA Clouds
+
+Match Ripster47's "Ripster EMA Clouds" TradingView indicator with its default settings: MA type EMA, source `hl2`, five clouds. A cloud is the band between a short and a long EMA of `hl2`, computed on daily bars.
+
+| Cloud | Short / long EMA | Role in Super Trends |
+|---|---|---|
+| `c1` | 8 / 9 | pullback zone |
+| `c2` | 5 / 12 | short-term trend |
+| `c3` | 34 / 50 | trend bias: the line between bullish and bearish |
+| `c4` | 72 / 89 | intermediate trend (evidence and levels only, not scored) |
+| `c5` | 180 / 200 | long-term trend |
+
+```
+src             = hl2
+ema_s, ema_l    = EMA(src, short), EMA(src, long)            for each cloud, EMA as defined in Conventions
+top[t], bot[t]  = max(ema_s[t], ema_l[t]), min(ema_s[t], ema_l[t])
+cloud_dir[t]    = +1 if ema_s[t] > ema_l[t] else -1           (TradingView colors the cloud green / red)
+pos(c)[t]       = +1 if close[t] > top(c)[t], -1 if close[t] < bot(c)[t], 0 inside the cloud
+stack[t]        = +1 if bot(c2)[t] > top(c3)[t]               (5/12 cloud fully above the 34/50 cloud)
+                  -1 if top(c2)[t] < bot(c3)[t]               (5/12 cloud fully below the 34/50 cloud)
+                   0 otherwise
+```
+
+Derived values: `rc_bias = pos(c3)`, `rc_stack = stack`, `rc_bars_since_stack_flip` (bars since `stack` last changed to its current nonzero value), `rc_c3_top` and `rc_c3_bot` (the 34/50 cloud edges, reported as the trend-bias level), and `rc_dir_w` (direction of the 34/50 cloud on weekly bars, evidence only).
+
+Factor score:
+
+```
+bias      = 30 * pos(c3)               (above the 34/50 cloud is bullish, below is bearish, inside is 0)
+trend     = 20 * cloud_dir(c2)
+stacking  = 20 * stack
+mid       = 10 * cloud_dir(c3)
+long      = 10 * pos(c5)
+pullback  = 10 * stack  if stack != 0 and, within the last 3 bars, price tested the 8/9 cloud from the trend side
+                        (bullish: some low <= top(c1); bearish: some high >= bot(c1))
+                        and close[t] is still on the trend side of it (bullish: close > bot(c1); bearish: close < top(c1))
+            0 otherwise                (a held pullback into the 8/9 cloud is the preferred entry)
+score     = clip(bias + trend + stacking + mid + long + pullback, -100, 100)
+```
+
+Parity requirement: on a TradingView daily export with the Ripster EMA Clouds indicator at default settings, computed on the exact bars in the export, every one of the ten EMAs matches within 0.01 per bar after a 200-bar warm-up, and every cloud direction matches on every bar after warm-up. See S2-T10.
+
 #### Regime detection and dynamic weights
 
 Base weights (sum 100):
@@ -356,16 +399,19 @@ Base weights (sum 100):
 | # | Factor | Base weight |
 |---|---|---|
 | 1 | Supertrend | 20 |
-| 2 | SMA analysis | 10 |
-| 3 | MACD | 10 |
-| 4 | Divergences | 10 |
-| 5 | Mean reversion | 8 |
-| 6 | Fibonacci retracement | 6 |
-| 7 | Support and resistance | 8 |
-| 8 | Volatility | 5 |
+| 2 | SMA analysis | 7 |
+| 3 | MACD | 8 |
+| 4 | Divergences | 9 |
+| 5 | Mean reversion | 7 |
+| 6 | Fibonacci retracement | 5 |
+| 7 | Support and resistance | 7 |
+| 8 | Volatility | 4 |
 | 9 | Volume oscillator | 6 |
 | 10 | Buy / sell volume | 9 |
 | 11 | Fundamentals | 8 |
+| 12 | Ripster EMA Clouds | 10 |
+
+Ripster EMA Clouds overlaps the moving-average and momentum factors, so its 10 points were taken mostly from SMA analysis (-3) and MACD (-2), and one point each from Divergences, Mean reversion, Fibonacci, Support and resistance, and Volatility.
 
 Per-ticker regime from ADX(14) on daily bars:
 - `trending`: ADX >= 25
@@ -387,6 +433,7 @@ Regime multipliers applied to the base weights, then renormalized to sum 100:
 | Volume oscillator | 1.00 | 1.00 | 1.00 |
 | Buy / sell volume | 1.00 | 1.00 | 1.00 |
 | Fundamentals | 1.00 | 1.00 | 1.00 |
+| Ripster EMA Clouds | 1.20 | 0.70 | 1.00 |
 
 Fundamental and event adjustments (applied after regime multipliers, before renormalizing):
 - `days_to_earnings <= 5`: fundamentals weight x 1.5, and the pick carries the `event_risk` flag.
@@ -426,15 +473,16 @@ confidence = 100 * agreement
            - 15 if atr_pct_rank > 90
            - 10 if any factor quality is degraded
            - 10 if st_dir_w != st_dir_d
+           - 10 if rc_stack == -st_dir_d          (the Ripster 5/12 vs 34/50 stack opposes the daily Supertrend)
            - 10 if event_risk
 confidence = clip(confidence, 0, 100)
 ```
 
 #### Selection rules
 
-A ticker is a **buy candidate** when all hold: display >= 65 (plus any threshold adjustments), `st_dir_d == +1`, confidence >= 50, data quality not `stale`, average 20-day dollar volume >= 20,000,000.
+A ticker is a **buy candidate** when all hold: display >= 65 (plus any threshold adjustments), `st_dir_d == +1`, `rc_bias >= 0` (close not below the 34/50 cloud), confidence >= 50, data quality not `stale`, average 20-day dollar volume >= 20,000,000.
 
-A ticker is a **sell candidate** when all hold: display <= 35 (minus any threshold adjustments), `st_dir_d == -1`, confidence >= 50, data quality not `stale`, same liquidity floor.
+A ticker is a **sell candidate** when all hold: display <= 35 (minus any threshold adjustments), `st_dir_d == -1`, `rc_bias <= 0` (close not above the 34/50 cloud), confidence >= 50, data quality not `stale`, same liquidity floor.
 
 "Sell" means bearish: reduce, exit, or avoid. Super Trends does not recommend short selling or any specific instrument, size, or expiry.
 
@@ -454,8 +502,9 @@ For each pick, store a structured evidence document:
   "display_score": 78.4, "confidence": 71, "band": "Buy",
   "regime": "trending", "market_regime": "risk_on",
   "supertrend": {"dir_d": 1, "dir_w": 1, "bars_since_flip": 3, "line": 212.40, "distance_atr": 1.2},
+  "ripster": {"bias": 1, "stack": 1, "bars_since_stack_flip": 12, "c2_dir": 1, "c3_dir": 1, "c3_top": 210.8, "c3_bot": 206.3, "dir_w": 1},
   "invalidation": {"level": 212.40, "rule": "daily close below the Supertrend line"},
-  "levels": {"support": [215.1, 208.7], "resistance": [229.5, 236.0], "fib": {"61.8": 214.2}, "next_target": 236.0},
+  "levels": {"support": [215.1, 208.7], "resistance": [229.5, 236.0], "fib": {"61.8": 214.2}, "cloud_34_50": [206.3, 210.8], "next_target": 236.0},
   "factors": [
     {"id": "supertrend", "score": 100, "weight": 23.4, "contribution": 23.4,
      "reasons": ["Daily Supertrend flipped up 3 bars ago", "Weekly Supertrend agrees"]}
@@ -470,7 +519,7 @@ For each pick, store a structured evidence document:
 
 Narrative: 3 to 5 sentences, written by an LLM from the evidence document only, through an OpenAI-compatible endpoint (on Stoke: the existing gateway in front of vLLM). Rules:
 - The system prompt forbids any number, level, or claim not present in the evidence document, forbids price targets beyond `next_target`, forbids the words "guaranteed", "will", "can't lose", and forbids advice on position size, options, or leverage.
-- Order: lead with the Supertrend state, then the two largest positive contributions, then the largest opposing factor ("what argues against it"), then the invalidation level.
+- Order: lead with the Supertrend state and the Ripster 34/50 cloud bias, then the two largest positive contributions, then the largest opposing factor ("what argues against it"), then the invalidation level.
 - **Numeric guard:** after generation, extract every number from the narrative. Each must match a value in the evidence document within rounding. Any unmatched number rejects the narrative.
 - On rejection, timeout (8 seconds), or endpoint error: retry once at temperature 0, then fall back to the deterministic template narrative. The stored narrative records `source: llm | template` and the model name.
 - The narrative never changes a score, a rank, or a selection.
@@ -485,7 +534,7 @@ For every published pick store `entry_price = next session's open`. On later run
 
 ### docs/PRD.md
 
-Must contain: product summary, users, the daily loop, all user stories (US-001 onward), all functional requirements with acceptance criteria, all non-functional requirements, the full Signal Engine Specification (formulas verbatim), the honesty requirements, the disclaimer text, a glossary (Supertrend, ATR, RMA, regime, display score, confidence, invalidation level, hit, excess return), and an explicit "Out of scope for v1" list.
+Must contain: product summary, users, the daily loop, all user stories (US-001 onward), all functional requirements with acceptance criteria, all non-functional requirements, the full Signal Engine Specification (formulas verbatim), the honesty requirements, the disclaimer text, a glossary (Supertrend, ATR, RMA, Ripster EMA Clouds, regime, display score, confidence, invalidation level, hit, excess return), and an explicit "Out of scope for v1" list.
 
 ### docs/ARCHITECTURE.md
 
@@ -973,10 +1022,15 @@ Volume oscillator (5, 10), relative volume, CMF(20), accumulation and distributi
 **AC:** buy plus sell equals volume for every bar; the zero-range bar rule is covered; the daily fallback is used and flagged when intraday bars are missing.
 **Deps:** S2-T01.
 
+**S2-T10: Ripster EMA Clouds with TradingView parity** `type:feature area:indicators priority:p0 size:M`
+Implement Factor 12's clouds exactly: the five EMA pairs on `hl2`, cloud top, bottom and direction, `pos`, `stack`, `rc_bars_since_stack_flip`, the 8/9 pullback test, and the weekly 34/50 direction. Golden fixtures: (a) a hand-computed case covering a stack flip in each direction, close inside a cloud, and a held and a failed 8/9 pullback; (b) TradingView parity files. For (b), add an owner checklist entry: export, for the same two tickers as S2-T02, a daily CSV with OHLCV plus the Ripster EMA Clouds plots at default settings, into `tests/golden/tradingview/`. Until they exist the parity test is skipped with a visible reason. When present, the test computes on the export's own bars and asserts each EMA matches within 0.01 and each cloud direction matches on every bar after a 200-bar warm-up.
+**AC:** hand-computed fixture passes; parity test passes or is skipped pending owner files; property test: `top >= bot` always, and `stack` is nonzero only when the 5/12 and 34/50 clouds do not overlap.
+**Deps:** S2-T01.
+
 **S2-T08: No-look-ahead and determinism harness** `type:test area:indicators priority:p0 size:M`
 A hypothesis property test applied to every public indicator: computing on `bars[:t]` yields the same values for indexes below `t - confirm_lag` as computing on the full series. A determinism test hashes all outputs for the fixture dataset and compares to a committed hash. A benchmark test enforces NFR-001's compute budget.
 **AC:** all indicators are registered with the harness (a test fails if a public indicator function is missing from the registry); the benchmark passes in CI on 2 cores.
-**Deps:** S2-T02 through S2-T07.
+**Deps:** S2-T02 through S2-T07, S2-T10.
 
 **S2-T09: Indicator snapshot persistence** `type:feature area:data priority:p1 size:S`
 Compute-all function producing one snapshot row per ticker per date (JSONB of indicator values plus levels), stored in `indicator_snapshots` with the config hash.
@@ -986,6 +1040,7 @@ Compute-all function producing one snapshot row per ticker per date (JSONB of in
 **Sprint 2 checklist (non-blocking; unmet items go to `docs/GATE_DEBT.md`)**
 - [ ] Every indicator in the specification is implemented and registered with the no-look-ahead harness
 - [ ] Supertrend hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open
+- [ ] Ripster EMA Clouds hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open
 - [ ] Determinism hash committed and checked in CI
 - [ ] Indicator coverage at or above 95 percent
 - [ ] Compute benchmark within budget
@@ -1019,10 +1074,15 @@ Same standard, including the quality-based weight multiplier for `daily_estimate
 **AC:** one test row per rule line; sign logic for rising volume on a falling price is covered.
 **Deps:** S3-T01.
 
+**S3-T14: Factor 12 (Ripster EMA Clouds)** `type:feature area:scoring priority:p0 size:M`
+Same standard as S3-T02, plus the Ripster parts of confidence (`rc_stack` opposing `st_dir_d`) and selection (`rc_bias` gate on both sides), and the `ripster` block of the evidence document.
+**AC:** one test row per rule line, both signs; `pos(c3) == 0` (close inside the 34/50 cloud) scores 0 for `bias` and passes both selection gates; a buy candidate closing below the 34/50 cloud is rejected with the reason recorded; the pullback rule is covered for held, failed, and stale (4 bars ago) tests.
+**Deps:** S3-T01, S2-T10.
+
 **S3-T05: Composite, confidence, bands** `type:feature area:scoring priority:p0 size:M`
 Weighted composite over non-missing factors with weight redistribution, display score, band, confidence. In this sprint all regime multipliers are 1.0 and fundamentals is `missing` (both arrive in Sprint 5); the code paths exist and are tested with injected values.
 **AC:** contributions sum to the composite within 1e-9; removing a factor redistributes weight proportionally; display score of composite 0 is 50.0.
-**Deps:** S3-T02, S3-T03, S3-T04.
+**Deps:** S3-T02, S3-T03, S3-T04, S3-T14.
 
 **S3-T06: Selection** `type:feature area:scoring priority:p0 size:M`
 Candidate rules, ranking with the full tie-breaker chain, max counts, correlation guard, "also qualified" list, and the nearest-miss record for an empty side.
@@ -1035,7 +1095,7 @@ Candidate rules, ranking with the full tie-breaker chain, max counts, correlatio
 **Deps:** S3-T06, S1-T06.
 
 **S3-T08: Evidence document and template narrative** `type:feature area:narrative priority:p0 size:M`
-Build the evidence document per pick and a deterministic template narrative (lead with Supertrend, top two contributions, top opposing factor, invalidation level). The LLM path arrives in Sprint 5.
+Build the evidence document per pick and a deterministic template narrative (lead with Supertrend and the 34/50 cloud bias, top two contributions, top opposing factor, invalidation level). The LLM path arrives in Sprint 5.
 **AC:** the evidence JSON validates against a committed JSON schema; every number in the template narrative appears in the evidence document.
 **Deps:** S3-T06.
 
@@ -1689,6 +1749,7 @@ Verify every text and background pair meets AA in both themes; adjust values if 
 - Candles: `--up` and `--down` bodies; wicks in the same color. In light and dark themes alike.
 - Supertrend line: 2 px, `--up` when below price, `--down` when above, with a marker at each flip.
 - SMA 20 / 50 / 200: 1 px lines in `--info`, `--text-1`, `--accent` with a legend.
+- Ripster EMA Clouds: the 5/12 and 34/50 clouds as fills at 15 percent opacity, `--up-soft` when the cloud is bullish and `--down-soft` when bearish, no edge lines. Shown on the ticker chart by default; the 8/9, 72/89 and 180/200 clouds are toggles. Never on the pick card sparkline.
 - Fibonacci levels: dashed 1 px `--text-2` with right-edge labels. Support and resistance: solid 1 px `--neutral` with strength shown by opacity.
 - Never more than the default overlays on first load; everything else is a toggle.
 
@@ -1994,7 +2055,7 @@ Demo matrix (extend it in the same PR as any new function):
 | Function | Verified by | Added in |
 |---|---|---|
 | Ingest and data quality flags | API status, excluded ticker shown with reason | 3 |
-| All 11 factors scored, contributions sum to the composite | analysis endpoint for 3 tickers | 3 (fundamentals and regimes in 5) |
+| All 12 factors scored, contributions sum to the composite | analysis endpoint for 3 tickers | 3 (fundamentals and regimes in 5) |
 | Top 3 buys and top 2 sells, duplicate guard | latest recommendations | 3 |
 | Supertrend line, direction, flip age | bars endpoint and chart overlay | 3, chart in 4 |
 | Today, Ticker, Watchlist, Runs, Settings screens | Playwright screenshots | 4 |
@@ -2527,9 +2588,9 @@ the evidence and a plain-language justification.
 
 ## What it does
 
-- Scores every watchlist ticker from 0 to 100 using 11 factors: Supertrend, SMA analysis, MACD,
+- Scores every watchlist ticker from 0 to 100 using 12 factors: Supertrend, SMA analysis, MACD,
   divergences, mean reversion, Fibonacci retracement, support and resistance, volatility,
-  volume oscillator, estimated buy / sell volume, and a fundamentals overlay
+  volume oscillator, estimated buy / sell volume, a fundamentals overlay, and Ripster EMA Clouds
 - Adjusts factor weights by regime (trending, ranging) and by fundamentals and earnings proximity
 - Publishes the top 3 buys and top 2 sells daily, never padding the list
 - Explains each pick: factor contributions, key levels, the level that invalidates the view
@@ -2694,7 +2755,7 @@ stokeai-supertrends/
   migrations/
   src/supertrends/
     __init__.py  version.py  settings.py  errors.py  logging.py
-    indicators/     primitives.py  supertrend.py  trend.py  momentum.py  divergence.py
+    indicators/     primitives.py  supertrend.py  ripster_clouds.py  trend.py  momentum.py  divergence.py
                     meanrev.py  volatility.py  fibonacci.py  levels.py  volume.py  flow.py  registry.py
     scoring/        factor.py  factors/ (one module per factor)  regime.py  weights.py
                     composite.py  confidence.py  config.py
@@ -2876,25 +2937,39 @@ flow:
 fundamentals:
   stale_days: 120
   stale_weight_multiplier: 0.5
+ripster:
+  source: hl2
+  ma_type: ema
+  clouds:
+    c1: [8, 9]
+    c2: [5, 12]
+    c3: [34, 50]
+    c4: [72, 89]
+    c5: [180, 200]
+  points: { bias: 30, trend: 20, stack: 20, mid: 10, long: 10, pullback: 10 }
+  pullback_lookback_bars: 3
+  confidence_stack_conflict_penalty: 10
+  selection_bias_gate: true
 weights:
   supertrend: 20
-  sma: 10
-  macd: 10
-  divergence: 10
-  mean_reversion: 8
-  fibonacci: 6
-  levels: 8
-  volatility: 5
+  sma: 7
+  macd: 8
+  divergence: 9
+  mean_reversion: 7
+  fibonacci: 5
+  levels: 7
+  volatility: 4
   volume_osc: 6
   flow: 9
   fundamentals: 8
+  ripster: 10
 regime:
   adx_length: 14
   trending_min: 25
   ranging_max: 20
   multipliers:
-    trending:     { supertrend: 1.25, sma: 1.20, macd: 1.10, divergence: 0.90, mean_reversion: 0.50, fibonacci: 1.00, levels: 0.90 }
-    ranging:      { supertrend: 0.70, sma: 0.70, macd: 0.90, divergence: 1.20, mean_reversion: 1.60, fibonacci: 1.10, levels: 1.40 }
+    trending:     { supertrend: 1.25, sma: 1.20, macd: 1.10, divergence: 0.90, mean_reversion: 0.50, fibonacci: 1.00, levels: 0.90, ripster: 1.20 }
+    ranging:      { supertrend: 0.70, sma: 0.70, macd: 0.90, divergence: 1.20, mean_reversion: 1.60, fibonacci: 1.10, levels: 1.40, ripster: 0.70 }
     transitional: {}
 events:
   earnings_window_days: 5
@@ -2918,7 +2993,7 @@ track_record:
   small_sample: 20
 ```
 
-The schema requires the eleven weights to sum to 100.
+The schema requires the twelve weights to sum to 100.
 
 ---
 
@@ -2978,7 +3053,7 @@ Golden fixture policy: golden files change only in a PR that also changes `scori
 Smoke checklist (automated in `tests/smoke`, also run by hand after each Stoke deploy):
 1. `/healthz` and `/readyz` return 200 and the expected version
 2. Latest recommendations return at most 3 buys and 2 sells, each with evidence, narrative, invalidation, and disclaimer
-3. Analysis for one watchlist ticker returns 11 factors (or fewer with a stated reason) and contributions that sum to the composite
+3. Analysis for one watchlist ticker returns 12 factors (or fewer with a stated reason) and contributions that sum to the composite
 4. Watchlist add and remove round trip (with token), and is rejected without it
 5. A triggered run reaches `published` or reports "market closed"
 6. Track record endpoint responds with sample sizes
@@ -3044,7 +3119,7 @@ Create this file in Step 1 with these entries, and append to it as you go. Each 
 |---|---|---|
 | 1 | Create DNS records for `supertrends.openstoke.com` and `supertrends-stage.openstoke.com` pointing at the private Stoke entry point chosen in the inventory (tailnet address or internal ingress). Do not expose the instance to the public internet | S8-T05 hostname, S9-T07 |
 | 2 | Create a Massive (formerly Polygon.io) account and API key on a plan whose terms and rate limits fit personal use of daily and 5-minute bars and financials; confirm display terms | S8-T05 real-provider run |
-| 3 | Export two TradingView daily charts with the built-in Supertrend (10, 3) as CSV into `tests/golden/tradingview/` | S2-T02 parity, release |
+| 3 | Export two TradingView daily charts with the built-in Supertrend (10, 3) and the Ripster EMA Clouds indicator (default settings) as CSV into `tests/golden/tradingview/` | S2-T02 and S2-T10 parity, release |
 | 4 | Run `scripts/stoke-inventory.sh` with the Stoke kubeconfig ; the output stays in git-ignored `private/` and is never committed | S8-T02 |
 | 5 | Create the `supertrends-stage` and `supertrends` namespaces' Secrets on Stoke (commands in Build and Deployment) | S8-T05, S9-T07 |
 | 6 | After the first publish, set the GHCR image and chart packages to public, and confirm fork PR approval, secret scanning, and private vulnerability reporting are on in repo settings | S8-T05 |

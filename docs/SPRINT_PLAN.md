@@ -543,7 +543,7 @@ Volume oscillator (5, 10), relative volume, CMF(20), accumulation and distributi
 
 - **Labels:** `type:test` `area:indicators` `priority:p0` `size:M` `sprint:2`
 - **Estimate:** M
-- **Dependencies:** S2-T02, S2-T03, S2-T04, S2-T05, S2-T06, S2-T07
+- **Dependencies:** S2-T02, S2-T03, S2-T04, S2-T05, S2-T06, S2-T07, S2-T10
 - **Spec references:** PRD: Indicators FR-2xx; NFR-001 compute budget; ARCHITECTURE: section 2 Component Responsibilities; TEST_PLAN: Indicators scenarios (no look-ahead, determinism, benchmark)
 
 **Description:**
@@ -567,12 +567,28 @@ Compute-all function producing one snapshot row per ticker per date (JSONB of in
 - [x] snapshot for the fixture dataset round-trips (#139)
 - [x] recomputing with the same inputs produces an identical JSON document (#139)
 
+### S2-T10: Ripster EMA Clouds with TradingView parity
+
+- **Labels:** `type:feature` `area:indicators` `priority:p0` `size:M` `sprint:2`
+- **Estimate:** M
+- **Dependencies:** S2-T01
+- **Spec references:** PRD: Indicators FR-2xx (FR-224); ARCHITECTURE: section 2 Component Responsibilities; TEST_PLAN: Indicators scenarios (Ripster EMA Clouds golden and parity)
+
+**Description:**
+Implement Factor 12's clouds exactly: the five EMA pairs on `hl2`, cloud top, bottom and direction, `pos`, `stack`, `rc_bars_since_stack_flip`, the 8/9 pullback test, and the weekly 34/50 direction. Golden fixtures: (a) a hand-computed case covering a stack flip in each direction, close inside a cloud, and a held and a failed 8/9 pullback; (b) TradingView parity files. For (b), add an owner checklist entry: export, for the same two tickers as S2-T02, a daily CSV with OHLCV plus the Ripster EMA Clouds plots at default settings, into `tests/golden/tradingview/`. Until they exist the parity test is skipped with a visible reason. When present, the test computes on the export's own bars and asserts each EMA matches within 0.01 and each cloud direction matches on every bar after a 200-bar warm-up.
+
+**Acceptance criteria:**
+- [ ] hand-computed fixture passes
+- [ ] parity test passes or is skipped pending owner files
+- [ ] property test: `top >= bot` always, and `stack` is nonzero only when the 5/12 and 34/50 clouds do not overlap
+
 ### Sprint 2 checklist (non-blocking; unmet items go to docs/GATE_DEBT.md)
 
 Filled in at sprint end on the integrated tip of the stacked PRs (#139 branch, 67de23a). None of the PRs is merged yet: the agent's `gh pr merge` was denied (docs/OWNER_CHECKLIST.md #25, GD-015).
 
 - [x] Every indicator in the specification is implemented and registered with the no-look-ahead harness (#131 to #138: 56 indicators registered, 21 exempt names with reasons; TS-IND-091 fails on an unregistered public function)
 - [x] Supertrend hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open (#137: TS-IND-020 passes; TS-IND-021 and 022 skipped, docs/OWNER_CHECKLIST.md #3 open, GD-016)
+- [ ] Ripster EMA Clouds hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open (added after the Sprint 2 audit by the Ripster EMA Clouds spec change; S2-T10 not started)
 - [x] Determinism hash committed and checked in CI (#138: `tests/golden/determinism.sha256`, floats at 10 significant digits per ADR-056; the synthetic dataset hash is checked by `scripts/validate-fixtures.sh` in CI)
 - [x] Indicator coverage at or above 95 percent (99 percent, 1,133 statements; total 97 percent)
 - [x] Compute benchmark within budget (TS-IND-094: 200 tickers x 756 bars in 2.75 s locally against the 60 s budget; passes in CI)
@@ -647,7 +663,7 @@ Same standard, including the quality-based weight multiplier for `daily_estimate
 
 - **Labels:** `type:feature` `area:scoring` `priority:p0` `size:M` `sprint:3`
 - **Estimate:** M
-- **Dependencies:** S3-T02, S3-T03, S3-T04
+- **Dependencies:** S3-T02, S3-T03, S3-T04, S3-T14
 - **Spec references:** PRD: Scoring FR-3xx; ARCHITECTURE: section 2 Component Responsibilities, section 13 Configuration; TEST_PLAN: Scoring scenarios (composite and confidence)
 
 **Description:**
@@ -696,7 +712,7 @@ Candidate rules, ranking with the full tie-breaker chain, max counts, correlatio
 - **Spec references:** PRD: Justification FR-5xx; ARCHITECTURE: section 2 Component Responsibilities, section 4 Data Flows; TEST_PLAN: Narrative and evidence scenarios
 
 **Description:**
-Build the evidence document per pick and a deterministic template narrative (lead with Supertrend, top two contributions, top opposing factor, invalidation level). The LLM path arrives in Sprint 5.
+Build the evidence document per pick and a deterministic template narrative (lead with Supertrend and the 34/50 cloud bias, top two contributions, top opposing factor, invalidation level). The LLM path arrives in Sprint 5.
 
 **Acceptance criteria:**
 - [ ] the evidence JSON validates against a committed JSON schema
@@ -772,6 +788,22 @@ Implement `make demo`, `make demo-verify`, and `make demo-down` as specified in 
 - [ ] `make demo-verify` prints one PASS or FAIL line per function and exits non-zero on any FAIL
 - [ ] no API key, network access, or cluster is needed
 
+### S3-T14: Factor 12 (Ripster EMA Clouds)
+
+- **Labels:** `type:feature` `area:scoring` `priority:p0` `size:M` `sprint:3`
+- **Estimate:** M
+- **Dependencies:** S3-T01, S2-T10
+- **Spec references:** PRD: Scoring FR-3xx (FR-333 to FR-335), Selection FR-4xx; ARCHITECTURE: section 2 Component Responsibilities; TEST_PLAN: Scoring scenarios (factor 12)
+
+**Description:**
+Same standard as S3-T02, plus the Ripster parts of confidence (`rc_stack` opposing `st_dir_d`) and selection (`rc_bias` gate on both sides), and the `ripster` block of the evidence document.
+
+**Acceptance criteria:**
+- [ ] one test row per rule line, both signs
+- [ ] `pos(c3) == 0` (close inside the 34/50 cloud) scores 0 for `bias` and passes both selection gates
+- [ ] a buy candidate closing below the 34/50 cloud is rejected with the reason recorded
+- [ ] the pullback rule is covered for held, failed, and stale (4 bars ago) tests
+
 ### Sprint 3 checklist (non-blocking; unmet items go to docs/GATE_DEBT.md)
 
 - [ ] `make demo && make demo-verify` passes and the demo matrix covers the functions added this sprint
@@ -843,7 +875,7 @@ Header with the as-of date, market regime, run status and data freshness. Three 
 - **Spec references:** PRD: UI FR-7xx, Indicators FR-2xx; NFR: accessibility; ARCHITECTURE: section 6.1 HTTP; TEST_PLAN: UI Ticker screen and e2e scenarios
 
 **Description:**
-Candlestick chart using `lightweight-charts` with overlays: Supertrend line (colored by direction), SMA 20 / 50 / 200, Fibonacci levels, support and resistance. Sub-panels: MACD with histogram, RSI with divergence markers, volume with estimated buy / sell split. Right rail: full factor table (score, weight, contribution, reasons), regime, adjustments, fundamentals summary, history of this ticker's scores.
+Candlestick chart using `lightweight-charts` with overlays: Supertrend line (colored by direction), SMA 20 / 50 / 200, Ripster 5/12 and 34/50 clouds, Fibonacci levels, support and resistance. Sub-panels: MACD with histogram, RSI with divergence markers, volume with estimated buy / sell split. Right rail: full factor table (score, weight, contribution, reasons), regime, adjustments, fundamentals summary, history of this ticker's scores.
 
 **Acceptance criteria:**
 - [ ] overlays match API values (e2e asserts the Supertrend series length and last value)
