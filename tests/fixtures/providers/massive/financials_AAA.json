@@ -1,0 +1,62 @@
+{
+ "status": "OK",
+ "request_id": "scrubbed",
+ "results": [
+  {
+   "revenue": 9000000000.0,
+   "gross_profit": 4000000000.0,
+   "operating_income": 2500000000.0,
+   "diluted_earnings_per_share": 1.5,
+   "diluted_shares_outstanding": 15000000000.0,
+   "period_end": "2025-03-31",
+   "filing_date": "2025-05-02",
+   "tickers": [
+    "AAA"
+   ],
+   "fiscal_quarter": 1,
+   "timeframe": "quarterly"
+  },
+  {
+   "revenue": 9100000000.0,
+   "gross_profit": 4000000000.0,
+   "operating_income": 2500000000.0,
+   "diluted_earnings_per_share": 1.55,
+   "diluted_shares_outstanding": 15000000000.0,
+   "period_end": "2025-06-30",
+   "filing_date": "2025-08-01",
+   "tickers": [
+    "AAA"
+   ],
+   "fiscal_quarter": 2,
+   "timeframe": "quarterly"
+  },
+  {
+   "revenue": 9200000000.0,
+   "gross_profit": 4000000000.0,
+   "operating_income": 2500000000.0,
+   "diluted_earnings_per_share": 1.6,
+   "diluted_shares_outstanding": 15000000000.0,
+   "period_end": "2025-09-30",
+   "filing_date": "2025-10-31",
+   "tickers": [
+    "AAA"
+   ],
+   "fiscal_quarter": 3,
+   "timeframe": "quarterly"
+  },
+  {
+   "revenue": 9300000000.0,
+   "gross_profit": 4000000000.0,
+   "operating_income": 2500000000.0,
+   "diluted_earnings_per_share": 1.65,
+   "diluted_shares_outstanding": 15000000000.0,
+   "period_end": "2025-12-31",
+   "filing_date": "2026-02-02",
+   "tickers": [
+    "AAA"
+   ],
+   "fiscal_quarter": 4,
+   "timeframe": "quarterly"
+  }
+ ]
+}
