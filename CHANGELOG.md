@@ -7,6 +7,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Indicator snapshots: `scoring.snapshot.compute_snapshot` (every per-bar indicator daily and weekly, levels, Fibonacci, divergences, flow; canonical JSON, NaN as null, no look-ahead), insert-only persistence with idempotent retry and conflict detection in `data.snapshots`, and `compute_and_store` for the `computing` step; the 10-digit canonicalizer moved into `indicators.registry` (S2-T09).
+- No-look-ahead and determinism harness: indicator registry, truncation and perturbation property tests with a negative control, determinism and synthetic dataset hashes, `scripts/regen-golden.sh`, `scripts/validate-fixtures.sh`, the 200-ticker compute benchmark, and unique-ID checks for specs; `supertrends.indicators.supertrend` is now the function (S2-T08).
+- Volume indicators (`volume_oscillator`, `relative_volume`, `obv_slope_sign`, `cmf`, `accumulation_distribution_days`) and estimated order flow (`split_volume`, `estimate_order_flow` with `intraday`, `daily_estimate`, and `trades` quality) (S2-T07).
+- Mean reversion and volatility indicators: Bollinger (20, 2), %B, z-score, bandwidth and rank, ATR% and rank, HV20, squeeze and expansion flags (S2-T05).
+- Divergence detector: regular and hidden, bullish and bearish divergences for RSI, MACD histogram, and OBV on confirmed pivots (daily width 5, weekly width 3), with typed records and a per-bar series form (S2-T04).
+- Trend and momentum indicators: SMA 20/50/200 with slope and cross detection, MACD (12, 26, 9) daily and weekly (as-of, no look-ahead), histogram run and signal cross helpers, and ADX(14) with +DI/-DI (S2-T03).
+- Supertrend with TradingView semantics (`supertrend`, `bars_since_flip`, `distance_atr`, `supertrend_weekly_direction`), a hand-computed 40-bar fixture, and the TradingView parity harness (skipped until the owner provides exports) (S2-T02).
+- Fibonacci legs, retracements and extensions, and support/resistance level clustering with breakout and breakdown flags (S2-T06).
+- Indicator primitives (`sma`, `ema`, `rma`, `stdev`, `true_range`, `atr`, `rsi`, `obv`, `percentile_rank`, `linreg_slope`, confirmed `pivots`, `zigzag`, array `resample_weekly`), the `supertrends.indicators` package skeleton with an aggregated `__all__`, and the `numpy` dependency (S2-T01).
 - `database_call_recorder()` returns the Postgres-backed `DbCallRecorder`, and the shared Massive client uses it, so every Massive call writes a sanitized `provider_calls` row; `call_recorder` reuses the adapters' `CallRecord` type (S1-T04, S1-T06 follow-up).
 - Deterministic fixture provider (synthetic bars, fundamentals, split) and XNYS calendar helpers (S1-T03).
 - Python package and the `supertrends` CLI with `--version`, `serve`, and `healthcheck`; `/healthz` and `/readyz` (S0-T01).
@@ -28,6 +37,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - API skeleton: `/readyz` checks database reachability and migrations at head (RFC 9457 503), `/metrics` Prometheus HTTP metrics, structlog JSON logs with request IDs and a secret scrubber, problem+json errors, Host allowlist with probe exemptions, and `require_write_token` (S1-T08).
 - Local Compose runs a one-shot `migrate` service (`supertrends db migrate`) before the app starts, so `/readyz` reports ready after `make up` (S1-T08).
 - Ingestion service and `supertrends ingest [--date] [--symbols] [--full]`: idempotent incremental daily, 5-minute, and fundamentals ingest, split-triggered full refetch, data quality classification, and `provider_calls` recording (S1-T06).
+
+### Fixed
+
+- UI: TypeScript back to ^5.9.3, since typescript-eslint 8 supports only TypeScript <6.1 and the Dependabot bump to 7.0.2 broke `npm ci`.
 
 ### Scoring
 

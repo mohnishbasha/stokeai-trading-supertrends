@@ -185,7 +185,7 @@ Rules:
 
 | Kind | Source | Location | Committed |
 |---|---|---|---|
-| Hand-computed | Written by hand from the formulas (for example the 40-bar Supertrend case with both flip directions and band ratcheting) | `tests/golden/handcomputed/` | Yes |
+| Hand-computed | Written by hand from the formulas (for example the 40-bar Supertrend case with both flip directions and band ratcheting, and the Ripster EMA Clouds case with a stack flip in each direction) | `tests/golden/handcomputed/` | Yes |
 | Synthetic dataset | Output of the fixture provider with a fixed seed | generated at test time; hash in `tests/golden/synthetic_dataset.sha256` | Hash only |
 | Expected-output files | Indicator and factor outputs for the synthetic dataset | `tests/golden/expected/` | Yes |
 | TradingView parity | CSV exports provided by the owner: OHLCV plus the built-in Supertrend (10, 3) columns, two tickers, daily chart | `tests/golden/tradingview/` | Owner decision (see 1.1 item 5) |
@@ -222,7 +222,7 @@ TradingView's `ta.supertrend` returns direction with the opposite sign (negative
 
 ### 5.6 TradingView parity file status
 
-Until the owner supplies the CSV files, the parity test is `Skipped` with the visible reason "TradingView export not yet provided (owner checklist item open)". It is a release blocker at S9-T04: it must be passing, not skipped, for v1.0.0.
+Until the owner supplies the CSV files, the parity test is `Skipped` with the visible reason "TradingView export not yet provided (owner checklist item open)". It is a release blocker at S9-T04: it must be passing, not skipped, for v1.0.0. The same applies to the Ripster EMA Clouds parity test (TS-IND-141, TS-IND-142), which uses the same owner export (the export also carries the Ripster EMA Clouds plots at default settings).
 
 ---
 
@@ -253,11 +253,11 @@ Properties that must hold for all registered functions:
 
 ### 6.2 Factor level
 
-For each of the 11 factors, `factor.compute(snapshot_at(t), ctx_at(t))` must equal the same call made on data truncated to bars up to t. The test builds the snapshot from `bars[:t]` and from `bars` followed by slicing at t, and compares score, evidence, and quality byte for byte.
+For each of the 12 factors, `factor.compute(snapshot_at(t), ctx_at(t))` must equal the same call made on data truncated to bars up to t. The test builds the snapshot from `bars[:t]` and from `bars` followed by slicing at t, and compares score, evidence, and quality byte for byte.
 
 ### 6.3 Registry rule
 
-All public indicator functions are registered in `tests/unit/lookahead_registry.py` with their `confirm_lag`. A test enumerates `supertrends.indicators.__all__` and fails if any public function is not registered. Adding an indicator without registering it fails CI.
+All public indicator functions are registered in `src/supertrends/indicators/registry.py` with their `confirm_lag` (public non-indicator names are listed in `EXEMPT` with a reason). A test enumerates `supertrends.indicators.__all__` and fails if any public function is not registered. Adding an indicator without registering it fails CI.
 
 ### 6.4 Negative control (the judge must be able to fail)
 
@@ -285,13 +285,13 @@ Requirement: NFR-002. Same bars plus the same config hash produce byte-identical
 
 ### 7.1 Design
 
-1. **Hash test (committed).** Compute all indicator outputs, all factor results, composites, display scores, confidence, bands, and the selection for the synthetic dataset on a fixed as-of date. Serialize with canonical JSON (sorted keys, floats formatted by `repr` of the IEEE 754 double, no locale), hash with sha256, and compare to `tests/golden/determinism.sha256`. Regeneration follows the golden policy (5.5).
+1. **Hash test (committed).** Compute all indicator outputs, all factor results, composites, display scores, confidence, bands, and the selection for the synthetic dataset on a fixed as-of date. Serialize with canonical JSON (sorted keys, NaN as null, floats rounded to 10 significant digits and then formatted by `repr`, no locale; ADR-056), hash with sha256, and compare to `tests/golden/determinism.sha256`. Regeneration follows the golden policy (5.5).
 2. **Double-run test.** Run the full scoring pipeline twice in one process and twice in separate processes (`subprocess`, different `PYTHONHASHSEED`, different `TZ`, different `LC_ALL`); the serialized outputs must be byte-identical.
 3. **Order independence.** Shuffle the ticker processing order and the input row order of a ticker's bars (sorted before use); the ranking and scores are unchanged.
 4. **Live path.** `supertrends run daily` on the fixture dataset twice from clean databases publishes identical recommendations (ticker, side, scores, contributions, rank), compared after removing run ids and timestamps.
 5. **LLM isolation.** Run the pipeline with the narrative provider set to `template`, to a mock that returns valid text, to a mock that returns invalid text, and to an endpoint that times out. Scores, ranks, and selections are byte-identical across all four. A static test (AST scan) asserts that no module under `scoring/` or `selection/` imports from `narrative/`.
 6. **Config hash.** The hash is sha256 of the canonical JSON and is stable across key order; changing one weight changes the hash.
-7. **Cross-architecture.** The hash test runs on `linux/amd64` (CI) and `linux/arm64` (CI image job or kind on ARM runner). Floating point differences are avoided by avoiding fused operations in the pure Python reference path and by rounding stored scores to a fixed number of decimals at the persistence boundary; if arm64 and amd64 hashes differ, that is a bug to fix, not a tolerance to add.
+7. **Cross-architecture.** The hash test runs on `linux/amd64` (CI) and `linux/arm64` (CI image job or kind on ARM runner). Floating point differences are avoided by avoiding fused operations in the pure Python reference path and by rounding stored scores to a fixed number of decimals at the persistence boundary; if arm64 and amd64 hashes differ, that is a bug to fix, not a tolerance to add. The indicator hash rounds floats to 10 significant digits (ADR-056): full-precision `repr` differed between macOS arm64 and Linux amd64 in the last bits of a few recursive indicators. That rounding is a fixed canonical form shared with the snapshot document (ADR-057), not a comparison tolerance, and it is never widened to make a hash pass.
 
 ---
 
@@ -326,7 +326,7 @@ The smoke suite lives in `tests/smoke/`, is driven by `SMOKE_BASE_URL`, and is t
 |---|---|---|---|
 | 1 | Health and readiness | `/healthz` and `/readyz` return 200; reported version equals the deployed version | `curl -fsS $BASE/healthz`, `curl -fsS $BASE/readyz`, `curl -fsS $BASE/api/v1/status \| jq .version` |
 | 2 | Latest recommendations | At most 3 buys and at most 2 sells; each pick has evidence, narrative, invalidation, and the disclaimer | `curl -fsS $BASE/api/v1/recommendations/latest \| jq '(.buys\|length), (.sells\|length)'` |
-| 3 | One ticker analysis | 11 factors (or fewer with a stated reason); contributions sum to the composite within 1e-6 | `curl -fsS $BASE/api/v1/tickers/AAA/analysis` (fixture ticker; use a real watchlist ticker on a real provider) |
+| 3 | One ticker analysis | 12 factors (or fewer with a stated reason); contributions sum to the composite within 1e-6 | `curl -fsS $BASE/api/v1/tickers/AAA/analysis` (fixture ticker; use a real watchlist ticker on a real provider) |
 | 4 | Watchlist round trip | Add then remove with the token succeeds; the same calls without the token are rejected (401) | `curl -X POST -H "Authorization: Bearer $T" $BASE/api/v1/watchlist/items`, then `curl -X DELETE -H "Authorization: Bearer $T" $BASE/api/v1/watchlist/items/{symbol}` |
 | 5 | Triggered run | `POST /api/v1/runs` reaches `published`, or reports "market closed" on a non-trading day | `curl -X POST -H "Authorization: Bearer $T" $BASE/api/v1/runs`, then poll `GET /api/v1/runs/{id}` |
 | 6 | Track record | `GET /api/v1/track-record` responds with sample sizes | `curl -fsS $BASE/api/v1/track-record \| jq .` |
@@ -410,7 +410,7 @@ Id prefixes: WL watchlist, ING ingestion and data, IND indicators, SCR scoring, 
 |---|---|---|---|---|
 | TS-ING-001 | `unit_fixture_provider_generate_same_seed_identical_bars` | Same seed gives byte-identical bars | FR-1xx, S1-T03 | Automated |
 | TS-ING-002 | `unit_fixture_provider_dataset_has_trending_ranging_reversing_tickers` | By construction the dataset includes one trending, one ranging, one reversing ticker (asserted via ADX and flips) | FR-1xx, S1-T03 | Automated |
-| TS-ING-003 | `golden_fixture_provider_dataset_hash_matches_committed_hash` | Synthetic dataset hash equals `tests/golden/synthetic_dataset.sha256` | FR-1xx, A§12 | Deferred |
+| TS-ING-003 | `golden_fixture_provider_dataset_hash_matches_committed_hash` | Synthetic dataset hash equals `tests/golden/synthetic_dataset.sha256` | FR-1xx, A§12 | Automated |
 | TS-ING-004 | `contract_provider_fixture_passes_shared_contract_suite` | Fixture provider passes the provider contract suite | FR-1xx, A§7 | Automated |
 | TS-ING-005 | `contract_provider_massive_recorded_passes_shared_contract_suite` | Massive adapter passes the contract suite on recorded scrubbed responses | FR-1xx, A§7 | Automated |
 | TS-ING-006 | `contract_provider_alternate_recorded_passes_shared_contract_suite` | Alternate provider adapter passes the contract suite | FR-1xx, S1-T05 | Automated |
@@ -499,152 +499,229 @@ Golden and property tests apply to every indicator. Tolerances are in section 5.
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-001 | `golden_sma_compute_handcomputed_series_matches_1e9` | SMA(5) on a hand series | FR-2xx, S2-T01 | Deferred |
-| TS-IND-002 | `golden_ema_compute_seeded_with_sma_of_first_n_matches_1e9` | EMA alpha 2/(n+1) seeded with the SMA of the first n values | FR-2xx, Conventions | Deferred |
-| TS-IND-003 | `golden_rma_compute_wilder_seed_and_recursion_matches_1e9` | RMA seeded with SMA, then `(prev*(n-1)+x)/n` | FR-2xx, Conventions | Deferred |
-| TS-IND-004 | `golden_true_range_compute_gap_up_gap_down_inside_bar_matches_1e9` | TR uses prior close for gaps | FR-2xx | Deferred |
-| TS-IND-005 | `unit_true_range_compute_first_bar_is_high_minus_low` | First bar has no prior close | FR-2xx | Deferred |
-| TS-IND-006 | `golden_atr_compute_rma10_and_rma14_match_1e9` | ATR is RMA of TR | FR-2xx | Deferred |
-| TS-IND-007 | `golden_rsi_compute_wilder_14_matches_1e9` | RSI(14) Wilder on a hand series | FR-2xx | Deferred |
-| TS-IND-008 | `unit_rsi_compute_all_gains_returns_100_all_losses_returns_0` | Degenerate series bounds | FR-2xx | Deferred |
-| TS-IND-009 | `golden_obv_compute_up_down_flat_closes_matches_1e9` | OBV adds, subtracts, or holds | FR-2xx | Deferred |
-| TS-IND-010 | `golden_stdev_compute_population_20_matches_1e9` | Population stdev, not sample | FR-2xx | Deferred |
-| TS-IND-011 | `unit_percentile_rank_compute_trailing_window_only_matches_1e9` | Percentile rank over trailing window | FR-2xx | Deferred |
-| TS-IND-012 | `golden_linreg_slope_compute_known_line_returns_exact_slope` | Least-squares slope on a linear series | FR-2xx | Deferred |
-| TS-IND-013 | `unit_pivots_compute_width_5_never_marks_within_5_bars_of_end` | Confirmed pivot rule | FR-2xx, S2-T01 | Deferred |
-| TS-IND-014 | `unit_zigzag_compute_threshold_8pct_vs_3_atr_pct_uses_max` | Threshold is `max(8%, 3*ATR%)` | FR-2xx, S2-T01 | Deferred |
-| TS-IND-015 | `unit_resample_weekly_compute_friday_close_matches_manual` | Weekly resample helper | FR-1xx, FR-2xx | Deferred |
-| TS-IND-016 | `prop_primitives_compute_output_length_equals_input_nan_warmup` | All primitives return same-length arrays with NaN warm-up | FR-2xx | Deferred |
+| TS-IND-001 | `golden_sma_compute_handcomputed_series_matches_1e9` | SMA(5) on a hand series | FR-2xx, S2-T01 | Automated |
+| TS-IND-002 | `golden_ema_compute_seeded_with_sma_of_first_n_matches_1e9` | EMA alpha 2/(n+1) seeded with the SMA of the first n values | FR-2xx, Conventions | Automated |
+| TS-IND-003 | `golden_rma_compute_wilder_seed_and_recursion_matches_1e9` | RMA seeded with SMA, then `(prev*(n-1)+x)/n` | FR-2xx, Conventions | Automated |
+| TS-IND-004 | `golden_true_range_compute_gap_up_gap_down_inside_bar_matches_1e9` | TR uses prior close for gaps | FR-2xx | Automated |
+| TS-IND-005 | `unit_true_range_compute_first_bar_is_high_minus_low` | First bar has no prior close | FR-2xx | Automated |
+| TS-IND-006 | `golden_atr_compute_rma10_and_rma14_match_1e9` | ATR is RMA of TR | FR-2xx | Automated |
+| TS-IND-007 | `golden_rsi_compute_wilder_14_matches_1e9` | RSI(14) Wilder on a hand series | FR-2xx | Automated |
+| TS-IND-008 | `unit_rsi_compute_all_gains_returns_100_all_losses_returns_0` | Degenerate series bounds | FR-2xx | Automated |
+| TS-IND-009 | `golden_obv_compute_up_down_flat_closes_matches_1e9` | OBV adds, subtracts, or holds | FR-2xx | Automated |
+| TS-IND-010 | `golden_stdev_compute_population_20_matches_1e9` | Population stdev, not sample | FR-2xx | Automated |
+| TS-IND-011 | `unit_percentile_rank_compute_trailing_window_only_matches_1e9` | Percentile rank over trailing window | FR-2xx | Automated |
+| TS-IND-012 | `golden_linreg_slope_compute_known_line_returns_exact_slope` | Least-squares slope on a linear series | FR-2xx | Automated |
+| TS-IND-013 | `unit_pivots_compute_width_5_never_marks_within_5_bars_of_end` | Confirmed pivot rule | FR-2xx, S2-T01 | Automated |
+| TS-IND-014 | `unit_zigzag_compute_threshold_8pct_vs_3_atr_pct_uses_max` | Threshold is `max(8%, 3*ATR%)` | FR-2xx, S2-T01 | Automated |
+| TS-IND-015 | `unit_resample_weekly_compute_friday_close_matches_manual` | Weekly resample helper | FR-1xx, FR-2xx | Automated |
+| TS-IND-016 | `prop_primitives_compute_output_length_equals_input_nan_warmup` | All primitives return same-length arrays with NaN warm-up | FR-2xx | Automated |
+| TS-IND-017 | `unit_indicators_all_aggregation_exposes_primitives` | `supertrends.indicators.__all__` aggregates every module's `__all__` | FR-2xx, S2-T01 | Automated |
+| TS-IND-018 | `unit_indicators_import_boundary_no_api_cli_mcp_data_runs` | No indicator module imports api, cli, mcp, data, or runs | ARCHITECTURE 2 | Automated |
 
 #### 10.3.2 Supertrend
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-020 | `golden_supertrend_compute_handcomputed_40_bar_both_flips_and_ratcheting_matches` | Hand-computed 40-bar case: up flip, down flip, band ratcheting | FR-2xx, S2-T02 | Deferred |
+| TS-IND-020 | `golden_supertrend_compute_handcomputed_40_bar_both_flips_and_ratcheting_matches` | Hand-computed 40-bar case: up flip, down flip, band ratcheting | FR-2xx, S2-T02 | Automated |
 | TS-IND-021 | `golden_supertrend_tradingview_parity_line_within_0_01_after_100_bar_warmup` | Line within 0.01 per bar versus TradingView export, two tickers | FR-2xx, S2-T02 | Skipped: TradingView CSV exports not yet provided by the owner (owner checklist item); manual: export built-in Supertrend (10, 3) with OHLCV for two tickers on the daily chart to `tests/golden/tradingview/` and run `pytest tests/golden -k tradingview`. Release blocker at S9-T04 |
 | TS-IND-022 | `golden_supertrend_tradingview_parity_direction_matches_every_bar_after_warmup` | Direction identical on every bar after the first 100 | FR-2xx, S2-T02 | Skipped: same owner files as TS-IND-021; manual: same step |
-| TS-IND-023 | `unit_supertrend_tv_boundary_conversion_negative_tv_direction_maps_to_plus_1_up` | TradingView -1 (up) converts to internal +1 only at the import boundary | FR-2xx, Conventions | Deferred |
-| TS-IND-024 | `unit_supertrend_tv_boundary_conversion_positive_tv_direction_maps_to_minus_1_down` | TradingView +1 (down) converts to internal -1 | FR-2xx, Conventions | Deferred |
-| TS-IND-025 | `unit_supertrend_compute_atr_undefined_prior_bar_direction_minus_1` | Warm-up rule: `atr[t-1]` undefined gives direction -1 | FR-2xx | Deferred |
-| TS-IND-026 | `unit_supertrend_compute_final_up_ratchets_down_only_while_close_stays_below` | `final_up` lowers or resets after a close above it | FR-2xx | Deferred |
-| TS-IND-027 | `unit_supertrend_compute_final_lo_ratchets_up_only_while_close_stays_above` | `final_lo` rises or resets after a close below it | FR-2xx | Deferred |
-| TS-IND-028 | `unit_supertrend_compute_flip_up_when_close_exceeds_final_up` | Direction flips to +1 | FR-2xx | Deferred |
-| TS-IND-029 | `unit_supertrend_compute_flip_down_when_close_below_final_lo` | Direction flips to -1 | FR-2xx | Deferred |
-| TS-IND-030 | `prop_supertrend_compute_direction_always_plus_or_minus_1_after_warmup` | Direction domain | FR-2xx, S2-T02 | Deferred |
-| TS-IND-031 | `prop_supertrend_compute_line_below_close_when_up_above_close_when_down` | Line side invariant | FR-2xx, S2-T02 | Deferred |
-| TS-IND-032 | `unit_supertrend_derived_bars_since_flip_counts_from_last_flip` | `bars_since_flip` is 0 on the flip bar | FR-2xx | Deferred |
-| TS-IND-033 | `unit_supertrend_derived_distance_atr_signed_close_minus_st_over_atr` | `st_distance_atr` sign and value | FR-2xx | Deferred |
-| TS-IND-034 | `unit_supertrend_derived_weekly_direction_uses_resampled_weekly_bars` | `st_dir_w` computed on weekly bars | FR-2xx | Deferred |
-| TS-IND-035 | `unit_supertrend_derived_st_line_equals_invalidation_level` | `st_line` is exposed as the invalidation level | FR-2xx, FR-5xx | Deferred |
-| TS-IND-036 | `unit_supertrend_params_non_default_length_and_factor_from_config` | Length and factor come from `config/scoring.yaml` | FR-2xx, A§13 | Deferred |
+| TS-IND-023 | `unit_supertrend_tv_boundary_conversion_negative_tv_direction_maps_to_plus_1_up` | TradingView -1 (up) converts to internal +1 only at the import boundary | FR-2xx, Conventions | Automated |
+| TS-IND-024 | `unit_supertrend_tv_boundary_conversion_positive_tv_direction_maps_to_minus_1_down` | TradingView +1 (down) converts to internal -1 | FR-2xx, Conventions | Automated |
+| TS-IND-025 | `unit_supertrend_compute_atr_undefined_prior_bar_direction_minus_1` | Warm-up rule: `atr[t-1]` undefined gives direction -1 | FR-2xx | Automated |
+| TS-IND-026 | `unit_supertrend_compute_final_up_ratchets_down_only_while_close_stays_below` | `final_up` lowers or resets after a close above it | FR-2xx | Automated |
+| TS-IND-027 | `unit_supertrend_compute_final_lo_ratchets_up_only_while_close_stays_above` | `final_lo` rises or resets after a close below it | FR-2xx | Automated |
+| TS-IND-028 | `unit_supertrend_compute_flip_up_when_close_exceeds_final_up` | Direction flips to +1 | FR-2xx | Automated |
+| TS-IND-029 | `unit_supertrend_compute_flip_down_when_close_below_final_lo` | Direction flips to -1 | FR-2xx | Automated |
+| TS-IND-030 | `prop_supertrend_compute_direction_always_plus_or_minus_1_after_warmup` | Direction domain | FR-2xx, S2-T02 | Automated |
+| TS-IND-031 | `prop_supertrend_compute_line_below_close_when_up_above_close_when_down` | Line side invariant | FR-2xx, S2-T02 | Automated |
+| TS-IND-032 | `unit_supertrend_derived_bars_since_flip_counts_from_last_flip` | `bars_since_flip` is 0 on the flip bar | FR-2xx | Automated |
+| TS-IND-033 | `unit_supertrend_derived_distance_atr_signed_close_minus_st_over_atr` | `st_distance_atr` sign and value | FR-2xx | Automated |
+| TS-IND-034 | `unit_supertrend_derived_weekly_direction_uses_resampled_weekly_bars` | `st_dir_w` computed on weekly bars | FR-2xx | Automated |
+| TS-IND-035 | `unit_supertrend_derived_st_line_equals_invalidation_level` | `st_line` is exposed as the invalidation level | FR-2xx, FR-5xx | Automated |
+| TS-IND-036 | `unit_supertrend_params_non_default_length_and_factor_from_config` | Length and factor come from `config/scoring.yaml` | FR-2xx, A§13 | Automated |
 
 #### 10.3.3 SMA 20 / 50 / 200 with slope and cross
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-040 | `golden_sma_stack_compute_20_50_200_matches_1e6` | Three SMAs on the synthetic dataset | FR-2xx, S2-T03 | Deferred |
-| TS-IND-041 | `unit_sma_slope_compute_5_bar_slope_sign_positive_negative_flat` | SMA20 slope over 5 bars | FR-2xx | Deferred |
-| TS-IND-042 | `unit_sma_cross_detect_golden_cross_reports_bar_index` | Golden cross bar index | FR-2xx, S2-T03 | Deferred |
-| TS-IND-043 | `unit_sma_cross_detect_death_cross_reports_bar_index` | Death cross bar index | FR-2xx, S2-T03 | Deferred |
-| TS-IND-044 | `unit_sma_cross_detect_no_cross_in_series_returns_none` | No cross reports none | FR-2xx | Deferred |
+| TS-IND-040 | `golden_sma_stack_compute_20_50_200_matches_1e6` | Three SMAs on the synthetic dataset | FR-2xx, S2-T03 | Automated |
+| TS-IND-041 | `unit_sma_slope_compute_5_bar_slope_sign_positive_negative_flat` | SMA20 slope over 5 bars | FR-2xx | Automated |
+| TS-IND-042 | `unit_sma_cross_detect_golden_cross_reports_bar_index` | Golden cross bar index | FR-2xx, S2-T03 | Automated |
+| TS-IND-043 | `unit_sma_cross_detect_death_cross_reports_bar_index` | Death cross bar index | FR-2xx, S2-T03 | Automated |
+| TS-IND-044 | `unit_sma_cross_detect_no_cross_in_series_returns_none` | No cross reports none | FR-2xx | Automated |
 
 #### 10.3.4 MACD
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-050 | `golden_macd_compute_12_26_9_daily_matches_1e6` | line, signal, hist | FR-2xx, S2-T03 | Deferred |
-| TS-IND-051 | `golden_macd_compute_weekly_matches_1e6` | Weekly MACD on resampled bars | FR-2xx, S2-T03 | Deferred |
-| TS-IND-052 | `unit_macd_signal_cross_detect_bullish_and_bearish_within_3_bars` | Cross detection with bar index | FR-2xx | Deferred |
-| TS-IND-053 | `unit_macd_hist_run_detect_three_rising_and_three_falling_bars` | Histogram run helper used by the factor | FR-2xx | Deferred |
+| TS-IND-050 | `golden_macd_compute_12_26_9_daily_matches_1e6` | line, signal, hist | FR-2xx, S2-T03 | Automated |
+| TS-IND-051 | `golden_macd_compute_weekly_matches_1e6` | Weekly MACD on resampled bars | FR-2xx, S2-T03 | Automated |
+| TS-IND-052 | `unit_macd_signal_cross_detect_bullish_and_bearish_within_3_bars` | Cross detection with bar index | FR-2xx | Automated |
+| TS-IND-053 | `unit_macd_hist_run_detect_three_rising_and_three_falling_bars` | Histogram run helper used by the factor | FR-2xx | Automated |
 
 #### 10.3.5 ADX(14), +DI, -DI
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-060 | `golden_adx_compute_14_matches_1e6` | ADX with Wilder smoothing on a hand series | FR-2xx, S2-T03 | Deferred |
-| TS-IND-061 | `unit_adx_compute_plus_di_minus_di_nonnegative_and_bounded_0_100` | DI and ADX range | FR-2xx | Deferred |
-| TS-IND-062 | `unit_adx_compute_flat_series_returns_zero_without_division_error` | Zero-range input does not divide by zero | FR-2xx | Deferred |
+| TS-IND-060 | `golden_adx_compute_14_matches_1e6` | ADX with Wilder smoothing on a hand series | FR-2xx, S2-T03 | Automated |
+| TS-IND-061 | `unit_adx_compute_plus_di_minus_di_nonnegative_and_bounded_0_100` | DI and ADX range | FR-2xx | Automated |
+| TS-IND-062 | `unit_adx_compute_flat_series_returns_zero_without_division_error` | Zero-range input does not divide by zero | FR-2xx | Automated |
 
 #### 10.3.6 Divergences
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-070 | `unit_divergence_detect_regular_bullish_price_lower_low_osc_higher_low_found` | Constructed fixture | FR-2xx, S2-T04 | Deferred |
-| TS-IND-071 | `unit_divergence_detect_regular_bearish_price_higher_high_osc_lower_high_found` | Constructed fixture | FR-2xx, S2-T04 | Deferred |
-| TS-IND-072 | `unit_divergence_detect_hidden_bullish_price_higher_low_osc_lower_low_found` | Constructed fixture | FR-2xx, S2-T04 | Deferred |
-| TS-IND-073 | `unit_divergence_detect_hidden_bearish_price_lower_high_osc_higher_high_found` | Constructed fixture | FR-2xx, S2-T04 | Deferred |
-| TS-IND-074 | `unit_divergence_detect_second_pivot_unconfirmed_not_reported` | A pivot fewer than 5 bars old is ignored | FR-2xx, NFR-007 | Deferred |
-| TS-IND-075 | `unit_divergence_detect_monotonic_series_no_false_detection` | No pivots, no divergence | FR-2xx, S2-T04 | Deferred |
-| TS-IND-076 | `unit_divergence_detect_second_pivot_older_than_15_bars_excluded` | Recency window | FR-2xx | Deferred |
-| TS-IND-077 | `unit_divergence_detect_pivots_outside_60_bar_lookback_excluded` | Lookback window | FR-2xx | Deferred |
-| TS-IND-078 | `unit_divergence_detect_rsi_macd_hist_obv_each_reported_separately` | Three oscillators produce separate records | FR-2xx | Deferred |
-| TS-IND-079 | `unit_divergence_detect_weekly_uses_pivot_width_3` | Weekly pivot width is 3 | FR-2xx | Deferred |
-| TS-IND-080 | `unit_divergence_record_contains_both_pivot_bars_prices_and_oscillator_values` | Typed record shape | FR-2xx, S2-T04 | Deferred |
+| TS-IND-070 | `unit_divergence_detect_regular_bullish_price_lower_low_osc_higher_low_found` | Constructed fixture | FR-2xx, S2-T04 | Automated |
+| TS-IND-071 | `unit_divergence_detect_regular_bearish_price_higher_high_osc_lower_high_found` | Constructed fixture | FR-2xx, S2-T04 | Automated |
+| TS-IND-072 | `unit_divergence_detect_hidden_bullish_price_higher_low_osc_lower_low_found` | Constructed fixture | FR-2xx, S2-T04 | Automated |
+| TS-IND-073 | `unit_divergence_detect_hidden_bearish_price_lower_high_osc_higher_high_found` | Constructed fixture | FR-2xx, S2-T04 | Automated |
+| TS-IND-074 | `unit_divergence_detect_second_pivot_unconfirmed_not_reported` | A pivot fewer than 5 bars old is ignored | FR-2xx, NFR-007 | Automated |
+| TS-IND-075 | `unit_divergence_detect_monotonic_series_no_false_detection` | No pivots, no divergence | FR-2xx, S2-T04 | Automated |
+| TS-IND-076 | `unit_divergence_detect_second_pivot_older_than_15_bars_excluded` | Recency window | FR-2xx | Automated |
+| TS-IND-077 | `unit_divergence_detect_pivots_outside_60_bar_lookback_excluded` | Lookback window | FR-2xx | Automated |
+| TS-IND-078 | `unit_divergence_detect_rsi_macd_hist_obv_each_reported_separately` | Three oscillators produce separate records | FR-2xx | Automated |
+| TS-IND-079 | `unit_divergence_detect_weekly_uses_pivot_width_3` | Weekly pivot width is 3 | FR-2xx | Automated |
+| TS-IND-080 | `unit_divergence_record_contains_both_pivot_bars_prices_and_oscillator_values` | Typed record shape | FR-2xx, S2-T04 | Automated |
+| TS-IND-200 | `unit_divergence_detect_newer_pivot_supersedes_second_pivot` | Only the two most recent pivots compare | FR-2xx, S2-T04 | Automated |
+| TS-IND-201 | `unit_divergence_macd_hist_helper_matches_independent_loop` | Local MACD histogram mirrors `momentum.macd` (cross-checked by S2-T08) | FR-2xx, S2-T04 | Automated |
+| TS-IND-202 | `unit_divergence_detect_nan_osc_or_equal_values_not_divergence` | NaN oscillator or equal values give none | FR-2xx, S2-T04 | Automated |
+| TS-IND-203 | `unit_divergence_detect_lows_and_highs_compared_separately` | Bullish and bearish pairs reported together | FR-2xx, S2-T04 | Automated |
+| TS-IND-204 | `unit_divergence_detect_invalid_inputs_and_empty` | Length mismatch, width < 1, empty, bad as_of | FR-2xx, S2-T04 | Automated |
+| TS-IND-205 | `unit_divergence_series_matches_detect_each_bar` | Per-bar flag array equals as-of detection | FR-2xx, S2-T04 | Automated |
+| TS-IND-206 | `unit_divergence_records_sorted_by_confirmed_at` | Record list ordering and confirmed_at | FR-2xx, S2-T04 | Automated |
+| TS-IND-207 | `unit_divergence_aggregation_exports` | Names re-exported by `supertrends.indicators` | FR-2xx, S2-T04 | Automated |
+| TS-IND-208 | `property_divergence_no_look_ahead_p2_plus_width_le_last_index` | Hypothesis: no record with p2 + width > last index; truncation invariance | FR-2xx, S2-T04 | Automated |
+| TS-IND-209 | `unit_divergence_detect_pivots_too_far_apart_never_active` | p1 and p2 more than 54 bars apart never form an active divergence | FR-2xx, S2-T04 | Automated |
 
 #### 10.3.7 Mean reversion and volatility indicators
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-081 | `golden_bollinger_compute_20_2_bands_pct_b_bandwidth_match_1e6` | Bands, %B, bandwidth | FR-2xx, S2-T05 | Deferred |
-| TS-IND-082 | `unit_zscore_compute_uses_population_stdev20_and_sma20` | `z = (close - SMA20) / stdev20` | FR-2xx | Deferred |
-| TS-IND-083 | `unit_atr_pct_rank_compute_252_bar_trailing_window` | ATR% rank window | FR-2xx, S2-T05 | Deferred |
-| TS-IND-084 | `unit_bbw_rank_compute_126_bar_trailing_window` | Bandwidth rank window | FR-2xx, S2-T05 | Deferred |
-| TS-IND-085 | `golden_hv20_compute_log_returns_annualized_sqrt_252_matches_1e6` | Historical volatility | FR-2xx | Deferred |
-| TS-IND-086 | `unit_volatility_flags_squeeze_true_when_bbw_rank_below_15` | Squeeze boundary at 15 | FR-2xx | Deferred |
-| TS-IND-087 | `unit_volatility_flags_expansion_requires_rank_above_85_and_bbw_rising_3_bars` | Expansion needs both conditions | FR-2xx | Deferred |
+| TS-IND-081 | `golden_bollinger_compute_20_2_bands_pct_b_bandwidth_match_1e6` | Bands, %B, bandwidth | FR-2xx, S2-T05 | Automated |
+| TS-IND-082 | `unit_zscore_compute_uses_population_stdev20_and_sma20` | `z = (close - SMA20) / stdev20` | FR-2xx | Automated |
+| TS-IND-083 | `unit_atr_pct_rank_compute_252_bar_trailing_window` | ATR% rank window | FR-2xx, S2-T05 | Automated |
+| TS-IND-084 | `unit_bbw_rank_compute_126_bar_trailing_window` | Bandwidth rank window | FR-2xx, S2-T05 | Automated |
+| TS-IND-085 | `golden_hv20_compute_log_returns_annualized_sqrt_252_matches_1e6` | Historical volatility | FR-2xx | Automated |
+| TS-IND-086 | `unit_volatility_flags_squeeze_true_when_bbw_rank_below_15` | Squeeze boundary at 15 | FR-2xx | Automated |
+| TS-IND-087 | `unit_volatility_flags_expansion_requires_rank_above_85_and_bbw_rising_3_bars` | Expansion needs both conditions | FR-2xx | Automated |
+| TS-IND-210 | `unit_bollinger_flat_window_pct_b_and_zscore_nan` | Zero-width bands give NaN, no inf | S2-T05 | Automated |
+| TS-IND-211 | `unit_meanrev_short_input_all_nan_same_length` | Input shorter than window | S2-T05 | Automated |
+| TS-IND-212 | `unit_meanrev_exports_in_all_and_package_aggregate` | `__all__` aggregation | S2-T05 | Automated |
+| TS-IND-213 | `unit_ranks_and_hv20_unchanged_when_future_bars_appended` | No look-ahead for trailing ranks | S2-T05 | Automated |
+| TS-IND-214 | `unit_hv20_constant_series_zero_and_nonpositive_close_nan` | HV20 edge cases | S2-T05 | Automated |
+| TS-IND-215 | `unit_expansion_nan_propagation_and_length_mismatch_raises` | NaN warm-up and validation | S2-T05 | Automated |
+| TS-IND-216 | `unit_bandwidth_flat_zero_and_atr_pct_zero_close_nan` | Flat prices and zero close | S2-T05 | Automated |
+| TS-IND-217 | `unit_volatility_exports_in_all_and_package_aggregate` | `__all__` aggregation | S2-T05 | Automated |
 
 #### 10.3.8 Fibonacci
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-100 | `unit_zigzag_leg_select_most_recent_completed_leg_over_120_bars` | Latest completed leg A to B | FR-2xx, S2-T06 | Deferred |
-| TS-IND-101 | `unit_fib_levels_up_leg_pullback_61_8_within_1e6_of_expected` | Constructed up-leg-then-pullback fixture | FR-2xx, S2-T06 | Deferred |
-| TS-IND-102 | `unit_fib_levels_all_five_retracements_measured_from_b_toward_a` | 23.6, 38.2, 50.0, 61.8, 78.6 | FR-2xx | Deferred |
-| TS-IND-103 | `unit_fib_extensions_127_2_and_161_8_computed_for_evidence` | Extensions present | FR-2xx | Deferred |
-| TS-IND-104 | `unit_fib_levels_down_leg_mirrored_levels_correct` | Mirror for a down leg | FR-2xx | Deferred |
-| TS-IND-105 | `unit_fib_no_qualifying_leg_returns_none_quality_degraded` | No leg gives none | FR-2xx | Deferred |
+| TS-IND-100 | `unit_zigzag_leg_select_most_recent_completed_leg_over_120_bars` | Latest completed leg A to B | FR-2xx, S2-T06 | Automated |
+| TS-IND-101 | `unit_fib_levels_up_leg_pullback_61_8_within_1e6_of_expected` | Constructed up-leg-then-pullback fixture | FR-2xx, S2-T06 | Automated |
+| TS-IND-102 | `unit_fib_levels_all_five_retracements_measured_from_b_toward_a` | 23.6, 38.2, 50.0, 61.8, 78.6 | FR-2xx | Automated |
+| TS-IND-103 | `unit_fib_extensions_127_2_and_161_8_computed_for_evidence` | Extensions present | FR-2xx | Automated |
+| TS-IND-104 | `unit_fib_levels_down_leg_mirrored_levels_correct` | Mirror for a down leg | FR-2xx | Automated |
+| TS-IND-105 | `unit_fib_no_qualifying_leg_returns_none_quality_degraded` | No leg gives none | FR-2xx | Automated |
+| TS-IND-106 | `unit_fib_near_and_holding_helpers_follow_factor_6_formula` | `near` and `holding`, up and down | FR-2xx, S2-T06 | Automated |
+| TS-IND-107 | `unit_fib_threshold_uses_3_atr_pct_when_above_8_percent` | Wide ranges lift the threshold, no leg | FR-2xx, S2-T06 | Automated |
 
 #### 10.3.9 Support and resistance
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-110 | `unit_levels_cluster_merges_pivots_within_half_atr` | Clustering tolerance | FR-2xx, S2-T06 | Deferred |
-| TS-IND-111 | `unit_levels_strength_touches_times_recency_weight_decays_1_0_to_0_3` | Strength formula | FR-2xx | Deferred |
-| TS-IND-112 | `unit_levels_keep_4_strongest_above_and_4_below_price` | Level count | FR-2xx | Deferred |
-| TS-IND-113 | `unit_levels_52_week_high_and_low_added_as_levels` | 52-week levels | FR-2xx, S2-T06 | Deferred |
-| TS-IND-114 | `unit_levels_breakout_flagged_only_on_the_bar_it_happens` | One-bar breakout flag | FR-2xx, S2-T06 | Deferred |
-| TS-IND-115 | `unit_levels_breakdown_requires_support_intact_prior_day` | Breakdown flag precondition | FR-2xx | Deferred |
-| TS-IND-116 | `unit_levels_nearest_support_resistance_distance_in_atr_units` | `d_s` and `d_r` | FR-2xx | Deferred |
+| TS-IND-110 | `unit_levels_cluster_merges_pivots_within_half_atr` | Clustering tolerance | FR-2xx, S2-T06 | Automated |
+| TS-IND-111 | `unit_levels_strength_touches_times_recency_weight_decays_1_0_to_0_3` | Strength formula | FR-2xx | Automated |
+| TS-IND-112 | `unit_levels_keep_4_strongest_above_and_4_below_price` | Level count | FR-2xx | Automated |
+| TS-IND-113 | `unit_levels_52_week_high_and_low_added_as_levels` | 52-week levels | FR-2xx, S2-T06 | Automated |
+| TS-IND-114 | `unit_levels_breakout_flagged_only_on_the_bar_it_happens` | One-bar breakout flag | FR-2xx, S2-T06 | Automated |
+| TS-IND-115 | `unit_levels_breakdown_requires_support_intact_prior_day` | Breakdown flag precondition | FR-2xx | Automated |
+| TS-IND-116 | `unit_levels_nearest_support_resistance_distance_in_atr_units` | `d_s` and `d_r` | FR-2xx | Automated |
+| TS-IND-117 | `unit_levels_insufficient_history_returns_none` | ATR warm-up gives none | FR-2xx, S2-T06 | Automated |
+| TS-IND-118 | `unit_levels_breakdown_flagged_only_on_the_bar_it_happens` | Mirror of TS-IND-114 | FR-2xx, S2-T06 | Automated |
+| TS-IND-119 | `unit_levels_breakout_requires_relative_volume_1_5` | Volume gate | FR-2xx, S2-T06 | Automated |
+| TS-IND-220 | `unit_levels_cluster_is_anchored_not_chained` | Anchor clustering, no chaining (ADR-055) | FR-2xx, S2-T06 | Automated |
+| TS-IND-221 | `unit_levels_unconfirmed_pivots_are_not_used` | Pivot within 5 bars of the end ignored | FR-2xx, S2-T06 | Automated |
 
 #### 10.3.10 Volume indicators and estimated order flow
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-120 | `golden_volume_oscillator_compute_5_10_matches_1e6` | `vo = 100 * (EMA5 - EMA10) / EMA10` | FR-2xx, S2-T07 | Deferred |
-| TS-IND-121 | `unit_relative_volume_compute_volume_over_sma20_volume` | Relative volume | FR-2xx | Deferred |
-| TS-IND-122 | `golden_cmf_compute_20_matches_1e6` | Chaikin Money Flow | FR-2xx, S2-T07 | Deferred |
-| TS-IND-123 | `unit_flow_split_buy_plus_sell_equals_volume_for_every_bar` | Conservation of volume | FR-2xx, S2-T07 | Deferred |
-| TS-IND-124 | `unit_flow_split_zero_range_bar_close_ge_prev_close_all_buy` | Zero-range rule, up or flat | FR-2xx, S2-T07 | Deferred |
-| TS-IND-125 | `unit_flow_split_zero_range_bar_close_lt_prev_close_all_sell` | Zero-range rule, down | FR-2xx, S2-T07 | Deferred |
-| TS-IND-126 | `unit_flow_daily_delta_and_delta_pct_computed_from_5m_bars` | Daily delta and delta percent | FR-2xx | Deferred |
-| TS-IND-127 | `unit_flow_delta_pct_10_mean_of_last_10_sessions` | 10-session mean | FR-2xx | Deferred |
-| TS-IND-128 | `unit_flow_quality_intraday_when_5m_bars_for_8_of_10_sessions` | `intraday` threshold boundary (8 of 10, 7 of 10) | FR-2xx | Deferred |
-| TS-IND-129 | `unit_flow_quality_daily_estimate_when_intraday_missing_and_flagged` | Fallback to daily bars with flag | FR-2xx, S2-T07 | Deferred |
-| TS-IND-130 | `unit_flow_accumulation_distribution_days_counted_over_last_20_sessions` | Up or down close with relative volume at or above 1.5 | FR-2xx | Deferred |
-| TS-IND-131 | `unit_flow_provider_trades_capability_interface_allows_tick_rule_quality` | `trades` quality path is accepted by the interface | FR-2xx, A§7 | Deferred |
-| TS-IND-132 | `unit_flow_regular_session_only_excludes_pre_and_post_market_bars` | 5-minute bars outside 09:30 to 16:00 ET are ignored | FR-2xx | Deferred |
+| TS-IND-120 | `golden_volume_oscillator_compute_5_10_matches_1e6` | `vo = 100 * (EMA5 - EMA10) / EMA10` | FR-2xx, S2-T07 | Automated |
+| TS-IND-121 | `unit_relative_volume_compute_volume_over_sma20_volume` | Relative volume | FR-2xx | Automated |
+| TS-IND-122 | `golden_cmf_compute_20_matches_1e6` | Chaikin Money Flow | FR-2xx, S2-T07 | Automated |
+| TS-IND-123 | `unit_flow_split_buy_plus_sell_equals_volume_for_every_bar` | Conservation of volume | FR-2xx, S2-T07 | Automated |
+| TS-IND-124 | `unit_flow_split_zero_range_bar_close_ge_prev_close_all_buy` | Zero-range rule, up or flat | FR-2xx, S2-T07 | Automated |
+| TS-IND-125 | `unit_flow_split_zero_range_bar_close_lt_prev_close_all_sell` | Zero-range rule, down | FR-2xx, S2-T07 | Automated |
+| TS-IND-126 | `unit_flow_daily_delta_and_delta_pct_computed_from_5m_bars` | Daily delta and delta percent | FR-2xx | Automated |
+| TS-IND-127 | `unit_flow_delta_pct_10_mean_of_last_10_sessions` | 10-session mean | FR-2xx | Automated |
+| TS-IND-128 | `unit_flow_quality_intraday_when_5m_bars_for_8_of_10_sessions` | `intraday` threshold boundary (8 of 10, 7 of 10) | FR-2xx | Automated |
+| TS-IND-129 | `unit_flow_quality_daily_estimate_when_intraday_missing_and_flagged` | Fallback to daily bars with flag | FR-2xx, S2-T07 | Automated |
+| TS-IND-130 | `unit_flow_accumulation_distribution_days_counted_over_last_20_sessions` | Up or down close with relative volume at or above 1.5 | FR-2xx | Automated |
+| TS-IND-131 | `unit_flow_provider_trades_capability_interface_allows_tick_rule_quality` | `trades` quality path is accepted by the interface | FR-2xx, A§7 | Automated |
+| TS-IND-132 | `unit_flow_regular_session_only_excludes_pre_and_post_market_bars` | 5-minute bars outside 09:30 to 16:00 ET are ignored | FR-2xx | Automated |
+| TS-IND-230 | `unit_volume_oscillator_zero_ema_is_nan_and_bad_windows_raise` | Zero EMA gives NaN, invalid window raises | S2-T07 | Automated |
+| TS-IND-231 | `unit_volume_obv_slope_sign_up_down_flat` | OBV slope sign over 20 bars | S2-T07 | Automated |
+| TS-IND-232 | `unit_volume_cmf_zero_range_bar_and_zero_volume` | Zero-range multiplier 0, zero volume sum NaN | S2-T07 | Automated |
+| TS-IND-233 | `unit_volume_relative_volume_zero_average_is_nan` | Zero SMA gives NaN | S2-T07 | Automated |
+| TS-IND-234 | `unit_volume_length_mismatch_raises` | Length mismatch raises | S2-T07 | Automated |
+| TS-IND-235 | `unit_flow_daily_path_uses_prior_daily_close_first_bar_buy` | PRD A-07 and A-23 on daily bars | S2-T07 | Automated |
+| TS-IND-236 | `unit_flow_zero_volume_session_nan_excluded_from_mean` | Zero-volume session | S2-T07 | Automated |
+| TS-IND-237 | `unit_flow_missing_sessions_older_than_window_ignored` | 8-of-10 counts only the last 10 sessions | S2-T07 | Automated |
+| TS-IND-238 | `unit_flow_unsorted_or_mismatched_inputs_raise` | Input validation | S2-T07 | Automated |
 
 #### 10.3.11 Harness, snapshots, performance
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-IND-090 | `prop_indicators_all_truncation_does_not_change_past_values` | The section 6 property for every registered indicator | NFR-007, S2-T08 | Deferred |
-| TS-IND-091 | `unit_indicators_registry_missing_public_function_fails_test` | A public indicator not in the registry fails CI | NFR-007, S2-T08 | Deferred |
-| TS-IND-092 | `prop_indicators_leaky_negative_control_is_detected` | An injected leaky indicator is flagged | NFR-007, S2-T08 | Deferred |
-| TS-IND-093 | `golden_indicators_determinism_hash_matches_committed_hash` | Hash of all outputs on the synthetic dataset | NFR-002, S2-T08 | Deferred |
-| TS-IND-094 | `unit_perf_budget_200_tickers_3y_daily_compute_under_60s_on_2_cores` | Benchmark for NFR-001 compute budget | NFR-001, S2-T08 | Deferred |
-| TS-IND-095 | `it_snapshots_persist_roundtrip_identical_json_for_same_inputs` | `indicator_snapshots` round trip and stable recompute | FR-2xx, S2-T09 | Deferred |
-| TS-IND-096 | `unit_indicators_nan_warmup_never_leaks_as_zero_into_snapshot` | NaN is stored as null, not zero | FR-2xx | Deferred |
+| TS-IND-090 | `prop_indicators_all_truncation_does_not_change_past_values` | The section 6 property for every registered indicator | NFR-007, S2-T08 | Automated |
+| TS-IND-091 | `unit_indicators_registry_missing_public_function_fails_test` | A public indicator not in the registry fails CI | NFR-007, S2-T08 | Automated |
+| TS-IND-092 | `prop_indicators_leaky_negative_control_is_detected` | An injected leaky indicator is flagged | NFR-007, S2-T08 | Automated |
+| TS-IND-093 | `golden_indicators_determinism_hash_matches_committed_hash` | Hash of all outputs on the synthetic dataset | NFR-002, S2-T08 | Automated |
+| TS-IND-094 | `unit_perf_budget_200_tickers_3y_daily_compute_under_60s_on_2_cores` | Benchmark for NFR-001 compute budget | NFR-001, S2-T08 | Automated |
+| TS-IND-095 | `it_snapshots_persist_roundtrip_identical_json_for_same_inputs` | `indicator_snapshots` round trip and stable recompute | FR-2xx, S2-T09 | Automated |
+| TS-IND-096 | `unit_indicators_nan_warmup_never_leaks_as_zero_into_snapshot` | NaN is stored as null, not zero | FR-2xx | Automated |
+| TS-IND-097 | `unit_indicators_series_outputs_match_input_length_and_warm_up_is_nan` | Series outputs have the input length, float64, NaN warm-up | NFR-007, S2-T08 | Automated |
+| TS-IND-098 | `prop_pivots_confirm_width_bars_late` | A pivot is absent before `p + w` bars exist and present one bar later | NFR-007, S2-T08 | Automated |
+| TS-IND-099 | `prop_weekly_values_use_only_bars_up_to_t` | Weekly resample and weekly divergences use bars up to t; a partial week revised on completion is not look-ahead (6.1 item 6, ADR-033) | NFR-007, S2-T08 | Automated |
+| TS-IND-240 | `unit_indicators_function_may_share_its_module_name` | `supertrend` the function is exported next to the module of the same name | S2-T08 | Automated |
+| TS-IND-241 | `unit_divergence_private_macd_hist_equals_momentum_macd_hist` | `divergence._macd_hist` equals `momentum.macd().hist` to 1e-12 | S2-T08 | Automated |
+| TS-IND-242 | `golden_indicators_double_run_in_subprocess_with_other_environment` | Same hashes in one process twice and in subprocesses with other PYTHONHASHSEED, TZ, LC_ALL | NFR-002, S2-T08 | Automated |
+| TS-IND-243 | `unit_regen_golden_refuses_without_reason` | `scripts/regen-golden.sh` needs `--reason`, `--check` writes nothing and spares TradingView and hand-computed files | S2-T08 | Automated |
+| TS-IND-244 | `unit_spec_test_plan_scenario_ids_are_unique` | No scenario ID repeats in TEST_PLAN | GD-009, S2-T08 | Automated |
+| TS-IND-245 | `unit_spec_prd_ambiguity_ids_are_unique` | PRD section 17 A-ids are unique | GD-009, S2-T08 | Automated |
+| TS-IND-246 | `unit_spec_architecture_adr_headings_are_unique` | ADR heading numbers are unique | GD-009, S2-T08 | Automated |
+| TS-IND-247 | `unit_indicators_registry_exemptions_are_not_plain_functions` | Exempt names exist in `__all__`, have a reason, and are not functions | S2-T08 | Automated |
+| TS-IND-248 | `unit_validate_fixtures_checks_the_synthetic_dataset_hash` | `scripts/validate-fixtures.sh` passes on the committed hash | S2-T08 | Automated |
+| TS-IND-250 | `unit_snapshot_has_daily_weekly_levels_fib_divergence_flow_sections` | The document carries daily and weekly values, levels (52-week extremes, Supertrend invalidation), Fibonacci, divergences, flow and the config hash | FR-2xx, S2-T09 | Automated |
+| TS-IND-251 | `unit_snapshot_as_of_t_is_identical_with_or_without_later_bars` | Snapshot bytes at t equal on truncated, full and future-perturbed bundles | NFR-007, S2-T09 | Automated |
+| TS-IND-252 | `unit_snapshot_json_bytes_are_deterministic_sorted_and_rounded` | Same inputs give the same bytes; sorted keys; floats at 10 significant digits (ADR-056) | NFR-002, S2-T09 | Automated |
+| TS-IND-253 | `unit_snapshot_covers_every_registered_series_indicator` | Each registered series indicator is in the snapshot or listed as a building block | FR-2xx, S2-T09 | Automated |
+| TS-IND-254 | `unit_snapshot_uses_parameters_from_the_config` | A changed config value changes the values and the config hash | FR-2xx, S2-T09 | Automated |
+| TS-IND-255 | `unit_snapshot_rejects_dates_without_bars` | No bar on or before the as-of date is an error; a later date uses the last bar | S2-T09 | Automated |
+| TS-IND-256 | `it_snapshots_write_same_document_twice_is_skipped` | An identical second write leaves one row and reports `unchanged` | FR-2xx, S2-T09 | Automated |
+| TS-IND-257 | `it_snapshots_write_different_document_for_same_key_raises` | A different document for the same run and symbol raises `SnapshotConflictError`; the stored row is untouched | FR-2xx, S2-T09 | Automated |
+| TS-IND-258 | `it_snapshots_update_and_delete_rejected_by_append_only_trigger` | UPDATE and DELETE on `indicator_snapshots` fail with `append_only_violation` | FR-2xx, S2-T09 | Automated |
+| TS-IND-259 | `it_snapshots_compute_and_store_skips_unknown_symbols_and_checks_config_hash` | Symbols without bars are skipped as `no_data`; a config whose hash differs from the run's is refused | FR-2xx, S2-T09 | Automated |
+
+#### 10.3.12 Ripster EMA Clouds
+
+| ID | Scenario name | Description | Spec ref | Status |
+|---|---|---|---|---|
+| TS-IND-133 | `golden_ripster_clouds_handcomputed_fixture_top_bot_dir_pos_stack_match_every_bar` | Hand-computed case: stack flip in each direction, close inside a cloud, held and failed 8/9 pullback | FR-224, S2-T10 | Automated |
+| TS-IND-134 | `unit_ripster_clouds_stack_flip_bars_since_stack_flip_counts_from_last_change_to_nonzero` | `rc_bars_since_stack_flip` is 0 on the flip bar, both directions | FR-224, S2-T10 | Automated |
+| TS-IND-135 | `unit_ripster_clouds_ema_computed_on_hl2_for_all_ten_periods` | EMAs 8, 9, 5, 12, 34, 50, 72, 89, 180, 200 on `hl2` | FR-224, S2-T10 | Automated |
+| TS-IND-136 | `unit_ripster_clouds_close_inside_cloud_pos_is_zero` | `pos` is 0 when close is inside the cloud, +1 above, -1 below | FR-224 | Automated |
+| TS-IND-137 | `unit_ripster_pullback_held_low_tests_c1_within_3_bars_and_close_above_bot_flag_true` | Bullish held test of the 8/9 cloud | FR-224, S2-T10 | Automated |
+| TS-IND-138 | `unit_ripster_pullback_failed_close_at_or_below_bot_c1_flag_false` | Bullish failed test | FR-224, S2-T10 | Automated |
+| TS-IND-139 | `unit_ripster_pullback_stale_test_4_bars_ago_flag_false` | Boundary: 3 bars counts, 4 bars does not | FR-224 | Automated |
+| TS-IND-140 | `unit_ripster_clouds_weekly_34_50_direction_uses_resampled_weekly_bars` | `rc_dir_w` computed on weekly bars, evidence only | FR-224 | Automated |
+| TS-IND-141 | `golden_ripster_clouds_tradingview_parity_each_ema_within_0_01_after_200_bar_warmup` | All ten EMAs within 0.01 per bar versus the TradingView export, computed on the export's own bars, two tickers | FR-224, S2-T10 | Skipped: TradingView CSV exports with the Ripster EMA Clouds plots not yet provided by the owner (owner checklist item 3); manual: export the Ripster EMA Clouds indicator at default settings with OHLCV for the same two tickers on the daily chart to `tests/golden/tradingview/` and run `pytest tests/golden -k tradingview`. Release blocker at S9-T04 |
+| TS-IND-142 | `golden_ripster_clouds_tradingview_parity_cloud_direction_matches_every_bar_after_warmup` | Every cloud direction identical on every bar after the first 200 | FR-224, S2-T10 | Skipped: same owner files as TS-IND-141; manual: same step |
+| TS-IND-143 | `prop_ripster_clouds_top_ge_bot_for_every_cloud_after_warmup` | Property: `top >= bot` | FR-224, S2-T10 | Automated |
+| TS-IND-144 | `prop_ripster_clouds_stack_nonzero_only_when_5_12_and_34_50_clouds_do_not_overlap` | Property: `stack` domain | FR-224, S2-T10 | Automated |
+| TS-IND-145 | `unit_ripster_clouds_registered_with_no_look_ahead_harness` | The Ripster indicator is in the registry and passes the section 6 property | NFR-007, S2-T08, S2-T10 | Automated |
+| TS-IND-146 | `unit_ripster_clouds_warmup_bars_are_nan_never_zero` | Fewer than 200 bars gives NaN for the 180/200 cloud | FR-224 | Automated |
 
 ### 10.4 Scoring, per factor (TS-SCR)
 
@@ -658,7 +735,7 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-SCR-002 | `unit_factor_result_score_minus_101_raises_validation_error` | A factor returning -101 raises | FR-3xx, S3-T01 | Deferred |
 | TS-SCR-003 | `unit_factor_registry_every_config_factor_id_registered_and_reverse` | Config ids and registered factors match both ways | FR-3xx, S3-T01 | Deferred |
 | TS-SCR-004 | `unit_factor_result_contains_evidence_items_name_value_unit_reason_and_quality` | FactorResult shape | FR-3xx | Deferred |
-| TS-SCR-005 | `prop_factors_all_scores_within_minus_100_and_100_for_random_snapshots` | Range property for all 11 factors | FR-3xx | Deferred |
+| TS-SCR-005 | `prop_factors_all_scores_within_minus_100_and_100_for_random_snapshots` | Range property for all 12 factors | FR-3xx | Deferred |
 | TS-SCR-006 | `unit_factor_reasons_one_deterministic_template_per_rule_that_fired` | Reasons come from templates, one per fired rule | FR-5xx | Deferred |
 | TS-SCR-007 | `prop_factors_all_truncation_does_not_change_score_at_t` | Factor-level no-look-ahead (section 6.2) | NFR-007 | Deferred |
 
@@ -850,6 +927,36 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-SCR-178 | `unit_fundamentals_days_to_earnings_stored_in_trading_days_not_in_score` | Event-risk input, excluded from score | FR-3xx | Deferred |
 | TS-SCR-179 | `unit_fundamentals_refresh_weekly_and_day_after_earnings` | Refresh schedule logic | FR-3xx, FR-1xx | Deferred |
 
+#### 10.4.12 Factor 12: Ripster EMA Clouds
+
+| ID | Scenario name | Description | Spec ref | Status |
+|---|---|---|---|---|
+| TS-SCR-180 | `unit_ripster_score_close_above_c3_bias_adds_30` | `bias` = +30 | FR-333 | Deferred |
+| TS-SCR-181 | `unit_ripster_score_close_below_c3_bias_subtracts_30` | `bias` = -30 | FR-333 | Deferred |
+| TS-SCR-182 | `unit_ripster_score_close_inside_c3_pos_0_bias_is_0` | `pos(c3)` = 0 scores 0 for `bias` | FR-333, S3-T14 | Deferred |
+| TS-SCR-183 | `unit_ripster_score_c2_bullish_trend_adds_20` | `trend` = +20 | FR-333 | Deferred |
+| TS-SCR-184 | `unit_ripster_score_c2_bearish_trend_subtracts_20` | `trend` = -20 | FR-333 | Deferred |
+| TS-SCR-185 | `unit_ripster_score_c2_fully_above_c3_stacking_adds_20` | `stack` = +1 | FR-333 | Deferred |
+| TS-SCR-186 | `unit_ripster_score_c2_fully_below_c3_stacking_subtracts_20` | `stack` = -1 | FR-333 | Deferred |
+| TS-SCR-187 | `unit_ripster_score_c2_overlapping_c3_stacking_is_0` | Overlapping clouds give 0 | FR-333 | Deferred |
+| TS-SCR-188 | `unit_ripster_score_c3_bullish_mid_adds_10` | `mid` = +10 | FR-333 | Deferred |
+| TS-SCR-189 | `unit_ripster_score_c3_bearish_mid_subtracts_10` | `mid` = -10 | FR-333 | Deferred |
+| TS-SCR-190 | `unit_ripster_score_close_above_c5_long_adds_10` | `long` = +10 | FR-333 | Deferred |
+| TS-SCR-191 | `unit_ripster_score_close_below_c5_long_subtracts_10` | `long` = -10 | FR-333 | Deferred |
+| TS-SCR-192 | `unit_ripster_score_close_inside_c5_long_is_0` | `pos(c5)` = 0 | FR-333 | Deferred |
+| TS-SCR-193 | `unit_ripster_score_pullback_held_stack_plus_1_low_2_bars_ago_close_above_bot_c1_adds_10` | Held bullish pullback | FR-333, S3-T14 | Deferred |
+| TS-SCR-194 | `unit_ripster_score_pullback_failed_close_at_or_below_bot_c1_is_0` | Failed bullish pullback | FR-333, S3-T14 | Deferred |
+| TS-SCR-195 | `unit_ripster_score_pullback_stale_test_4_bars_ago_is_0` | Stale test (4 bars ago) does not count | FR-333, S3-T14 | Deferred |
+| TS-SCR-196 | `unit_ripster_score_pullback_test_3_bars_ago_counts` | Boundary: `pullback_lookback_bars` = 3 is inclusive | FR-333 | Deferred |
+| TS-SCR-197 | `unit_ripster_score_pullback_bearish_held_stack_minus_1_high_at_or_above_bot_c1_close_below_top_c1_subtracts_10` | Held bearish pullback | FR-333 | Deferred |
+| TS-SCR-198 | `unit_ripster_score_pullback_bearish_failed_close_at_or_above_top_c1_is_0` | Failed bearish pullback | FR-333 | Deferred |
+| TS-SCR-199 | `unit_ripster_score_pullback_stack_0_is_0_even_when_c1_tested` | Pullback requires `stack != 0` | FR-333 | Deferred |
+| TS-SCR-200 | `unit_ripster_score_all_components_bullish_maximum_30_20_20_10_10_10_is_100` | Upper bound | FR-333 | Deferred |
+| TS-SCR-201 | `unit_ripster_score_all_components_bearish_maximum_is_minus_100` | Lower bound | FR-333 | Deferred |
+| TS-SCR-202 | `unit_ripster_score_c4_72_89_cloud_is_evidence_only_not_scored` | Changing the 72/89 cloud leaves the score unchanged | FR-333 | Deferred |
+| TS-SCR-203 | `unit_ripster_score_pullback_lookback_read_from_config_ripster_key` | `ripster.pullback_lookback_bars` | FR-333, A§13 | Deferred |
+| TS-SCR-204 | `unit_ripster_score_evidence_lists_six_components_and_derived_rc_values` | Components and `rc_*` values in the evidence | FR-333, FR-5xx | Deferred |
+
 ### 10.5 Regime and weights (TS-REG)
 
 | ID | Scenario name | Description | Spec ref | Status |
@@ -858,11 +965,11 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-REG-002 | `unit_regime_classify_adx_24_99_is_transitional` | Just below 25 | FR-3xx | Deferred |
 | TS-REG-003 | `unit_regime_classify_adx_20_is_transitional` | Boundary: ranging is `< 20` | FR-3xx | Deferred |
 | TS-REG-004 | `unit_regime_classify_adx_19_99_is_ranging` | Just below 20 | FR-3xx | Deferred |
-| TS-REG-005 | `unit_weights_base_sum_equals_100` | Eleven base weights sum to 100 | FR-3xx, A§13 | Deferred |
+| TS-REG-005 | `unit_weights_base_sum_equals_100` | Twelve base weights sum to 100 | FR-3xx, A§13 | Deferred |
 | TS-REG-006 | `unit_config_weights_not_summing_to_100_fails_validation_naming_key` | Schema rejects | FR-3xx, S0-T09 | Automated |
-| TS-REG-007 | `unit_weights_multiplier_table_every_cell_trending_matches_spec` | One parametrized row per cell, trending column (11 cells) | FR-3xx, S5-T05 | Deferred |
-| TS-REG-008 | `unit_weights_multiplier_table_every_cell_ranging_matches_spec` | Ranging column (11 cells) | FR-3xx, S5-T05 | Deferred |
-| TS-REG-009 | `unit_weights_multiplier_table_every_cell_transitional_all_1_0` | Transitional column (11 cells) | FR-3xx, S5-T05 | Deferred |
+| TS-REG-007 | `unit_weights_multiplier_table_every_cell_trending_matches_spec` | One parametrized row per cell, trending column (12 cells) | FR-3xx, S5-T05 | Deferred |
+| TS-REG-008 | `unit_weights_multiplier_table_every_cell_ranging_matches_spec` | Ranging column (12 cells) | FR-3xx, S5-T05 | Deferred |
+| TS-REG-009 | `unit_weights_multiplier_table_every_cell_transitional_all_1_0` | Transitional column (12 cells) | FR-3xx, S5-T05 | Deferred |
 | TS-REG-010 | `unit_weights_renormalize_after_regime_multipliers_sum_exactly_100` | Renormalization | FR-3xx | Deferred |
 | TS-REG-011 | `unit_weights_event_adjust_days_to_earnings_5_multiplies_fundamentals_1_5` | Boundary: 5 trading days | FR-3xx | Deferred |
 | TS-REG-012 | `unit_weights_event_adjust_days_to_earnings_6_no_change` | Boundary: 6 | FR-3xx | Deferred |
@@ -884,6 +991,9 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-REG-028 | `unit_weights_all_but_one_factor_missing_remaining_weight_100` | Extreme redistribution | FR-3xx | Deferred |
 | TS-REG-029 | `unit_weights_sprint3_defaults_all_multipliers_1_fundamentals_missing_paths_exist` | Code paths exist with injected values | FR-3xx, S3-T05 | Deferred |
 | TS-REG-030 | `it_regime_benchmarks_spy_qqq_used_even_when_not_on_watchlist` | Market regime source | FR-3xx, FR-0xx | Deferred |
+| TS-REG-031 | `unit_weights_base_ripster_is_10_and_supertrend_is_20` | New base weights: supertrend 20, sma 7, macd 8, divergence 9, mean_reversion 7, fibonacci 5, levels 7, volatility 4, volume_osc 6, flow 9, fundamentals 8, ripster 10 | FR-3xx, A§13, S3-T14 | Deferred |
+| TS-REG-032 | `unit_weights_multiplier_ripster_trending_1_20_ranging_0_70_transitional_1_00` | Ripster row of the regime table | FR-3xx, S5-T05 | Deferred |
+| TS-REG-033 | `unit_config_ripster_block_missing_key_fails_validation_naming_key` | `ripster` block keys validated by the schema (twelve weights) | FR-3xx, S0-T09 | Deferred |
 
 ### 10.6 Composite, display, bands, confidence (TS-CMP)
 
@@ -914,11 +1024,14 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-CMP-023 | `unit_confidence_any_factor_degraded_subtracts_10` | Penalty | FR-3xx | Deferred |
 | TS-CMP-024 | `unit_confidence_weekly_direction_differs_from_daily_subtracts_10` | Penalty | FR-3xx | Deferred |
 | TS-CMP-025 | `unit_confidence_event_risk_subtracts_10` | Penalty | FR-3xx | Deferred |
-| TS-CMP-026 | `unit_confidence_all_penalties_stack_subtracts_45` | Sum of penalties | FR-3xx | Deferred |
+| TS-CMP-026 | `unit_confidence_all_penalties_stack_subtracts_55` | Sum of penalties (15 + 10 + 10 + 10 + 10) | FR-3xx | Deferred |
 | TS-CMP-027 | `unit_confidence_clipped_to_0_when_penalties_exceed_agreement` | Lower clip | FR-3xx | Deferred |
 | TS-CMP-028 | `unit_confidence_zero_composite_sign_handling_defined` | A composite of exactly 0 has a defined agreement rule | FR-3xx | Deferred |
 | TS-CMP-029 | `unit_confidence_missing_factors_excluded_from_agreement_denominator` | Weight base is over non-missing factors | FR-3xx | Deferred |
 | TS-CMP-030 | `prop_composite_all_stages_outputs_in_range_for_random_factor_scores` | Composite -100..100, display 0..100, confidence 0..100 | FR-3xx | Deferred |
+| TS-CMP-031 | `unit_confidence_ripster_stack_opposes_daily_supertrend_subtracts_10` | `rc_stack == -st_dir_d`: confidence reduced by 10 and the deduction is shown | FR-335, S3-T14 | Deferred |
+| TS-CMP-032 | `unit_confidence_ripster_stack_same_sign_or_zero_no_deduction` | `st_dir_d` = +1 with `rc_stack` = +1 or 0 gives no Ripster deduction | FR-335 | Deferred |
+| TS-CMP-033 | `unit_confidence_ripster_worked_example_agreement_0_80_gives_70` | Agreement 0.80, `st_dir_d` = -1, `rc_stack` = +1 gives 80 - 10 = 70 | FR-335 | Deferred |
 
 ### 10.7 Selection (TS-SEL)
 
@@ -962,6 +1075,13 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-SEL-036 | `unit_selection_stickiness_none_ticker_may_repeat_consecutive_days` | No stickiness rule | FR-4xx | Deferred |
 | TS-SEL-037 | `unit_selection_day_n_on_list_counter_counts_consecutive_days` | "day N on the list" | FR-4xx, FR-7xx | Deferred |
 | TS-SEL-038 | `unit_selection_sell_is_bearish_label_no_short_instruction_in_output` | No shorting, sizing, instrument advice in payload text | FR-4xx, FR-5xx | Deferred |
+| TS-SEL-039 | `unit_selection_buy_candidate_rc_bias_minus_1_not_qualified_reason_close_below_34_50_cloud` | Close below the 34/50 cloud rejects a buy and records the reason | FR-334, S3-T14 | Deferred |
+| TS-SEL-040 | `unit_selection_buy_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the buy gate | FR-334, S3-T14 | Deferred |
+| TS-SEL-041 | `unit_selection_buy_candidate_rc_bias_plus_1_passes_ripster_gate` | Close above the cloud passes the buy gate | FR-334 | Deferred |
+| TS-SEL-042 | `unit_selection_sell_candidate_rc_bias_plus_1_not_qualified_reason_close_above_34_50_cloud` | Close above the 34/50 cloud rejects a sell and records the reason | FR-334, S3-T14 | Deferred |
+| TS-SEL-043 | `unit_selection_sell_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the sell gate | FR-334, S3-T14 | Deferred |
+| TS-SEL-044 | `unit_selection_sell_candidate_rc_bias_minus_1_passes_ripster_gate` | Close below the cloud passes the sell gate | FR-334 | Deferred |
+| TS-SEL-045 | `unit_selection_ripster_gate_rejection_listed_in_nearest_miss_reasons` | A gate rejection appears as the nearest-miss reason when a side is empty | FR-334, FR-4xx | Deferred |
 
 ### 10.8 Justification and narrative (TS-NAR)
 
@@ -972,7 +1092,7 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-NAR-003 | `unit_evidence_build_includes_invalidation_level_and_rule` | Supertrend line and rule text | FR-5xx, US-007 | Deferred |
 | TS-NAR-004 | `unit_evidence_build_includes_levels_support_resistance_fib_next_target` | Levels block | FR-5xx | Deferred |
 | TS-NAR-005 | `unit_evidence_build_includes_adjustments_flags_and_config_hash` | Adjustments, flags, `config_hash` | FR-5xx | Deferred |
-| TS-NAR-006 | `unit_narrative_template_leads_with_supertrend_then_top_two_then_opposing_then_invalidation` | Order | FR-5xx | Deferred |
+| TS-NAR-006 | `unit_narrative_template_leads_with_supertrend_and_34_50_cloud_bias_then_top_two_then_opposing_then_invalidation` | Order: Supertrend state and the 34/50 cloud bias first | FR-5xx | Deferred |
 | TS-NAR-007 | `unit_narrative_template_every_number_appears_in_evidence_document` | Template passes its own guard | FR-5xx, S3-T08 | Deferred |
 | TS-NAR-008 | `unit_narrative_template_three_to_five_sentences` | Length | FR-5xx | Deferred |
 | TS-NAR-009 | `unit_narrative_template_no_opposing_factor_omits_line_without_inventing` | No factor argues against | FR-5xx | Deferred |
@@ -1005,6 +1125,7 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-NAR-036 | `it_narrative_mock_endpoint_run_publishes_llm_narratives` | Sprint 5 checklist item | FR-5xx | Deferred |
 | TS-NAR-037 | `unit_narrative_prompt_versioned_in_prompts_directory_version_in_record` | Prompt versioning | FR-5xx | Deferred |
 | TS-NAR-038 | `unit_narrative_disclaimer_present_in_every_narrative_payload` | Disclaimer attached | FR-5xx, A§9 | Deferred |
+| TS-NAR-039 | `unit_evidence_build_includes_ripster_block_and_levels_cloud_34_50` | `ripster` block and `levels.cloud_34_50` validate against the committed schema | FR-5xx, S3-T14 | Deferred |
 
 ### 10.9 Track record (TS-TRK)
 
@@ -1364,12 +1485,12 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 |---|---|---|
 | Watchlist | TS-WL | 15 |
 | Ingestion and data | TS-ING | 44 |
-| Indicators | TS-IND | 96 |
-| Scoring (11 factors plus framework) | TS-SCR | 140 |
-| Regime and weights | TS-REG | 30 |
-| Composite and confidence | TS-CMP | 30 |
-| Selection | TS-SEL | 38 |
-| Justification and narrative | TS-NAR | 38 |
+| Indicators | TS-IND | 110 |
+| Scoring (12 factors plus framework) | TS-SCR | 165 |
+| Regime and weights | TS-REG | 33 |
+| Composite and confidence | TS-CMP | 33 |
+| Selection | TS-SEL | 45 |
+| Justification and narrative | TS-NAR | 39 |
 | Track record | TS-TRK | 23 |
 | Backtest | TS-BKT | 14 |
 | API | TS-API | 35 |
@@ -1428,7 +1549,7 @@ Regression tests are never deleted.
 
 1. **Scenario ownership.** The PR that adds or changes behavior adds or updates scenario rows in this file (PR template checkbox "TEST_PLAN.md scenarios added or updated"). The status moves `Deferred` to `Automated` in the PR that adds the test.
 2. **Sprint end audit.** At the end of each sprint, the spec doc audit includes this file: every row for a feature shipped in the sprint is `Automated` or `Skipped` with a reason; none are silently dropped.
-3. **Skipped rows.** Every `Skipped` row carries a written reason and a manual step. At S9-T04 each `Skipped` row has a recorded manual result in the release PR. The TradingView parity rows (TS-IND-021, TS-IND-022) may not remain skipped for v1.0.0.
+3. **Skipped rows.** Every `Skipped` row carries a written reason and a manual step. At S9-T04 each `Skipped` row has a recorded manual result in the release PR. The TradingView parity rows (TS-IND-021, TS-IND-022, TS-IND-141, TS-IND-142) may not remain skipped for v1.0.0.
 4. **Golden files.** Changed only under the policy in section 5.5; `scripts/validate-fixtures.sh` runs in CI.
 5. **Flaky tests.** A flaky test is a bug with `type:bug` and `priority:p1`. It is fixed or quarantined within one sprint with the reason recorded; retries are not used to hide non-determinism in scoring tests.
 6. **Time and randomness.** Tests inject clocks and seeds. No test depends on the wall clock, the machine time zone, or locale.
@@ -1456,7 +1577,7 @@ Run against the staging build (and, for items marked P, again on production afte
 
 - [ ] `docs/GATE_DEBT.md` is empty and every sprint checklist is checked
 - [ ] No `Deferred` rows remain in section 10; every `Skipped` row has a recorded manual result
-- [ ] TradingView parity tests (TS-IND-021, TS-IND-022) are passing, not skipped (release blocker otherwise)
+- [ ] TradingView parity tests (TS-IND-021, TS-IND-022, TS-IND-141, TS-IND-142) are passing, not skipped (release blocker otherwise)
 - [ ] `make coverage` meets every threshold in section 3
 - [ ] `scripts/check-versions.sh` passes and the changelog section for the version, including a "Scoring" heading if `scoring.version` changed, is written
 

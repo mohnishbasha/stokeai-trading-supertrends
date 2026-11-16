@@ -20,6 +20,7 @@ concurrency:
 env:
   UV_VERSION: "0.13.5"
   FORCE_COLOR: "1"
+  HYPOTHESIS_PROFILE: ci
 
 jobs:
   lint-and-typecheck:
@@ -50,6 +51,8 @@ jobs:
         run: ./scripts/check-spdx.sh
       - name: shellcheck
         run: shellcheck scripts/*.sh .agent/skills/*/run.sh
+      - name: Validate fixtures
+        run: ./scripts/validate-fixtures.sh
       - name: Dependency licenses
         run: ./scripts/gen-third-party-licenses.sh
       - name: pip-audit
