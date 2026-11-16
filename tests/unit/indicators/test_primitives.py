@@ -570,6 +570,7 @@ def test_unit_indicators_all_aggregation_exposes_primitives() -> None:
         "meanrev",
         "momentum",
         "primitives",
+        "ripster_clouds",
         "supertrend",
         "trend",
         "volatility",

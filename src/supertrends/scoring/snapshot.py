@@ -114,7 +114,13 @@ SNAPSHOT_COVERS: dict[str, str] = {
     "zscore": "daily.zscore",
 }
 NOT_SNAPSHOTTED: dict[str, str] = {
+    "bars_since_stack_flip": "Ripster field; joins the snapshot with the ripster block in S3-T14",
+    "cloud_stack": "Ripster field; joins the snapshot with the ripster block in S3-T14",
     "ema": "building block of MACD; not a decision input on its own",
+    "ema_cloud": "building block of ripster_clouds",
+    "ripster_clouds": "Factor 12 clouds; join the snapshot with the ripster block in S3-T14",
+    "ripster_pullback": "Ripster field; joins the snapshot with the ripster block in S3-T14",
+    "ripster_weekly_direction": "Ripster evidence field; joins the snapshot in S3-T14",
     "linreg_slope": "building block of the OBV slope sign",
     "percentile_rank": "building block of the BBW and ATR% ranks",
     "pivot_masks": "building block of the divergence and level detectors",

@@ -47,7 +47,7 @@ def ema(src: list[float], n: int) -> list[Num]:
     return out
 
 
-def derive() -> dict[str, object]:  # noqa: C901, PLR0912
+def derive() -> dict[str, object]:  # noqa: PLR0912
     n = len(CLOSES)
     close = [float(c) for c in CLOSES]
     high = [c + 1.0 for c in close]
@@ -122,9 +122,4 @@ if __name__ == "__main__":
         out = Path(__file__).with_name("ripster_clouds.json")
         out.write_text(json.dumps(data, indent=1) + "\n", encoding="utf-8")
     else:
-        for t in range(len(CLOSES)):
-            c1 = data["cloud"][0]  # type: ignore[index]
-            print(
-                t, CLOSES[t], data["stack"][t], data["bars_since_stack_flip"][t],  # type: ignore[index]
-                data["pullback"][t], c1["pos"][t], data["cloud"][2]["pos"][t],  # type: ignore[index]
-            )  # fmt: skip
+        sys.stdout.write(json.dumps(data) + "\n")

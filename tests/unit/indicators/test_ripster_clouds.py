@@ -7,6 +7,7 @@ Expected values come from tests/golden/handcomputed/ripster_clouds.json, derived
 independent plain-Python script next to it, or are checked by hand in comments here.
 """
 
+import itertools
 import json
 import math
 from pathlib import Path
@@ -74,9 +75,7 @@ def cloud(top: list[float], bot: list[float]) -> EmaCloud:
 # --- TS-IND-133 -----------------------------------------------------------------------------
 
 
-def test_golden_ripster_clouds_handcomputed_fixture_top_bot_dir_pos_stack_match_every_bar() -> (
-    None
-):
+def test_golden_ripster_clouds_handcomputed_fixture_top_bot_dir_pos_stack_match_every_bar() -> None:
     """TS-IND-133: every cloud field, stack, bars since flip and pullback match the derivation."""
     fx = load_fixture()
     clouds = tuple((int(s), int(lg)) for s, lg in fx["clouds"])
@@ -98,7 +97,7 @@ def test_golden_ripster_clouds_fixture_covers_flips_inside_close_and_pullbacks()
     stack = arr(fx["stack"])
     pull = arr(fx["pullback"])
     pos = [arr(c["pos"]) for c in fx["cloud"]]
-    steps = list(zip(stack[:-1], stack[1:], strict=True))
+    steps = list(itertools.pairwise(stack))
     assert any(a <= 0 < b for a, b in steps), "stack flip up"
     assert any(a >= 0 > b for a, b in steps), "stack flip down"
     assert any((x == 0).any() for x in pos), "close inside a cloud"
@@ -342,8 +341,10 @@ def test_prop_ripster_clouds_stack_nonzero_only_when_5_12_and_34_50_clouds_do_no
     overlap = ok & (c2.bot <= c3.top) & (c2.top >= c3.bot)
     assert (s[overlap] == 0).all()
     assert same(s, cloud_stack(c2, c3))
-    assert np.isin(res.pullback[ok], (1.0, 0.0, -1.0)).all()
-    assert (res.pullback[ok] * s[ok] >= 0).all()  # a pullback never opposes the stack
+    pk = ~np.isnan(res.pullback)  # also NaN while c1 warms up, if c1 is the slower cloud
+    assert not (pk & ~ok).any()
+    assert np.isin(res.pullback[pk], (1.0, 0.0, -1.0)).all()
+    assert (res.pullback[pk] * s[pk] >= 0).all()  # a pullback never opposes the stack
 
 
 # --- TS-IND-145 / 146 -----------------------------------------------------------------------

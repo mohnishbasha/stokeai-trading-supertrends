@@ -24,6 +24,7 @@ from supertrends.indicators import levels as _m_levels
 from supertrends.indicators import meanrev as _m_meanrev
 from supertrends.indicators import momentum as _m_momentum
 from supertrends.indicators import primitives as _m_primitives
+from supertrends.indicators import ripster_clouds as _m_ripster_clouds
 from supertrends.indicators import supertrend as _m_supertrend
 from supertrends.indicators import trend as _m_trend
 from supertrends.indicators import volatility as _m_volatility
@@ -35,6 +36,7 @@ from supertrends.indicators.levels import *
 from supertrends.indicators.meanrev import *
 from supertrends.indicators.momentum import *
 from supertrends.indicators.primitives import *
+from supertrends.indicators.ripster_clouds import *
 from supertrends.indicators.supertrend import *
 from supertrends.indicators.trend import *
 from supertrends.indicators.volatility import *
@@ -48,6 +50,7 @@ __all__ += _m_levels.__all__
 __all__ += _m_meanrev.__all__
 __all__ += _m_momentum.__all__
 __all__ += _m_primitives.__all__
+__all__ += _m_ripster_clouds.__all__
 __all__ += _m_supertrend.__all__
 __all__ += _m_trend.__all__
 __all__ += _m_volatility.__all__
