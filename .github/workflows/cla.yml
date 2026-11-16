@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright 2026 Serverless Ventures LLC
+#
+# CLA check on every pull request. Runs on pull_request (never pull_request_target) with a
+# read-only token, and executes scripts/cla.py from the base commit, not from the PR, so a
+# PR cannot change its own gate. Signatures live in signatures/cla.json on the
+# cla-signatures branch and are recorded by cla-sign.yml.
+name: cla
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  cla:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - name: Fetch signatures
+        run: |
+          mkdir -p .cla
+          if git fetch --depth 1 origin cla-signatures; then
+            git show FETCH_HEAD:signatures/cla.json > .cla/cla.json || true
+          fi
+      - name: Check CLA
+        env:
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          python3 scripts/cla.py check --author "$AUTHOR" --signatures .cla/cla.json \
+            --exempt "mohnishbasha,dependabot[bot],github-actions[bot]"
