@@ -1,0 +1,10 @@
+{
+ "status": "OK",
+ "request_id": "scrubbed",
+ "results": {
+  "ticker": "AAA",
+  "name": "Synthetic Aaa Corp",
+  "type": "CS",
+  "active": true
+ }
+}

@@ -1,0 +1,219 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright 2026 Serverless Ventures LLC
+#
+# Pull request and branch CI (ARCHITECTURE section 10). Uses pull_request, never
+# pull_request_target; fork PRs get a read-only token and no secrets. Actions are pinned by SHA.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [develop, staging, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_VERSION: "0.13.5"
+  FORCE_COLOR: "1"
+  HYPOTHESIS_PROFILE: ci
+
+jobs:
+  lint-and-typecheck:
+    # The display name is the check context that branch protection requires.
+    name: ci / lint-and-typecheck
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - name: make setup (clean clone)
+        run: make setup
+      - name: make build
+        run: make build
+      - name: make check
+        run: make check
+      - name: SPDX headers
+        run: ./scripts/check-spdx.sh
+      - name: shellcheck
+        run: shellcheck scripts/*.sh .agent/skills/*/run.sh
+      - name: Validate fixtures
+        run: ./scripts/validate-fixtures.sh
+      - name: Dependency licenses
+        run: ./scripts/gen-third-party-licenses.sh
+      - name: pip-audit
+        # Audits the locked dependencies; the project itself is not on PyPI.
+        run: |
+          uv export --locked --no-emit-project --quiet -o "$RUNNER_TEMP/requirements.txt"
+          uv run --locked pip-audit --strict --disable-pip --progress-spinner off \
+            -r "$RUNNER_TEMP/requirements.txt"
+      - name: npm audit
+        run: npm --prefix ui audit --audit-level=high
+      - name: gitleaks
+        run: |
+          docker run --rm -v "$PWD:/repo" \
+            ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
+            git /repo --no-banner --redact
+
+  unit-tests:
+    name: ci / unit-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - run: uv sync --locked
+      - run: npm --prefix ui ci
+      - run: npm --prefix ui run build
+      - run: make test
+
+  coverage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - run: uv sync --locked
+      - run: npm --prefix ui ci
+      - run: make coverage
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: |
+            coverage.xml
+            ui/coverage/coverage-summary.json
+          retention-days: 14
+
+  integration-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-bookworm@sha256:40865bc877a289da75963d97d72b59633f639fc5af7a4e856bfa3714cae5b536
+        env:
+          POSTGRES_USER: supertrends
+          POSTGRES_PASSWORD: supertrends
+          POSTGRES_DB: supertrends
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U supertrends -d supertrends"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      SUPERTRENDS_IT_DATABASE_URL: postgresql+psycopg://supertrends:supertrends@localhost:5432/supertrends
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run pytest tests/integration -q
+
+  e2e-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Placeholder until Sprint 4
+        run: echo "e2e-tests placeholder, Playwright flows arrive in Sprint 4 (ui/tests/e2e)."
+
+  build-image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Build args
+        id: meta
+        run: |
+          {
+            echo "version=$(tr -d '[:space:]' < VERSION)"
+            echo "commit=$(git rev-parse --short HEAD)"
+            echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } >> "$GITHUB_OUTPUT"
+      - name: Build linux/amd64 and linux/arm64 (no push)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: false
+          build-args: |
+            VERSION=${{ steps.meta.outputs.version }}
+            COMMIT=${{ steps.meta.outputs.commit }}
+            CREATED=${{ steps.meta.outputs.created }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Load linux/amd64 for container tests
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: ghcr.io/mohnishbasha/stokeai-supertrends:${{ steps.meta.outputs.version }}
+          build-args: |
+            VERSION=${{ steps.meta.outputs.version }}
+            COMMIT=${{ steps.meta.outputs.commit }}
+            CREATED=${{ steps.meta.outputs.created }}
+          cache-from: type=gha
+      - name: Container hardening and Compose loop
+        env:
+          SUPERTRENDS_IT_IMAGE: ghcr.io/mohnishbasha/stokeai-supertrends:${{ steps.meta.outputs.version }}
+        run: |
+          uv sync --locked
+          uv run pytest tests/integration/test_image.py -q
+
+  changelog:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: type:feature and type:bug PRs must update CHANGELOG.md
+        env:
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [[ ",$LABELS," == *",type:feature,"* || ",$LABELS," == *",type:bug,"* ]]; then
+            if ! git diff --name-only "$BASE_SHA" HEAD | grep -qx CHANGELOG.md; then
+              echo "x This PR is labeled type:feature or type:bug but does not touch CHANGELOG.md"
+              exit 1
+            fi
+          fi
+          echo "ok changelog rule satisfied"

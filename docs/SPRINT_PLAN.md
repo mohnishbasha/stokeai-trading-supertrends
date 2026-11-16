@@ -133,9 +133,9 @@ Indicator and scoring thresholds are high on purpose: a silent math error here p
 Create the tree in Appendix B. `pyproject.toml` with uv, package `supertrends` under `src/`, Python 3.12, ruff, mypy strict, pytest, pytest-cov, hypothesis. A `supertrends` console entry point that prints version and commit.
 
 **Acceptance criteria:**
-- [ ] `uv sync --locked` works on a clean clone
-- [ ] `supertrends --version` prints `supertrends {VERSION} ({commit})`
-- [ ] `mypy --strict src` passes on the empty package
+- [x] `uv sync --locked` works on a clean clone
+- [x] `supertrends --version` prints `supertrends {VERSION} ({commit})`
+- [x] `mypy --strict src` passes on the empty package
 
 ### S0-T02: UI project
 
@@ -148,8 +148,8 @@ Create the tree in Appendix B. `pyproject.toml` with uv, package `supertrends` u
 `ui/` with Vite, React, TypeScript strict, ESLint, Vitest, Playwright installed. A single placeholder route.
 
 **Acceptance criteria:**
-- [ ] `npm --prefix ui ci && npm --prefix ui run build` produces `ui/dist`
-- [ ] `npm --prefix ui run lint` and `type-check` exit 0 with 0 warnings
+- [x] `npm --prefix ui ci && npm --prefix ui run build` produces `ui/dist`
+- [x] `npm --prefix ui run lint` and `type-check` exit 0 with 0 warnings
 
 ### S0-T03: Root Makefile
 
@@ -162,8 +162,8 @@ Create the tree in Appendix B. `pyproject.toml` with uv, package `supertrends` u
 Create the root `Makefile` exactly as specified in Build and Deployment, with `make help`. Targets that depend on later sprints exist now and print "not available until Sprint N" with exit 0.
 
 **Acceptance criteria:**
-- [ ] `make help` lists every required target
-- [ ] `make setup`, `make build`, `make check` pass on a clean clone
+- [x] `make help` lists every required target
+- [x] `make setup`, `make build`, `make check` pass on a clean clone
 
 ### S0-T04: Version source of truth and scripts
 
@@ -176,8 +176,8 @@ Create the root `Makefile` exactly as specified in Build and Deployment, with `m
 Root `VERSION` file containing `0.1.0`. `scripts/check-versions.sh`, `scripts/extract-changelog.sh`, `CHANGELOG.md` with an `[Unreleased]` section. See Versioning.
 
 **Acceptance criteria:**
-- [ ] `scripts/check-versions.sh` exits 0
-- [ ] changing `ui/package.json` version alone makes it exit 1 naming that file
+- [x] `scripts/check-versions.sh` exits 0
+- [x] changing `ui/package.json` version alone makes it exit 1 naming that file
 
 ### S0-T05: CI pipeline
 
@@ -190,9 +190,9 @@ Root `VERSION` file containing `0.1.0`. `scripts/check-versions.sh`, `scripts/ex
 `.github/workflows/ci.yml` with jobs `lint-and-typecheck`, `unit-tests`, `coverage`, `integration-tests` (Postgres service container), `e2e-tests` (placeholder until Sprint 4), `build-image` (buildx, amd64 and arm64, no push on PRs). Dependabot for pip, npm, GitHub Actions, and Docker. `pip-audit` and `npm audit --audit-level=high` in CI.
 
 **Acceptance criteria:**
-- [ ] CI is green on `develop`
-- [ ] a PR with a lint error fails `lint-and-typecheck`
-- [ ] the image job builds both architectures
+- [x] CI is green on `develop`
+- [x] a PR with a lint error fails `lint-and-typecheck`
+- [x] the image job builds both architectures
 
 ### S0-T06: Dockerfile skeleton and Compose
 
@@ -205,10 +205,10 @@ Root `VERSION` file containing `0.1.0`. `scripts/check-versions.sh`, `scripts/ex
 Multi-stage `Dockerfile` in the shape given in Build and Deployment, building the placeholder UI and the empty API. `deploy/compose/docker-compose.local.yml` with Postgres and the app.
 
 **Acceptance criteria:**
-- [ ] `make image` builds
-- [ ] the container runs as non-root with a read-only root filesystem
-- [ ] `make up` then `curl -fsS localhost:8080/healthz` returns `{"status":"ok"}`
-- [ ] `make down` cleans up
+- [x] `make image` builds
+- [x] the container runs as non-root with a read-only root filesystem
+- [x] `make up` then `curl -fsS localhost:8080/healthz` returns `{"status":"ok"}`
+- [x] `make down` cleans up
 
 ### S0-T07: Agent harness files
 
@@ -221,9 +221,9 @@ Multi-stage `Dockerfile` in the shape given in Build and Deployment, building th
 Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent/skills/run-tests/` and `.agent/skills/check-types/` (each with `SKILL.md` and `run.sh`), per Appendix J. `.gitignore` includes `logs/`.
 
 **Acceptance criteria:**
-- [ ] each file contains every required section
-- [ ] both skill `run.sh` scripts exit 0
-- [ ] `runner.mk`, `run-supertrends.sh`, `run-supertrends-status.sh` are untouched and not ignored
+- [x] each file contains every required section
+- [x] both skill `run.sh` scripts exit 0
+- [x] `runner.mk`, `run-supertrends.sh`, `run-supertrends-status.sh` are untouched and not ignored
 
 ### S0-T08: License and community files
 
@@ -236,10 +236,10 @@ Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent
 `LICENSE` (the unmodified PolyForm Noncommercial License 1.0.0 text, fetched from polyformproject.org, never retyped or edited, preceded only by the line "Required Notice: Copyright 2026 Serverless Ventures LLC (https://serverlessvc.com)"), `COPYRIGHT` (Copyright 2026 Serverless Ventures LLC, a Delaware limited liability company formed on November 26, 2024; the copyright year is the year this software was first published, 2026, not the formation year; all rights reserved except as granted in LICENSE; noncommercial use only; commercial licenses from legal@serverlessvc.com), `COMMERCIAL.md` (plain-language summary: what counts as noncommercial, examples of commercial use that need a license, how to ask for one; states that commercial licenses are governed by Delaware law and that LICENSE controls if the two differ), `CLA.md` (governed by Delaware law; names the company as "Serverless Ventures LLC, a Delaware limited liability company formed on November 26, 2024"; individual contributor license agreement granting Serverless Ventures LLC the right to relicense; base it on a standard template such as the Apache ICLA adapted for this project and flag it in the owner checklist for legal review), a CLA check in CI, SPDX headers on every source file with `scripts/check-spdx.sh`, `CONTRIBUTING.md` (dev setup, TDD and spec rules, Conventional Commits, CLA requirement), `CODE_OF_CONDUCT.md` (Contributor Covenant), `SECURITY.md` (private vulnerability reporting through GitHub Security Advisories, contact legal@serverlessvc.com), `THIRD_PARTY_LICENSES.md` generated by `scripts/gen-third-party-licenses.sh` from the Python and npm lock files, `DISCLAIMER.md` with the text from Security Guidelines.
 
 **Acceptance criteria:**
-- [ ] files exist
-- [ ] the license script runs in CI and fails if a dependency has a license outside the allowlist (MIT, BSD, Apache-2.0, ISC, PSF, MPL-2.0, and LGPL for unmodified libraries such as psycopg), and fails on GPL, AGPL, SSPL, or unknown, because strong-copyleft dependencies cannot be combined with a noncommercial license
-- [ ] `scripts/check-spdx.sh` fails on a source file without the SPDX header
-- [ ] a PR from a non-owner account without a signed CLA is blocked
+- [x] files exist
+- [x] the license script runs in CI and fails if a dependency has a license outside the allowlist (MIT, BSD, Apache-2.0, ISC, PSF, MPL-2.0, and LGPL for unmodified libraries such as psycopg), and fails on GPL, AGPL, SSPL, or unknown, because strong-copyleft dependencies cannot be combined with a noncommercial license
+- [x] `scripts/check-spdx.sh` fails on a source file without the SPDX header
+- [ ] a PR from a non-owner account without a signed CLA is blocked (not met: the `cla` check fails such a PR but is not yet a required status check; owner checklist #18 and #19, docs/GATE_DEBT.md GD-001)
 
 ### S0-T09: Config and settings skeleton
 
@@ -252,9 +252,9 @@ Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent
 `config/scoring.yaml` with every default from the Signal Engine Specification, a pydantic settings model, a JSON schema export, and a `config_hash` function (sha256 of the canonical JSON).
 
 **Acceptance criteria:**
-- [ ] loading the default file succeeds
-- [ ] an unknown key or out-of-range weight fails with a message naming the key
-- [ ] the hash is stable across key order
+- [x] loading the default file succeeds
+- [x] an unknown key or out-of-range weight fails with a message naming the key
+- [x] the hash is stable across key order
 
 ### S0-T10: Stoke inventory script
 
@@ -267,20 +267,22 @@ Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent
 `scripts/stoke-inventory.sh` that, given a kubeconfig, writes `private/STOKE_INVENTORY.md` (git-ignored: it describes a real cluster and must never be committed to this public repository) classifying each dependency as REUSE, UPGRADE, INSTALL, or NOT NEEDED (see Build and Deployment, Stoke profile). It is read-only: `kubectl get` and `flux get` only.
 
 **Acceptance criteria:**
-- [ ] with no kubeconfig it writes the table with every row "UNKNOWN: run against the cluster" and exits 0
-- [ ] `shellcheck` passes
-- [ ] the owner checklist has an entry asking the owner to run it
+- [x] with no kubeconfig it writes the table with every row "UNKNOWN: run against the cluster" and exits 0
+- [x] `shellcheck` passes
+- [x] the owner checklist has an entry asking the owner to run it
 
 ### Sprint 0 checklist (non-blocking; unmet items go to docs/GATE_DEBT.md)
 
-- [ ] `make setup && make build && make check` pass on a clean clone (proven in CI)
-- [ ] CI green on `develop` and `staging`
-- [ ] Image builds for `linux/amd64` and `linux/arm64` in CI
-- [ ] `make up`, `/healthz`, `make down` work
-- [ ] All agent harness files and legal files present
-- [ ] `scripts/check-versions.sh` passes
-- [ ] Five spec docs audited and current
-- [ ] Retrospective written; tag `sprint-0-complete` pushed
+- [x] `make setup && make build && make check` pass on a clean clone (proven in CI)
+- [x] CI green on `develop` and `staging`
+- [x] Image builds for `linux/amd64` and `linux/arm64` in CI
+- [x] `make up`, `/healthz`, `make down` work
+- [x] All agent harness files and legal files present
+- [x] `scripts/check-versions.sh` passes
+- [x] Five spec docs audited and current
+- [x] Retrospective written; tag `sprint-0-complete` pushed
+
+Checklist run 2026-11-15. All eight items pass. One task-level criterion is unmet and is logged in `docs/GATE_DEBT.md` (GD-001: S0-T08 CLA check not yet merge-blocking).
 
 ---
 
@@ -301,8 +303,8 @@ Generate `.gitignore`, `AGENTS.md`, `CLAUDE.md`, `SKILLS.md`, `SOUL.md`, `.agent
 SQLAlchemy 2 models and Alembic migrations for: `tickers`, `watchlists`, `watchlist_items`, `bars_daily`, `bars_intraday`, `fundamentals`, `earnings_calendar`, `runs`, `indicator_snapshots`, `factor_scores`, `recommendations`, `narratives`, `outcomes`, `config_versions`, `provider_calls`. Composite primary keys on (ticker, ts) for bars. `recommendations` and `factor_scores` are append-only (enforced by a trigger that rejects UPDATE and DELETE).
 
 **Acceptance criteria:**
-- [ ] `alembic upgrade head` and `downgrade base` both succeed on an empty database
-- [ ] the append-only trigger rejects an UPDATE in an integration test
+- [x] `alembic upgrade head` and `downgrade base` both succeed on an empty database (#118)
+- [x] the append-only trigger rejects an UPDATE in an integration test (#118)
 
 ### S1-T02: Provider interfaces
 
@@ -315,8 +317,8 @@ SQLAlchemy 2 models and Alembic migrations for: `tickers`, `watchlists`, `watchl
 `MarketDataProvider` (daily bars, intraday bars, splits and dividends, capability flags `intraday`, `trades`, `adjusted`), `FundamentalsProvider` (quarterly financials, forward estimates if available, earnings dates), both as Protocols with typed results. A registry selects providers from settings.
 
 **Acceptance criteria:**
-- [ ] a fake provider passes the shared contract test suite
-- [ ] an unknown provider name fails at startup with a clear message
+- [x] a fake provider passes the shared contract test suite (#117)
+- [x] an unknown provider name fails at startup with a clear message (#117)
 
 ### S1-T03: Fixture provider
 
@@ -329,8 +331,8 @@ SQLAlchemy 2 models and Alembic migrations for: `tickers`, `watchlists`, `watchl
 A deterministic synthetic generator (seeded geometric Brownian motion with regime switches, gaps, a split, and volume patterns) that produces 3 years of daily and 30 days of 5-minute bars for 12 synthetic tickers plus `SPY` and `QQQ` stand-ins. No vendor data is committed to the repository. This provider powers dev, CI, kind, and the smoke suite.
 
 **Acceptance criteria:**
-- [ ] same seed produces identical bars
-- [ ] the dataset includes at least one trending, one ranging, and one reversing ticker by construction, asserted in tests
+- [x] same seed produces identical bars (#120)
+- [x] the dataset includes at least one trending, one ranging, and one reversing ticker by construction, asserted in tests (#120)
 
 ### S1-T04: Massive (formerly Polygon.io) provider
 
@@ -343,10 +345,10 @@ A deterministic synthetic generator (seeded geometric Brownian motion with regim
 REST adapter for daily aggregates, 5-minute aggregates, splits, dividends, and financials. Base URL is configurable (`https://api.massive.com` default; `https://api.polygon.io` is the legacy host). Token-bucket rate limiter with a configurable calls-per-minute (default 5, the free-tier limit; verify the current plan limits at implementation time), exponential backoff with jitter on 429 and 5xx, response caching by (endpoint, params), and every call recorded in `provider_calls`. The seed watchlist has about 200 symbols, so daily updates must use the grouped daily bars endpoint (one call returns the whole market for a date) with per-ticker calls only for backfill, corporate actions, and intraday bars; record in the owner checklist that a paid plan is likely needed for 5-minute bars on 200 symbols. Tests use recorded, scrubbed fixtures; no test calls the network.
 
 **Acceptance criteria:**
-- [ ] contract tests pass
-- [ ] a 429 sequence is retried and succeeds
-- [ ] the API key never appears in logs, errors, or `provider_calls`
-- [ ] with no key configured the provider reports `unconfigured` and the app still starts on the fixture provider
+- [x] contract tests pass (#121)
+- [x] a 429 sequence is retried and succeeds (#121)
+- [x] the API key never appears in logs, errors, or `provider_calls` (#121; the key is never part of a `CallRecord`, and `sanitize` drops credential-named parameters before #128's `DbCallRecorder` writes `provider_calls`)
+- [x] with no key configured the provider reports `unconfigured` and the app still starts on the fixture provider (#121)
 
 ### S1-T05: Second provider adapter
 
@@ -359,8 +361,8 @@ REST adapter for daily aggregates, 5-minute aggregates, splits, dividends, and f
 One alternate provider behind the same interface so the product is not tied to a single vendor. Choose between Alpaca Market Data and Tiingo by reading their current docs and terms at implementation time; record the choice as an ADR. Fundamentals may come from a different vendor than bars (for example Financial Modeling Prep); the registry allows mixing.
 
 **Acceptance criteria:**
-- [ ] contract tests pass with recorded fixtures
-- [ ] switching `SUPERTRENDS_MARKET_PROVIDER` changes the active provider with no code change
+- [x] contract tests pass with recorded fixtures (#119)
+- [x] switching `SUPERTRENDS_MARKET_PROVIDER` changes the active provider with no code change (#119)
 
 ### S1-T06: Ingestion service
 
@@ -373,10 +375,10 @@ One alternate provider behind the same interface so the product is not tied to a
 `supertrends ingest` and an internal function used by runs: incremental fetch per ticker (from last stored bar), upsert, corporate-action handling (on a new split, refetch the full adjusted history for that ticker), weekly resample, and a data-quality pass that sets `ok`, `degraded`, `stale` (latest daily bar older than the last completed session), or `insufficient_history`. Trading calendar from `exchange_calendars` (XNYS), including half days and holidays.
 
 **Acceptance criteria:**
-- [ ] re-running ingestion is idempotent
-- [ ] a simulated split triggers a full refetch
-- [ ] a holiday does not mark tickers stale
-- [ ] a ticker with a gap of more than 3 sessions is flagged `degraded`
+- [x] re-running ingestion is idempotent (#124)
+- [x] a simulated split triggers a full refetch (#124)
+- [x] a holiday does not mark tickers stale (#124)
+- [x] a ticker with a gap of more than 3 sessions is flagged `degraded` (#124)
 
 ### S1-T07: Watchlist service and API
 
@@ -389,12 +391,12 @@ One alternate provider behind the same interface so the product is not tied to a
 CRUD for one default watchlist plus named groups. Symbol validation against the provider's reference data (or a permissive regex on the fixture provider). Seed on first start: the 14 groups and 200 unique symbols in Appendix L, written to `config/watchlist.seed.yaml`, following the seed rules there (many-to-many group membership, provider validation, `unresolved` and `needs_review` handling, VIX not scored, crypto file kept but not ingested). Hard cap 300 tickers. `SPY` and `QQQ` are always ingested as benchmarks even if removed from the watchlist.
 
 **Acceptance criteria:**
-- [ ] endpoints in the API contract behave as specified
-- [ ] adding ticker 301 returns 422
-- [ ] the seed loads all 14 groups
-- [ ] a symbol in three groups is stored once with three memberships
-- [ ] an unresolvable seed symbol is recorded as `unresolved` with a reason and excluded, never substituted
-- [ ] write endpoints require the bearer token; read endpoints do not
+- [x] endpoints in the API contract behave as specified (#123)
+- [x] adding ticker 301 returns 422 (#123)
+- [x] the seed loads all 14 groups (#123)
+- [x] a symbol in three groups is stored once with three memberships (#123)
+- [ ] an unresolvable seed symbol is recorded as `unresolved` with a reason and excluded, never substituted. Not met: `000660` fails the `tickers.symbol` CHECK and is reported as "not storable" instead of being stored as `unresolved` (GD-005)
+- [x] write endpoints require the bearer token; read endpoints do not (#123)
 
 ### S1-T08: API skeleton and observability base
 
@@ -407,19 +409,23 @@ CRUD for one default watchlist plus named groups. Symbol validation against the 
 FastAPI app with `/healthz` (process up), `/readyz` (database reachable, migrations at head), `/metrics` (Prometheus), structured JSON logs via structlog with a request ID, and RFC 9457 problem responses. Settings from environment with the `SUPERTRENDS_` prefix.
 
 **Acceptance criteria:**
-- [ ] `/readyz` returns 503 when the database is down
-- [ ] logs are valid JSON lines
-- [ ] no log line contains a secret (tested by a log-scrubbing unit test)
+- [x] `/readyz` returns 503 when the database is down (#122)
+- [x] logs are valid JSON lines (#122)
+- [x] no log line contains a secret (tested by a log-scrubbing unit test) (#122)
 
 ### Sprint 1 checklist (non-blocking; unmet items go to docs/GATE_DEBT.md)
 
-- [ ] `supertrends ingest` on the fixture provider fills the database; a second run changes nothing
-- [ ] Provider contract tests pass for fixture, Massive, and the alternate provider
-- [ ] Watchlist API works end to end against Postgres in CI
-- [ ] No test touches the network (CI runs with outbound network blocked for the test step)
-- [ ] `make up && make smoke` pass
-- [ ] Coverage thresholds met; spec docs audited
-- [ ] Retrospective written; tag `sprint-1-complete` pushed
+All eight Sprint 1 tasks are merged to `develop` (#117 to #124, plus #127 for CI and #128 for provider-call recording) and promoted to `staging` (#129).
+
+- [x] `supertrends ingest` on the fixture provider fills the database; a second run changes nothing (`develop` f9ffd93 on local Postgres 17, 2026-11-15: `db migrate`, `watchlist seed`, then `ingest --symbols` for the 10 fixture symbols plus SPY and QQQ, run twice. Both runs left the same row counts, 9,072 daily, 28,080 intraday, 128 fundamentals, and 20 earnings, and the same `bars_daily` checksum. Also automated as `it_cli_ingest_fills_database_and_second_run_changes_nothing`)
+- [x] Provider contract tests pass for fixture, Massive, and the alternate provider (#120, #121, #119; green on `develop`)
+- [x] Watchlist API works end to end against Postgres in CI (`integration-tests` job green on `develop` and on the `staging` promotion #129)
+- [ ] No test touches the network (CI runs with outbound network blocked for the test step). Partly met: pytest-socket blocks every non-localhost socket in all test runs (#117), but the CI test step has no OS-level outbound block (GD-003)
+- [x] `make up && make smoke` pass (3 of 3 on `develop` 0304bd8 and on `staging` a6bc05d, 2026-11-15)
+- [x] Coverage thresholds met; spec docs audited (`staging` a6bc05d: Python 96% line and branch, 3,146 statements, every per-directory threshold met; audit notes in docs/RETROSPECTIVES.md)
+- [x] Retrospective written; tag `sprint-1-complete` pushed (on the `staging` promotion of this checklist)
+
+Checklist run 2026-11-15. Six of seven items pass. One task criterion is unmet (S1-T07 unresolved seed symbols, GD-005). Unmet and process items are in `docs/GATE_DEBT.md`: GD-003, GD-005, GD-006, GD-008, and GD-012 to GD-014 are open; GD-002, GD-004, GD-007, and GD-009 to GD-011 are resolved.
 
 ---
 
@@ -442,8 +448,8 @@ All indicator functions live in `src/supertrends/indicators/`, take a pandas Dat
 `sma`, `ema`, `rma`, `stdev`, `true_range`, `atr`, `rsi`, `obv`, `percentile_rank`, `linreg_slope`, `pivots` (confirmed, width parameter), `zigzag`, `resample_weekly`.
 
 **Acceptance criteria:**
-- [ ] each matches a hand-computed fixture to 1e-9
-- [ ] `pivots` never marks a pivot fewer than `width` bars from the end
+- [x] each matches a hand-computed fixture to 1e-9 (#131)
+- [x] `pivots` never marks a pivot fewer than `width` bars from the end (#131)
 
 ### S2-T02: Supertrend with TradingView parity
 
@@ -456,9 +462,9 @@ All indicator functions live in `src/supertrends/indicators/`, take a pandas Dat
 Implement Factor 1's formula exactly. Golden fixtures: (a) a hand-computed 40-bar case covering both flip directions and band ratcheting; (b) TradingView parity files. For (b), add an owner checklist entry: export from TradingView, for two tickers on the daily chart, a CSV with OHLCV plus the built-in Supertrend (10, 3) columns, and place them in `tests/golden/tradingview/`. Until they exist the parity test is skipped with a visible reason, and the sprint checklist records that. When present, the test asserts the line matches within 0.01 and the direction matches on every bar after a 100-bar warm-up.
 
 **Acceptance criteria:**
-- [ ] hand-computed fixture passes
-- [ ] parity test passes or is skipped pending owner files
-- [ ] property test: direction is always +1 or -1 after warm-up, and the line is below close when up and above close when down
+- [x] hand-computed fixture passes (#137)
+- [x] parity test passes or is skipped pending owner files (#137; skipped, docs/OWNER_CHECKLIST.md #3, GD-016)
+- [x] property test: direction is always +1 or -1 after warm-up, and the line is below close when up and above close when down (#137)
 
 ### S2-T03: Trend and momentum indicators
 
@@ -471,8 +477,8 @@ Implement Factor 1's formula exactly. Golden fixtures: (a) a hand-computed 40-ba
 SMA 20 / 50 / 200 with slope and cross detection, MACD (12, 26, 9) daily and weekly, ADX(14) with +DI and -DI.
 
 **Acceptance criteria:**
-- [ ] fixtures match to 1e-6
-- [ ] cross detection reports the bar index of the cross
+- [x] fixtures match to 1e-6 (#134)
+- [x] cross detection reports the bar index of the cross (#134)
 
 ### S2-T04: Divergence detector
 
@@ -485,9 +491,9 @@ SMA 20 / 50 / 200 with slope and cross detection, MACD (12, 26, 9) daily and wee
 Regular and hidden, bullish and bearish, for RSI, MACD histogram, and OBV, on daily and weekly, using confirmed pivots only. Returns typed divergence records with both pivot bars, prices, and oscillator values.
 
 **Acceptance criteria:**
-- [ ] constructed fixtures for each of the four types are detected
-- [ ] a divergence whose second pivot is not yet confirmed is not reported
-- [ ] no false detection on a monotonic series
+- [x] constructed fixtures for each of the four types are detected (#135)
+- [x] a divergence whose second pivot is not yet confirmed is not reported (#135)
+- [x] no false detection on a monotonic series (#135)
 
 ### S2-T05: Mean reversion and volatility indicators
 
@@ -500,8 +506,8 @@ Regular and hidden, bullish and bearish, for RSI, MACD histogram, and OBV, on da
 Bollinger (20, 2), %B, bandwidth and its percentile rank, z-score, ATR%, ATR% rank, HV20, squeeze and expansion flags.
 
 **Acceptance criteria:**
-- [ ] fixtures match
-- [ ] rank functions use only trailing windows
+- [x] fixtures match (#132)
+- [x] rank functions use only trailing windows (#132)
 
 ### S2-T06: Fibonacci and support / resistance
 
@@ -514,9 +520,9 @@ Bollinger (20, 2), %B, bandwidth and its percentile rank, z-score, ATR%, ATR% ra
 ZigZag leg selection, retracement and extension levels, level clustering with strength, nearest support and resistance, breakout and breakdown detection, 52-week high and low.
 
 **Acceptance criteria:**
-- [ ] on a constructed up-leg-then-pullback fixture, the 61.8 level is within 1e-6 of the expected price
-- [ ] clusters merge pivots within 0.5 ATR
-- [ ] a breakout is only flagged on the bar it happens
+- [x] on a constructed up-leg-then-pullback fixture, the 61.8 level is within 1e-6 of the expected price (#133)
+- [x] clusters merge pivots within 0.5 ATR (#133)
+- [x] a breakout is only flagged on the bar it happens (#133)
 
 ### S2-T07: Volume indicators and estimated order flow
 
@@ -529,9 +535,9 @@ ZigZag leg selection, retracement and extension levels, level clustering with st
 Volume oscillator (5, 10), relative volume, CMF(20), accumulation and distribution days, intraday buy / sell split and daily delta, with the `intraday` and `daily_estimate` quality paths.
 
 **Acceptance criteria:**
-- [ ] buy plus sell equals volume for every bar
-- [ ] the zero-range bar rule is covered
-- [ ] the daily fallback is used and flagged when intraday bars are missing
+- [x] buy plus sell equals volume for every bar (#136)
+- [x] the zero-range bar rule is covered (#136)
+- [x] the daily fallback is used and flagged when intraday bars are missing (#136)
 
 ### S2-T08: No-look-ahead and determinism harness
 
@@ -544,8 +550,8 @@ Volume oscillator (5, 10), relative volume, CMF(20), accumulation and distributi
 A hypothesis property test applied to every public indicator: computing on `bars[:t]` yields the same values for indexes below `t - confirm_lag` as computing on the full series. A determinism test hashes all outputs for the fixture dataset and compares to a committed hash. A benchmark test enforces NFR-001's compute budget.
 
 **Acceptance criteria:**
-- [ ] all indicators are registered with the harness (a test fails if a public indicator function is missing from the registry)
-- [ ] the benchmark passes in CI on 2 cores
+- [x] all indicators are registered with the harness (a test fails if a public indicator function is missing from the registry) (#138)
+- [x] the benchmark passes in CI on 2 cores (#138)
 
 ### S2-T09: Indicator snapshot persistence
 
@@ -558,8 +564,8 @@ A hypothesis property test applied to every public indicator: computing on `bars
 Compute-all function producing one snapshot row per ticker per date (JSONB of indicator values plus levels), stored in `indicator_snapshots` with the config hash.
 
 **Acceptance criteria:**
-- [ ] snapshot for the fixture dataset round-trips
-- [ ] recomputing with the same inputs produces an identical JSON document
+- [x] snapshot for the fixture dataset round-trips (#139)
+- [x] recomputing with the same inputs produces an identical JSON document (#139)
 
 ### S2-T10: Ripster EMA Clouds with TradingView parity
 
@@ -578,14 +584,16 @@ Implement Factor 12's clouds exactly: the five EMA pairs on `hl2`, cloud top, bo
 
 ### Sprint 2 checklist (non-blocking; unmet items go to docs/GATE_DEBT.md)
 
-- [ ] Every indicator in the specification is implemented and registered with the no-look-ahead harness
-- [ ] Supertrend hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open
-- [ ] Ripster EMA Clouds hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open
-- [ ] Determinism hash committed and checked in CI
-- [ ] Indicator coverage at or above 95 percent
-- [ ] Compute benchmark within budget
-- [ ] `make up && make smoke` pass; spec docs audited
-- [ ] Retrospective written; tag `sprint-2-complete` pushed
+Filled in at sprint end on the integrated tip of the stacked PRs (#139 branch, 67de23a). None of the PRs is merged yet: the agent's `gh pr merge` was denied (docs/OWNER_CHECKLIST.md #25, GD-015).
+
+- [x] Every indicator in the specification is implemented and registered with the no-look-ahead harness (#131 to #138: 56 indicators registered, 21 exempt names with reasons; TS-IND-091 fails on an unregistered public function)
+- [x] Supertrend hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open (#137: TS-IND-020 passes; TS-IND-021 and 022 skipped, docs/OWNER_CHECKLIST.md #3 open, GD-016)
+- [ ] Ripster EMA Clouds hand-computed fixture passes; TradingView parity passes, or is skipped with the owner checklist entry open (added after the Sprint 2 audit by the Ripster EMA Clouds spec change; S2-T10 not started)
+- [x] Determinism hash committed and checked in CI (#138: `tests/golden/determinism.sha256`, floats at 10 significant digits per ADR-056; the synthetic dataset hash is checked by `scripts/validate-fixtures.sh` in CI)
+- [x] Indicator coverage at or above 95 percent (99 percent, 1,133 statements; total 97 percent)
+- [x] Compute benchmark within budget (TS-IND-094: 200 tickers x 756 bars in 2.75 s locally against the 60 s budget; passes in CI)
+- [ ] `make up && make smoke` pass; spec docs audited (spec docs audited in #140; smoke passed 3 of 3 on the integrated tip locally, but not on `develop` or `staging`, which do not have the Sprint 2 code yet: GD-015)
+- [ ] Retrospective written; tag `sprint-2-complete` pushed (retrospective written in #140; tag not pushed, because it must point at a `staging` build that has the merged Sprint 2 code: GD-015)
 
 ---
 

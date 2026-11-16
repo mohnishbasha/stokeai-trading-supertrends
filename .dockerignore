@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright 2026 Serverless Ventures LLC
+.git
+.venv
+**/__pycache__
+**/node_modules
+ui/dist
+ui/coverage
+dist
+logs
+private
+.env
+.env.*
+coverage.xml
+.coverage
+.mypy_cache
+.ruff_cache
+.pytest_cache
+1
+supertrends-build-prompt.md
+runner.mk
+run-supertrends.sh
+run-supertrends-status.sh

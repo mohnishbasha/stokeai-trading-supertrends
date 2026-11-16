@@ -1,0 +1,64 @@
+{
+ "corporate_actions": {
+  "forward_splits": [
+   {
+    "symbol": "AAA",
+    "cusip": "000000000",
+    "id": "fs-1",
+    "old_rate": 1,
+    "new_rate": 4,
+    "ex_date": "2026-02-17",
+    "process_date": "2026-02-18",
+    "record_date": "2026-02-13"
+   }
+  ],
+  "reverse_splits": [
+   {
+    "symbol": "AAA",
+    "cusip": "000000000",
+    "id": "rs-1",
+    "old_rate": 10,
+    "new_rate": 1,
+    "ex_date": "2026-03-10",
+    "process_date": "2026-03-11",
+    "record_date": "2026-03-06"
+   }
+  ],
+  "cash_dividends": [
+   {
+    "symbol": "AAA",
+    "cusip": "000000000",
+    "id": "d-1",
+    "rate": 0.25,
+    "ex_date": "2026-02-06",
+    "process_date": "2026-02-10",
+    "record_date": "2026-02-09",
+    "foreign": false,
+    "special": false
+   },
+   {
+    "symbol": "AAA",
+    "cusip": "000000000",
+    "id": "d-2",
+    "rate": 0.05,
+    "ex_date": "2026-02-06",
+    "process_date": "2026-02-10",
+    "record_date": "2026-02-09",
+    "foreign": false,
+    "special": true
+   },
+   {
+    "symbol": "AAA",
+    "cusip": "000000000",
+    "id": "d-3",
+    "rate": 0.26,
+    "ex_date": "2026-05-08",
+    "process_date": "2026-05-12",
+    "record_date": "2026-05-11",
+    "foreign": false,
+    "special": false
+   }
+  ]
+ },
+ "next_page_token": null
+}
