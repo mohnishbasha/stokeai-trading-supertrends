@@ -141,7 +141,7 @@ Python line and branch coverage stayed at 96%: 431 statements at the end of Spri
 - Run the local integration of all branches (checks, integration tests, `make up && make smoke`) before marking any stacked PR ready, not only at sprint end.
 - Turn cross-cutting description requirements into explicit acceptance criteria in the task that owns the wiring.
 
-## Sprint 2: Indicator Engine (work done 2026-11-15; merges pending)
+## Sprint 2: Indicator Engine (work done 2026-11-15; S2-T10 and promotion merges pending)
 
 All nine tasks are implemented, with green CI, in nine stacked PRs. None is merged: the agent's `gh pr merge` was denied again (docs/OWNER_CHECKLIST.md #25, GD-015). As a result, issues #19 to #27 are open and In Review with implementation comments, `develop` has not been promoted to `staging`, and the `sprint-2-complete` tag is not pushed. Everything below was measured on the integrated tip of the stack (the #139 branch, 67de23a).
 
@@ -157,6 +157,7 @@ All nine tasks are implemented, with green CI, in nine stacked PRs. None is merg
 | S2-T06 | [#24](https://github.com/mohnishbasha/stokeai-trading-supertrends/issues/24) | #133 | ZigZag leg selection, Fibonacci retracements and extensions, support and resistance clusters with strength, nearest levels, breakout and breakdown, 52-week high and low |
 | S2-T07 | [#25](https://github.com/mohnishbasha/stokeai-trading-supertrends/issues/25) | #136 | Volume oscillator, relative volume, OBV slope sign, CMF, accumulation and distribution days, estimated order flow with `trades`, `intraday`, and `daily_estimate` quality |
 | S2-T08 | [#26](https://github.com/mohnishbasha/stokeai-trading-supertrends/issues/26) | #138 | Indicator registry (56 indicators, 21 exempt names), truncation and perturbation properties with a negative control, determinism and synthetic dataset hashes, `scripts/validate-fixtures.sh` and `scripts/regen-golden.sh`, 200-ticker benchmark, duplicate-ID tests |
+| S2-T10 | [#143](https://github.com/mohnishbasha/stokeai-trading-supertrends/issues/143) | #144 | Ripster EMA Clouds (Factor 12 clouds): five EMA clouds on `hl2`, stack, bars since the stack flip, the 8/9 pullback test, weekly 34/50 direction; hand-computed fixture with an independent derivation script; TradingView parity (skipped pending owner exports). Added after the sprint-end audit by the Ripster spec change (#142) |
 | S2-T09 | [#27](https://github.com/mohnishbasha/stokeai-trading-supertrends/issues/27) | #139 | Pure `compute_snapshot` producing the canonical snapshot document; insert-only `indicator_snapshots` persistence with idempotent retry, conflict detection, and a config-hash check |
 
 Supporting PR: #140 holds the sprint-end docs (this entry, the checklist, gate debt, owner item #25, and the spec audit).
@@ -211,3 +212,15 @@ Python line and branch coverage went from 96% to 97%: 3,146 statements on Sprint
 - Reserve ADR and PRD ambiguity number ranges per task, the same way as scenario IDs.
 - Make `make smoke` default its base URL from `SUPERTRENDS_HOST_PORT`.
 - Turn carried gate-debt items into acceptance criteria on a named task at sprint planning, so they are not left without an owner.
+
+### Addendum: S2-T10 and the close-out (2026-11-15)
+
+The owner merged #131 to #140, closing #19 to #27. The Ripster EMA Clouds spec change (#142) then added S2-T10 (#143) to Sprint 2. It was built test-first: the failing tests are in 0eda12e and the implementation in ca1a461, both in #144 with green CI. The agent's `gh pr merge` is still denied, so #144 and the promotion PR #145 wait on the owner (docs/OWNER_CHECKLIST.md #26). Smoke on `staging` and the `sprint-2-complete` tag follow those merges (GD-015).
+
+- **Spec sections updated:** `docs/TEST_PLAN.md` TS-IND-133 to 146 Automated, with 141 and 142 Skipped pending the owner export. `docs/SPRINT_PLAN.md` S2-T10 acceptance ticked and the checklist re-run. `docs/GATE_DEBT.md` GD-015 updated and GD-018 added. `docs/OWNER_CHECKLIST.md` #25 done and #26 added. PRD A-24 and ADR-058 (from #142) were audited against the code and need no change.
+- **Tests added:** 20 (18 unit and property tests in `tests/unit/indicators/test_ripster_clouds.py`, plus 2 golden parity tests, which are skipped). Collected totals are now 659 unit, 9 golden, and 50 integration tests.
+- **Coverage delta:** the total is still 97 percent with Postgres (712 passed, 6 skipped; 4,561 statements). `indicators` is at 99 percent (1,264 statements), and `ripster_clouds.py` at 96 percent.
+- **Smoke:** 3 of 3 on the #144 tip with `make image && make up`. Port 8080 was taken again, so `SUPERTRENDS_HOST_PORT=18080` and `SMOKE_BASE_URL` were both set by hand. The "What to change" item on the smoke default is still open.
+- **What worked:** A spec change that adds a task to a sprint already marked complete fit the non-gating model cleanly. The checklist was re-run, and one row moved from unmet to met.
+- **What did not:** The sprint-end docs were written before the scope was final, so they had to be revised. Merge permission is still the single blocker for closing out the sprint.
+- **What to change:** When a spec PR adds a task to a past sprint, open that task's issue and its PR in the same session, so the sprint does not reopen days later.
