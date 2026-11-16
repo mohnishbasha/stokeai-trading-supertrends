@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright 2026 Serverless Ventures LLC
+#
+# Records a CLA signature when a pull request comment is exactly the signing phrase, then
+# re-runs the failed cla check. It never checks out pull request code: it runs
+# scripts/cla.py from the default branch and writes only to the cla-signatures branch.
+name: cla-sign
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cla-sign
+  cancel-in-progress: false
+
+jobs:
+  sign:
+    if: github.event.issue.pull_request && contains(github.event.comment.body, 'I hereby sign the CLA')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - name: Record signature
+        env:
+          AUTHOR: ${{ github.event.comment.user.login }}
+          AUTHOR_ID: ${{ github.event.comment.user.id }}
+          PR: ${{ github.event.issue.number }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+          BODY: ${{ github.event.comment.body }}
+        run: |
+          cp scripts/cla.py /tmp/cla.py
+          if git fetch origin cla-signatures; then
+            git switch cla-signatures
+          else
+            # First signature: create the branch with an empty signature list.
+            git switch --orphan cla-signatures
+            mkdir -p signatures
+            echo '{"signedContributors": []}' > signatures/cla.json
+            git add signatures/cla.json
+          fi
+          python3 /tmp/cla.py sign --author "$AUTHOR" --author-id "$AUTHOR_ID" --pr "$PR" \
+            --comment-id "$COMMENT_ID" --signatures signatures/cla.json --body "$BODY"
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -am "chore: record CLA signature for $AUTHOR (#$PR)"
+            git push origin cla-signatures
+          fi
+      - name: Re-run the cla check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          sha="$(gh api "repos/$REPO/pulls/$PR" --jq .head.sha)"
+          run_id="$(gh api "repos/$REPO/actions/workflows/cla.yml/runs?head_sha=$sha" --jq '.workflow_runs[0].id // empty')"
+          if [[ -n "$run_id" ]]; then
+            gh run rerun "$run_id" --repo "$REPO" --failed || gh run rerun "$run_id" --repo "$REPO" || true
+          fi
