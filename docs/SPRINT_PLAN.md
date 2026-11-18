@@ -592,8 +592,8 @@ First filled in at sprint end on the integrated tip of the stacked PRs (#139 bra
 - [x] Determinism hash committed and checked in CI (#138: `tests/golden/determinism.sha256`, floats at 10 significant digits per ADR-056; the synthetic dataset hash is checked by `scripts/validate-fixtures.sh` in CI)
 - [x] Indicator coverage at or above 95 percent (99 percent, 1,264 statements with S2-T10; total 97 percent with Postgres, 712 passed)
 - [x] Compute benchmark within budget (TS-IND-094: 200 tickers x 756 bars in 2.75 s locally against the 60 s budget; passes in CI)
-- [ ] `make up && make smoke` pass; spec docs audited (spec docs audited in #140 and again for S2-T10 in #144; smoke passed 3 of 3 locally on the #144 tip, but not yet on a `staging` build, because #144 and #145 are not merged: GD-015)
-- [ ] Retrospective written; tag `sprint-2-complete` pushed (retrospective written in #140 and extended for S2-T10 in #144; tag not pushed, because it must point at a `staging` build that has all of Sprint 2: GD-015)
+- [x] `make up && make smoke` pass; spec docs audited (spec docs audited in #140 and again for S2-T10 in #144; smoke passed 3 of 3 on the `staging` build 2831814 after #145, 2026-11-17)
+- [x] Retrospective written; tag `sprint-2-complete` pushed (retrospective in #140, extended in #144 and the close-out PR; `sprint-2-complete` pushed on `staging` 2831814, 2026-11-17)
 
 ---
 
