@@ -141,7 +141,7 @@ Python line and branch coverage stayed at 96%: 431 statements at the end of Spri
 - Run the local integration of all branches (checks, integration tests, `make up && make smoke`) before marking any stacked PR ready, not only at sprint end.
 - Turn cross-cutting description requirements into explicit acceptance criteria in the task that owns the wiring.
 
-## Sprint 2: Indicator Engine (work done 2026-11-15; S2-T10 and promotion merges pending)
+## Sprint 2: Indicator Engine (work done 2026-11-15; closed 2026-11-17)
 
 All nine tasks are implemented, with green CI, in nine stacked PRs. None is merged: the agent's `gh pr merge` was denied again (docs/OWNER_CHECKLIST.md #25, GD-015). As a result, issues #19 to #27 are open and In Review with implementation comments, `develop` has not been promoted to `staging`, and the `sprint-2-complete` tag is not pushed. Everything below was measured on the integrated tip of the stack (the #139 branch, 67de23a).
 
@@ -221,6 +221,10 @@ The owner merged #131 to #140, closing #19 to #27. The Ripster EMA Clouds spec c
 - **Tests added:** 20 (18 unit and property tests in `tests/unit/indicators/test_ripster_clouds.py`, plus 2 golden parity tests, which are skipped). Collected totals are now 659 unit, 9 golden, and 50 integration tests.
 - **Coverage delta:** the total is still 97 percent with Postgres (712 passed, 6 skipped; 4,561 statements). `indicators` is at 99 percent (1,264 statements), and `ripster_clouds.py` at 96 percent.
 - **Smoke:** 3 of 3 on the #144 tip with `make image && make up`. Port 8080 was taken again, so `SUPERTRENDS_HOST_PORT=18080` and `SMOKE_BASE_URL` were both set by hand. The "What to change" item on the smoke default is still open.
+
+### Close-out (2026-11-17)
+
+The owner merged #144 (closing #143) and the promotion PR #145 on 2026-11-16, so every Sprint 2 issue (#19 to #27, #143) is closed. The `staging` tip 2831814 has the same tree as the #144 tip where coverage was measured, and CI is green on it. With `make image && make up` (`SUPERTRENDS_HOST_PORT=18080`, because port 8080 was taken again), `make smoke` passed 3 of 3 against `staging`. `sprint-2-complete` is tagged on 2831814 and pushed. GD-006 and GD-015 are resolved, and owner item #26 is done. GD-016 to GD-018 carry forward.
 - **What worked:** A spec change that adds a task to a sprint already marked complete fit the non-gating model cleanly. The checklist was re-run, and one row moved from unmet to met.
 - **What did not:** The sprint-end docs were written before the scope was final, so they had to be revised. Merge permission is still the single blocker for closing out the sprint.
 - **What to change:** When a spec PR adds a task to a past sprint, open that task's issue and its PR in the same session, so the sprint does not reopen days later.
