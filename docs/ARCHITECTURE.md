@@ -558,6 +558,13 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** Each factor task edits one module and its tests. `snapshot.SCHEMA_VERSION` is 2, so stored version 1 snapshots stay valid history but do not carry the new fields. The determinism hash covers indicators only and is unchanged. TS-SCR-196 (a test 3 bars ago counts) conflicts with the indicator window t-2 to t; PRD A-25 records the window and S3-T14 resolves the row.
 - **Status:** Accepted.
 
+### ADR-061: Factors 5 to 8 rule resolution (PRD A-28, A-29)
+- **Context:** Mean reversion, Fibonacci, Support and resistance, and Volatility are specified as rule lists. Two lists leave overlaps or empty cases open: several Fibonacci levels can be near at once, and a close at the 52-week extreme leaves one side of the S/R set empty.
+- **Decision:** Fibonacci tries its rules in listed order and the first match wins (38.2, 50.0, 61.8 holds, then the failure rule, then the resume rule); `near` and `holding` are the S2-T06 indicator functions, with the `near_atr` config value. S/R takes `d_s` and `d_r` from the snapshot's nearest levels and falls back to the 52-week low and high (floored at 0) when a side is empty; the breakout and breakdown flags from the indicator also need relative volume at or above `levels.breakout_rel_volume`. Volatility derives the squeeze from `bbw_rank < squeeze_rank` (strict) and takes the expansion from the snapshot flag, because "bbw rising 3 bars" is not recoverable from the last bar; it then re-checks `bbw_rank > expansion_rank`. A null z-score or RSI degrades Mean reversion and contributes 0; both null make it `missing`. Percent-like volatility evidence (ATR %, HV20, band width) is stored as percent so the reason's number equals the evidence value. Factors read values through `scoring/factors/_values.py` (`num`, `sign`): null and non-finite read as None, an absent path raises `KeyError`.
+- **Alternatives rejected:** Highest score wins among overlapping Fibonacci levels (not in the spec text, and rewards the deepest level); treating an empty S/R side as `rr` 1 (hides the room-to-the-extreme signal); recomputing expansion from the rank alone (drops the rising condition).
+- **Consequences:** No config change, so `scoring.version` stays 2. A flat price series makes `compute_snapshot` raise ZeroDivisionError in `support_resistance` (ATR 0), an S2-T06 indicator defect that is outside this task and is reported to the owner.
+- **Status:** Accepted.
+
 ---
 
 ## 4. Data Flows
