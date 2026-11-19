@@ -11,7 +11,7 @@ import json
 import math
 from itertools import pairwise
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
@@ -30,6 +30,7 @@ FACTOR_IDS: tuple[str, ...] = (
     "volume_osc",
     "flow",
     "fundamentals",
+    "ripster",
 )
 REGIMES: tuple[str, ...] = ("trending", "ranging", "transitional")
 REQUIRED_BENCHMARKS: frozenset[str] = frozenset({"SPY", "QQQ"})
@@ -143,6 +144,48 @@ class Fundamentals(_Strict):
     stale_weight_multiplier: PosFloat
 
 
+class RipsterCloudPairs(_Strict):
+    """The five EMA clouds as (short, long) pairs (Factor 12)."""
+
+    c1: tuple[PosInt, PosInt]
+    c2: tuple[PosInt, PosInt]
+    c3: tuple[PosInt, PosInt]
+    c4: tuple[PosInt, PosInt]
+    c5: tuple[PosInt, PosInt]
+
+    @model_validator(mode="after")
+    def _short_below_long(self) -> "RipsterCloudPairs":
+        for name in ("c1", "c2", "c3", "c4", "c5"):
+            short, long = getattr(self, name)
+            if short >= long:
+                msg = f"ripster.clouds.{name} must be [short, long] with short < long"
+                raise ValueError(msg)
+        return self
+
+    def pairs(self) -> tuple[tuple[int, int], ...]:
+        """The clouds c1 to c5 as (short, long) pairs, the shape `ripster_clouds` takes."""
+        return (self.c1, self.c2, self.c3, self.c4, self.c5)
+
+
+class RipsterPoints(_Strict):
+    bias: NonNegFloat
+    trend: NonNegFloat
+    stack: NonNegFloat
+    mid: NonNegFloat
+    long: NonNegFloat
+    pullback: NonNegFloat
+
+
+class Ripster(_Strict):
+    source: Literal["hl2"]
+    ma_type: Literal["ema"]
+    clouds: RipsterCloudPairs
+    points: RipsterPoints
+    pullback_lookback_bars: PosInt
+    confidence_stack_conflict_penalty: NonNegFloat
+    selection_bias_gate: bool
+
+
 class Weights(_Strict):
     supertrend: NonNegFloat
     sma: NonNegFloat
@@ -155,6 +198,7 @@ class Weights(_Strict):
     volume_osc: NonNegFloat
     flow: NonNegFloat
     fundamentals: NonNegFloat
+    ripster: NonNegFloat
 
     @model_validator(mode="after")
     def _sum_to_100(self) -> "Weights":
@@ -262,6 +306,7 @@ class ScoringConfig(_Strict):
     volume: Volume
     flow: Flow
     fundamentals: Fundamentals
+    ripster: Ripster
     weights: Weights
     regime: Regime
     events: Events
