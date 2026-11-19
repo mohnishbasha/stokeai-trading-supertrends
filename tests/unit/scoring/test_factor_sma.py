@@ -102,7 +102,7 @@ def test_unit_sma_score_rule_lines(snapshot: dict[str, Any], expected: float) ->
 
 
 def test_unit_sma_cross_window_follows_the_config_lookback() -> None:
-    """TS-SCR-038: the cross window is sma.cross_lookback, not a literal 10."""
+    """TS-SCR-326: the cross window is sma.cross_lookback, not a literal 10."""
     short = CFG.model_copy(update={"sma": CFG.sma.model_copy(update={"cross_lookback": 4})})
     ctx = context(short)
     assert FACTOR.compute(snap(cross=(4, 1)), ctx).score == 10.0
@@ -146,7 +146,7 @@ def test_unit_sma_evidence_wording_for_bearish_ties_and_no_cross() -> None:
 
 
 def test_unit_sma_missing_slope_is_degraded_and_scores_the_rest() -> None:
-    """TS-SCR-036: a null slope adds 0 and flags the factor degraded."""
+    """TS-SCR-325: a null slope adds 0 and flags the factor degraded."""
     res = FACTOR.compute(snap(105, 100, 100, slope20=None), CTX)
     assert res.quality is Quality.DEGRADED
     assert res.score == pytest.approx(50.0)
@@ -155,7 +155,7 @@ def test_unit_sma_missing_slope_is_degraded_and_scores_the_rest() -> None:
 
 @pytest.mark.parametrize("field", ["close", "sma_50", "sma_200"])
 def test_unit_sma_missing_averages_return_missing(field: str) -> None:
-    """TS-SCR-030: a null close or average (history shorter than 200 bars) is missing, score 0."""
+    """TS-SCR-325: a null close or average (history shorter than 200 bars) is missing, score 0."""
     snapshot = snap(105, 100, 100)
     snapshot["daily"][field] = None
     res = FACTOR.compute(snapshot, CTX)
@@ -165,5 +165,5 @@ def test_unit_sma_missing_averages_return_missing(field: str) -> None:
 
 
 def test_unit_sma_absent_keys_return_missing() -> None:
-    """TS-SCR-030: a snapshot without the daily block is missing, not an exception."""
+    """TS-SCR-325: a snapshot without the daily block is missing, not an exception."""
     assert FACTOR.compute({}, CTX).quality is Quality.MISSING

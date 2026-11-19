@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Scoring factors 1 to 4 (S3-T02): Supertrend, SMA stack and slope, MACD, and RSI, MACD and OBV divergence, with evidence and reasons, table-driven tests for every rule line, and window-boundary tests on real snapshots (ADR-060).
 - Factor framework (S3-T01): `FactorResult`, `EvidenceItem`, `FactorContext`, the quality vocabulary, reason templates, and the factor registry in `scoring.factor`; twelve stub modules under `scoring/factors/`; snapshot schema 2 with `prev_close`, `high`, `low`, `close_lag_3`, `ret_5`, `avg_dollar_volume_20d`, the `ripster` block, and `daily.sma_cross` fixed to SMA50 against SMA200 (ADR-059).
 - Indicator snapshots: `scoring.snapshot.compute_snapshot` (every per-bar indicator daily and weekly, levels, Fibonacci, divergences, flow; canonical JSON, NaN as null, no look-ahead), insert-only persistence with idempotent retry and conflict detection in `data.snapshots`, and `compute_and_store` for the `computing` step; the 10-digit canonicalizer moved into `indicators.registry` (S2-T09).
 - No-look-ahead and determinism harness: indicator registry, truncation and perturbation property tests with a negative control, determinism and synthetic dataset hashes, `scripts/regen-golden.sh`, `scripts/validate-fixtures.sh`, the 200-ticker compute benchmark, and unique-ID checks for specs; `supertrends.indicators.supertrend` is now the function (S2-T08).

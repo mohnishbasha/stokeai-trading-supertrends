@@ -558,6 +558,13 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** Each factor task edits one module and its tests. `snapshot.SCHEMA_VERSION` is 2, so stored version 1 snapshots stay valid history but do not carry the new fields. The determinism hash covers indicators only and is unchanged. TS-SCR-196 (a test 3 bars ago counts) conflicts with the indicator window t-2 to t; PRD A-25 records the window and S3-T14 resolves the row.
 - **Status:** Accepted.
 
+### ADR-060: Factors 1 to 4 scoring details (PRD A-26, A-27)
+- **Context:** Factors 1 to 4 (Supertrend, SMA, MACD, Divergences) read the indicator snapshot. The seed rules leave open how window boundaries are counted, how ties score, what a weekly divergence "of the same type" is, and what a null input does.
+- **Decision:** Each factor is a pure function of the snapshot and the scoring config; thresholds and multipliers (`fresh_flip_bars`, `stretch_atr`, `cross_lookback`, `weekly_disagree_multiplier`, divergence points, `hidden_multiplier`, `weekly_confirm_multiplier`, `recency_bars`) are read from the config, and the fixed point values of the rule lines (60, 25, 15, 10, 30, 20, 35) are module constants. Windows follow the indicators: the as-of bar is bar 1 of a cross window, and divergence recency is `t - p2`; the factors re-check the window so the boundary is tested without the indicator. Ties add 0. The weekly divergence confirmation matches on oscillator, kind and side, multiplies the total once, and needs a counted daily divergence. A null warm-up input makes the factor `missing`; a null weekly or secondary input scores 0 for that part and marks the factor `degraded`. Evidence items and reasons come from `ReasonTemplate`s, one item per rule input, named after the input (`st_line`, `bars_since_flip`, `macd_hist_run`, `rsi_regular_bullish`, and so on).
+- **Alternatives rejected:** Trusting the snapshot windows without a re-check (the boundary could then only be tested through full snapshots); matching the weekly confirmation on side and kind only (a weekly OBV divergence would amplify a daily RSI one); scoring a null input as neutral without a flag (hides data gaps from the confidence step).
+- **Consequences:** The four modules also declare `bars` and `weekly.weeks` as inputs. A snapshot change to the cross or recency windows must change the factors with it (the pipeline tests TS-SCR-320 to 322 fail otherwise).
+- **Status:** Accepted.
+
 ---
 
 ## 4. Data Flows

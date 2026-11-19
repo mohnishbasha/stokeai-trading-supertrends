@@ -106,7 +106,7 @@ def test_unit_macd_score_rule_lines(snapshot: dict[str, Any], expected: float) -
 
 
 def test_unit_macd_weekly_multiplier_and_cross_window_follow_the_config() -> None:
-    """TS-SCR-060: the 0.75 and the 3-bar window come from the config."""
+    """TS-SCR-326: the 0.75 and the 3-bar window come from the config."""
     macd = CFG.macd.model_copy(update={"weekly_disagree_multiplier": 0.5, "cross_lookback": 2})
     ctx = context(CFG.model_copy(update={"macd": macd}))
     assert FACTOR.compute(snap(0.5, 0.3, weekly=DOWN_W), ctx).score == 30.0  # 60 * 0.5
@@ -164,7 +164,7 @@ def test_unit_macd_evidence_wording_for_bearish_and_agreeing_weekly() -> None:
 
 
 def test_unit_macd_weekly_unavailable_is_degraded_without_the_multiplier() -> None:
-    """TS-SCR-061: no weekly MACD leaves the score unscaled and flags the factor degraded."""
+    """TS-SCR-325: no weekly MACD leaves the score unscaled and flags the factor degraded."""
     res = FACTOR.compute(snap(0.5, 0.3, weekly=None), CTX)
     assert res.quality is Quality.DEGRADED
     assert res.score == pytest.approx(60.0)
@@ -174,7 +174,7 @@ def test_unit_macd_weekly_unavailable_is_degraded_without_the_multiplier() -> No
 
 @pytest.mark.parametrize("path", [("macd", "line"), ("macd", "signal")])
 def test_unit_macd_warmup_returns_missing(path: tuple[str, str]) -> None:
-    """TS-SCR-050: a null daily line or signal (warm-up) is missing with score 0."""
+    """TS-SCR-325: a null daily line or signal (warm-up) is missing with score 0."""
     snapshot = snap(0.5, 0.3, weekly=UP_W)
     snapshot["daily"][path[0]][path[1]] = None
     res = FACTOR.compute(snapshot, CTX)

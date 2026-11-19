@@ -203,7 +203,7 @@ def test_unit_divergence_score_rule_lines(
 
 
 def test_unit_divergence_points_multipliers_and_recency_follow_the_config() -> None:
-    """TS-SCR-074: points, hidden and weekly multipliers, and recency come from the config."""
+    """TS-SCR-326: points, hidden and weekly multipliers, and recency come from the config."""
     dv = CFG.divergence.model_copy(
         update={
             "points": CFG.divergence.points.model_copy(update={"rsi": 10.0}),
@@ -213,10 +213,10 @@ def test_unit_divergence_points_multipliers_and_recency_follow_the_config() -> N
         }
     )
     ctx = context(CFG.model_copy(update={"divergence": dv}))
-    assert FACTOR.compute(snap([rec("rsi", *RB)]), ctx).score == 10.0
-    assert FACTOR.compute(snap([rec("rsi", *HB)]), ctx).score == 2.5  # 10 * 0.25
+    assert FACTOR.compute(snap([rec("rsi", *RB, ago=1)]), ctx).score == 10.0
+    assert FACTOR.compute(snap([rec("rsi", *HB, ago=1)]), ctx).score == 2.5  # 10 * 0.25
     weekly = [rec("rsi", *RB, ago=1, timeframe="weekly")]
-    assert FACTOR.compute(snap([rec("rsi", *RB)], weekly), ctx).score == 20.0  # 10 * 2.0
+    assert FACTOR.compute(snap([rec("rsi", *RB, ago=1)], weekly), ctx).score == 20.0  # 10 * 2.0
     assert FACTOR.compute(snap([rec("rsi", *RB, ago=4)]), ctx).score == 10.0
     assert FACTOR.compute(snap([rec("rsi", *RB, ago=5)]), ctx).score == 0.0
 
@@ -282,7 +282,7 @@ def test_unit_divergence_unknown_oscillator_is_rejected() -> None:
 
 
 def test_unit_divergence_absent_block_returns_missing() -> None:
-    """TS-SCR-078: a snapshot without divergence blocks is missing, score 0, not an exception."""
+    """TS-SCR-325: a snapshot without divergence blocks is missing, score 0, not an exception."""
     res = FACTOR.compute({}, CTX)
     assert res.quality is Quality.MISSING
     assert res.score == 0

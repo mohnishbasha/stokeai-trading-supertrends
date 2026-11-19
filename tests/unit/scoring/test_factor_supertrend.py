@@ -93,7 +93,7 @@ def test_unit_supertrend_score_rule_lines(snapshot: dict[str, Any], expected: fl
 
 
 def test_unit_supertrend_score_reads_thresholds_from_the_config() -> None:
-    """TS-SCR-016: the freshness and stretch limits come from the config, not constants."""
+    """TS-SCR-326: the freshness and stretch limits come from the config, not constants."""
     tight = CFG.model_copy(
         update={
             "supertrend": CFG.supertrend.model_copy(
@@ -140,7 +140,7 @@ def test_unit_supertrend_evidence_reasons_for_down_conflict_old_stretched() -> N
 
 
 def test_unit_supertrend_weekly_unavailable_is_degraded_and_scores_the_rest() -> None:
-    """TS-SCR-012: no weekly direction contributes 0 and flags the factor degraded."""
+    """TS-SCR-325: no weekly direction contributes 0 and flags the factor degraded."""
     res = FACTOR.compute(snap(d=1, w=None, bars_since_flip=1.0), CTX)
     assert res.quality is Quality.DEGRADED
     assert res.score == pytest.approx(75.0)  # 60 + 0 + 15
@@ -152,7 +152,7 @@ def test_unit_supertrend_weekly_unavailable_is_degraded_and_scores_the_rest() ->
 
 
 def test_unit_supertrend_distance_unavailable_is_degraded_with_no_stretch() -> None:
-    """TS-SCR-019: a null distance (zero ATR) is degraded, with no stretch penalty."""
+    """TS-SCR-325: a null distance (zero ATR) is degraded, with no stretch penalty."""
     res = FACTOR.compute(snap(distance=None), CTX)
     assert res.quality is Quality.DEGRADED
     assert res.score == pytest.approx(85.0)
@@ -178,7 +178,7 @@ def test_unit_supertrend_distance_unavailable_is_degraded_with_no_stretch() -> N
 def test_unit_supertrend_missing_inputs_return_missing_with_score_zero(
     snapshot: dict[str, Any],
 ) -> None:
-    """TS-SCR-010: warm-up (null direction, line or flip age) or absent keys are missing."""
+    """TS-SCR-325: warm-up (null direction, line or flip age) or absent keys are missing."""
     res = FACTOR.compute(snapshot, CTX)
     assert res.quality is Quality.MISSING
     assert res.score == 0

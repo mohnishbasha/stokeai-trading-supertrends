@@ -174,7 +174,13 @@ def test_unit_factors_registry_is_complete_in_a_fresh_interpreter_without_other_
     assert out.stdout.strip().split(",") == list(FACTOR_IDS)
 
 
-@pytest.mark.parametrize(("factor_id", "task"), sorted(EXPECTED_OWNERS.items()))
+# Factors whose owner task has landed; they have their own rule tests (S3-T02: factors 1 to 4).
+IMPLEMENTED = {"supertrend", "sma", "macd", "divergence"}
+
+
+@pytest.mark.parametrize(
+    ("factor_id", "task"), sorted(i for i in EXPECTED_OWNERS.items() if i[0] not in IMPLEMENTED)
+)
 def test_unit_factor_stub_raises_not_implemented_naming_its_owner_task(
     factor_id: str, task: str, ctx: FactorContext
 ) -> None:
