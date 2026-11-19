@@ -898,28 +898,38 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-140 | `unit_volume_osc_score_positive_vo_rising_price_vo_part_positive` | Rising volume confirms an up move | FR-3xx | Deferred |
-| TS-SCR-141 | `unit_volume_osc_score_positive_vo_falling_price_vo_part_negative` | Selling on rising volume | FR-3xx, S3-T04 | Deferred |
-| TS-SCR-142 | `unit_volume_osc_score_negative_vo_rising_price_vo_part_negative` | Rally on fading volume | FR-3xx | Deferred |
-| TS-SCR-143 | `unit_volume_osc_score_negative_vo_falling_price_vo_part_positive` | Decline on fading volume | FR-3xx | Deferred |
-| TS-SCR-144 | `unit_volume_osc_score_vo_part_clipped_at_60` | `clip(vo*2, -60, 60)` | FR-3xx | Deferred |
-| TS-SCR-145 | `unit_volume_osc_score_ret5_zero_vo_part_zero` | `sign(0) == 0` | FR-3xx | Deferred |
-| TS-SCR-146 | `unit_volume_osc_score_obv_slope_positive_adds_40` | `obv_part` | FR-3xx | Deferred |
-| TS-SCR-147 | `unit_volume_osc_score_obv_slope_negative_subtracts_40` | `obv_part` | FR-3xx | Deferred |
-| TS-SCR-148 | `unit_volume_osc_score_total_clipped_to_100` | Clip | FR-3xx | Deferred |
+| TS-SCR-140 | `unit_volume_osc_score_positive_vo_rising_price_vo_part_positive` | Rising volume confirms an up move | FR-3xx | Automated |
+| TS-SCR-141 | `unit_volume_osc_score_positive_vo_falling_price_vo_part_negative` | Selling on rising volume | FR-3xx, S3-T04 | Automated |
+| TS-SCR-142 | `unit_volume_osc_score_negative_vo_rising_price_vo_part_negative` | Rally on fading volume | FR-3xx | Automated |
+| TS-SCR-143 | `unit_volume_osc_score_negative_vo_falling_price_vo_part_positive` | Decline on fading volume | FR-3xx | Automated |
+| TS-SCR-144 | `unit_volume_osc_score_vo_part_clipped_at_60` | `clip(vo*2, -60, 60)` | FR-3xx | Automated |
+| TS-SCR-145 | `unit_volume_osc_score_ret5_zero_vo_part_zero` | `sign(0) == 0` | FR-3xx | Automated |
+| TS-SCR-146 | `unit_volume_osc_score_obv_slope_positive_adds_40` | `obv_part` | FR-3xx | Automated |
+| TS-SCR-147 | `unit_volume_osc_score_obv_slope_negative_subtracts_40` | `obv_part` | FR-3xx | Automated |
+| TS-SCR-148 | `unit_volume_osc_score_total_clipped_to_100` | Clip | FR-3xx | Automated |
+| TS-SCR-400 | `unit_volume_osc_null_input_is_missing_score_zero` | Any of `vo`, `ret5`, `obv_slope` in warm-up gives a missing factor | FR-312, S3-T04 | Automated |
+| TS-SCR-401 | `unit_volume_osc_evidence_lists_inputs_and_parts_with_reasons` | Evidence has vo, ret5, OBV sign, vo_part, obv_part | FR-312, S3-T04 | Automated |
+| TS-SCR-402 | `unit_volume_osc_reason_names_confirm_or_fade` | The vo_part reason says confirms or fades | FR-312, S3-T04 | Automated |
+| TS-SCR-403 | `unit_volume_osc_input_paths_resolve` | Declared input paths resolve | FR-312, S3-T04 | Automated |
+| TS-SCR-404 | `unit_volume_osc_pure_and_deterministic` | Same snapshot, equal results, no mutation | FR-301, S3-T04 | Automated |
 
 #### 10.4.10 Factor 10: Buy / sell volume
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-150 | `unit_flow_score_delta_pct_10_clip_50_plus_cmf_clip_50` | Both parts and both clips | FR-3xx | Deferred |
-| TS-SCR-151 | `unit_flow_score_delta_pct_10_0_2_clipped_at_50` | `0.2*300 = 60` clips to 50 | FR-3xx | Deferred |
-| TS-SCR-152 | `unit_flow_score_cmf20_negative_part_clipped_at_minus_50` | Clip low | FR-3xx | Deferred |
-| TS-SCR-153 | `unit_flow_score_quality_intraday_weight_multiplier_1_0` | No weight change | FR-3xx | Deferred |
-| TS-SCR-154 | `unit_flow_score_quality_daily_estimate_weight_multiplier_0_6` | Weight times 0.6 | FR-3xx, S3-T04 | Deferred |
-| TS-SCR-155 | `unit_flow_score_quality_stored_and_shown_in_evidence` | Quality visible in evidence | FR-3xx, FR-7xx | Deferred |
-| TS-SCR-156 | `unit_flow_score_accumulation_distribution_days_reported_as_evidence` | 20-session counts | FR-3xx | Deferred |
-| TS-SCR-157 | `unit_flow_score_trades_quality_path_accepts_provider_flag` | Optional upgrade is accepted by the interface | FR-3xx, A§7 | Deferred |
+| TS-SCR-150 | `unit_flow_score_delta_pct_10_clip_50_plus_cmf_clip_50` | Both parts and both clips | FR-3xx | Automated |
+| TS-SCR-151 | `unit_flow_score_delta_pct_10_0_2_clipped_at_50` | `0.2*300 = 60` clips to 50 | FR-3xx | Automated |
+| TS-SCR-152 | `unit_flow_score_cmf20_negative_part_clipped_at_minus_50` | Clip low | FR-3xx | Automated |
+| TS-SCR-153 | `unit_flow_score_quality_intraday_weight_multiplier_1_0` | No weight change | FR-3xx | Automated |
+| TS-SCR-154 | `unit_flow_score_quality_daily_estimate_weight_multiplier_0_6` | Weight times 0.6 | FR-3xx, S3-T04 | Automated |
+| TS-SCR-155 | `unit_flow_score_quality_stored_and_shown_in_evidence` | Quality visible in evidence | FR-3xx, FR-7xx | Automated |
+| TS-SCR-156 | `unit_flow_score_accumulation_distribution_days_reported_as_evidence` | 20-session counts | FR-3xx | Automated |
+| TS-SCR-157 | `unit_flow_score_trades_quality_path_accepts_provider_flag` | Optional upgrade is accepted by the interface | FR-3xx, A§7 | Automated |
+| TS-SCR-405 | `unit_flow_null_input_is_missing_score_zero` | `delta_pct_10` or `cmf20` in warm-up gives a missing factor | FR-313, S3-T04 | Automated |
+| TS-SCR-406 | `unit_flow_unknown_quality_is_rejected` | A quality outside intraday, daily_estimate, trades raises ValueError | FR-313, S3-T04 | Automated |
+| TS-SCR-407 | `unit_flow_null_day_counts_leave_out_evidence_items` | Null accumulation or distribution counts are left out; score unchanged | FR-313, S3-T04 | Automated |
+| TS-SCR-408 | `unit_flow_evidence_lists_delta_and_cmf_with_reasons` | Evidence has delta_pct_10 and cmf_20 with formatted reasons | FR-313, S3-T04 | Automated |
+| TS-SCR-409 | `unit_flow_input_paths_resolve_and_pure` | Declared paths resolve; compute is pure | FR-301, S3-T04 | Automated |
 
 #### 10.4.11 Factor 11: Fundamentals overlay
 
