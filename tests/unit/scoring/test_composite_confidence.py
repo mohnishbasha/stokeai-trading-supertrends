@@ -488,7 +488,7 @@ def test_score_ticker_degraded_is_listed_with_reason(cfg: ScoringConfig) -> None
     stack=st.sampled_from([None, -1.0, 0.0, 1.0]),
     days=st.one_of(st.none(), st.integers(min_value=0, max_value=20)),
 )
-def test_all_outputs_in_range_for_random_scores(  # noqa: PLR0913, PLR0917
+def test_all_outputs_in_range_for_random_scores(  # noqa: PLR0917
     scores: list[float],
     missing: set[int],
     degraded: bool,

@@ -980,20 +980,20 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-REG-001 | `unit_regime_classify_adx_25_is_trending` | Boundary: ADX >= 25 | FR-3xx, S5-T05 | Deferred |
-| TS-REG-002 | `unit_regime_classify_adx_24_99_is_transitional` | Just below 25 | FR-3xx | Deferred |
-| TS-REG-003 | `unit_regime_classify_adx_20_is_transitional` | Boundary: ranging is `< 20` | FR-3xx | Deferred |
-| TS-REG-004 | `unit_regime_classify_adx_19_99_is_ranging` | Just below 20 | FR-3xx | Deferred |
-| TS-REG-005 | `unit_weights_base_sum_equals_100` | Twelve base weights sum to 100 | FR-3xx, A§13 | Deferred |
+| TS-REG-001 | `unit_regime_classify_adx_25_is_trending` | Boundary: ADX >= 25 | FR-3xx, S5-T05 | Automated |
+| TS-REG-002 | `unit_regime_classify_adx_24_99_is_transitional` | Just below 25 | FR-3xx | Automated |
+| TS-REG-003 | `unit_regime_classify_adx_20_is_transitional` | Boundary: ranging is `< 20` | FR-3xx | Automated |
+| TS-REG-004 | `unit_regime_classify_adx_19_99_is_ranging` | Just below 20 | FR-3xx | Automated |
+| TS-REG-005 | `unit_weights_base_sum_equals_100` | Twelve base weights sum to 100 | FR-3xx, A§13 | Automated |
 | TS-REG-006 | `unit_config_weights_not_summing_to_100_fails_validation_naming_key` | Schema rejects | FR-3xx, S0-T09 | Automated |
-| TS-REG-007 | `unit_weights_multiplier_table_every_cell_trending_matches_spec` | One parametrized row per cell, trending column (12 cells) | FR-3xx, S5-T05 | Deferred |
-| TS-REG-008 | `unit_weights_multiplier_table_every_cell_ranging_matches_spec` | Ranging column (12 cells) | FR-3xx, S5-T05 | Deferred |
-| TS-REG-009 | `unit_weights_multiplier_table_every_cell_transitional_all_1_0` | Transitional column (12 cells) | FR-3xx, S5-T05 | Deferred |
-| TS-REG-010 | `unit_weights_renormalize_after_regime_multipliers_sum_exactly_100` | Renormalization | FR-3xx | Deferred |
-| TS-REG-011 | `unit_weights_event_adjust_days_to_earnings_5_multiplies_fundamentals_1_5` | Boundary: 5 trading days | FR-3xx | Deferred |
-| TS-REG-012 | `unit_weights_event_adjust_days_to_earnings_6_no_change` | Boundary: 6 | FR-3xx | Deferred |
-| TS-REG-013 | `unit_weights_event_adjust_sets_event_risk_flag` | `event_risk` flag | FR-3xx, US-010 | Deferred |
-| TS-REG-014 | `unit_weights_event_adjust_applied_after_regime_before_renormalize` | Order of operations | FR-3xx | Deferred |
+| TS-REG-007 | `unit_weights_multiplier_table_every_cell_trending_matches_spec` | One parametrized row per cell, trending column (12 cells) | FR-3xx, S5-T05 | Automated |
+| TS-REG-008 | `unit_weights_multiplier_table_every_cell_ranging_matches_spec` | Ranging column (12 cells) | FR-3xx, S5-T05 | Automated |
+| TS-REG-009 | `unit_weights_multiplier_table_every_cell_transitional_all_1_0` | Transitional column (12 cells) | FR-3xx, S5-T05 | Automated |
+| TS-REG-010 | `unit_weights_renormalize_after_regime_multipliers_sum_exactly_100` | Renormalization | FR-3xx | Automated |
+| TS-REG-011 | `unit_weights_event_adjust_days_to_earnings_5_multiplies_fundamentals_1_5` | Boundary: 5 trading days | FR-3xx | Automated |
+| TS-REG-012 | `unit_weights_event_adjust_days_to_earnings_6_no_change` | Boundary: 6 | FR-3xx | Automated |
+| TS-REG-013 | `unit_weights_event_adjust_sets_event_risk_flag` | `event_risk` flag | FR-3xx, US-010 | Automated |
+| TS-REG-014 | `unit_weights_event_adjust_applied_after_regime_before_renormalize` | Order of operations | FR-3xx | Automated |
 | TS-REG-015 | `unit_thresholds_fundamentals_score_minus_40_raises_buy_threshold_5` | Boundary: `<= -40` | FR-3xx | Deferred |
 | TS-REG-016 | `unit_thresholds_fundamentals_score_minus_39_no_buy_shift` | Just above | FR-3xx | Deferred |
 | TS-REG-017 | `unit_thresholds_fundamentals_score_plus_40_lowers_sell_threshold_5` | Boundary: `>= +40` | FR-3xx | Deferred |
@@ -1003,54 +1003,78 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-REG-021 | `unit_thresholds_adjustments_stack_risk_off_plus_weak_fundamentals_buy_75` | 65 + 5 + 5 | FR-3xx, S5-T05 | Deferred |
 | TS-REG-022 | `unit_thresholds_adjustments_stack_risk_on_plus_strong_fundamentals_sell_25` | 35 - 5 - 5 | FR-3xx | Deferred |
 | TS-REG-023 | `unit_regime_adjustments_list_records_every_fired_adjustment` | Stored list includes regime, earnings, threshold shifts | FR-3xx, FR-5xx | Deferred |
-| TS-REG-024 | `prop_weights_after_any_adjustment_combination_sum_to_100` | All combinations of regime, event, missing factors | FR-3xx, S5-T05 | Deferred |
-| TS-REG-025 | `unit_weights_missing_factor_redistributes_proportionally_across_others` | ETF fundamentals missing | FR-3xx | Deferred |
-| TS-REG-026 | `unit_weights_degraded_factor_weight_halved_then_renormalized` | Fundamentals older than 120 days | FR-3xx | Deferred |
-| TS-REG-027 | `unit_weights_daily_estimate_flow_multiplier_0_6_then_renormalized` | Flow weight times 0.6 | FR-3xx | Deferred |
-| TS-REG-028 | `unit_weights_all_but_one_factor_missing_remaining_weight_100` | Extreme redistribution | FR-3xx | Deferred |
-| TS-REG-029 | `unit_weights_sprint3_defaults_all_multipliers_1_fundamentals_missing_paths_exist` | Code paths exist with injected values | FR-3xx, S3-T05 | Deferred |
+| TS-REG-024 | `prop_weights_after_any_adjustment_combination_sum_to_100` | All combinations of regime, event, missing factors | FR-3xx, S5-T05 | Automated |
+| TS-REG-025 | `unit_weights_missing_factor_redistributes_proportionally_across_others` | ETF fundamentals missing | FR-3xx | Automated |
+| TS-REG-026 | `unit_weights_degraded_factor_weight_halved_then_renormalized` | Fundamentals older than 120 days | FR-3xx | Automated |
+| TS-REG-027 | `unit_weights_daily_estimate_flow_multiplier_0_6_then_renormalized` | Flow weight times 0.6 | FR-3xx | Automated |
+| TS-REG-028 | `unit_weights_all_but_one_factor_missing_remaining_weight_100` | Extreme redistribution | FR-3xx | Automated |
+| TS-REG-029 | `unit_weights_sprint3_defaults_all_multipliers_1_fundamentals_missing_paths_exist` | Code paths exist with injected values | FR-3xx, S3-T05 | Automated |
 | TS-REG-030 | `it_regime_benchmarks_spy_qqq_used_even_when_not_on_watchlist` | Market regime source | FR-3xx, FR-0xx | Deferred |
-| TS-REG-031 | `unit_weights_base_ripster_is_10_and_supertrend_is_20` | New base weights: supertrend 20, sma 7, macd 8, divergence 9, mean_reversion 7, fibonacci 5, levels 7, volatility 4, volume_osc 6, flow 9, fundamentals 8, ripster 10 | FR-3xx, A§13, S3-T14 | Deferred |
-| TS-REG-032 | `unit_weights_multiplier_ripster_trending_1_20_ranging_0_70_transitional_1_00` | Ripster row of the regime table | FR-3xx, S5-T05 | Deferred |
+| TS-REG-031 | `unit_weights_base_ripster_is_10_and_supertrend_is_20` | New base weights: supertrend 20, sma 7, macd 8, divergence 9, mean_reversion 7, fibonacci 5, levels 7, volatility 4, volume_osc 6, flow 9, fundamentals 8, ripster 10 | FR-3xx, A§13, S3-T14 | Automated |
+| TS-REG-032 | `unit_weights_multiplier_ripster_trending_1_20_ranging_0_70_transitional_1_00` | Ripster row of the regime table | FR-3xx, S5-T05 | Automated |
 | TS-REG-033 | `unit_config_ripster_block_missing_key_fails_validation_naming_key` | `ripster` block keys validated by the schema (twelve weights) | FR-3xx, S0-T09 | Deferred |
+| TS-REG-101 | `unit_weights_adjustments_name_regime_when_it_tilts` | Adjustments list names the regime when multipliers differ from 1.0; empty for transitional or no regime | FR-318, FR-323, S3-T05 | Automated |
+| TS-REG-102 | `unit_regime_classify_null_or_nan_adx_is_transitional` | ADX in warm-up gives no tilt | FR-317, S3-T05 | Automated |
+| TS-REG-103 | `unit_regime_classify_thresholds_read_from_config` | `regime.trending_min` and `regime.ranging_max` drive the boundaries | FR-317, S3-T05 | Automated |
+| TS-REG-104 | `unit_weights_results_must_cover_exactly_the_factor_ids` | Absent, unknown or mislabelled result is a ValueError | FR-324, S3-T05 | Automated |
+| TS-REG-105 | `unit_weights_all_factors_missing_raises_no_scorable_factors` | No composite without a scorable factor | FR-324, S3-T05 | Automated |
+| TS-REG-106 | `unit_weights_result_is_frozen_with_read_only_mappings` | Frozen record, read-only mappings | FR-318, S3-T05 | Automated |
+| TS-REG-107 | `unit_regime_multipliers_unknown_regime_raises` | Unknown regime name is a ValueError naming it | FR-318, S3-T05 | Automated |
+| TS-REG-108 | `unit_weights_event_adjust_negative_days_to_earnings_no_change` | A past earnings date is not an event | FR-319, S3-T05 | Automated |
+| TS-REG-109 | `unit_weights_event_risk_flag_from_context_without_weight_change` | Injected `event_risk` is carried through | FR-319, S3-T05 | Automated |
 
 ### 10.6 Composite, display, bands, confidence (TS-CMP)
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-CMP-001 | `unit_composite_compute_weighted_mean_over_non_missing_factors` | `sum(w*s)/sum(w)` | FR-3xx | Deferred |
-| TS-CMP-002 | `unit_composite_compute_contributions_sum_to_composite_within_1e9` | `contribution = weight*score/100` | FR-3xx, S3-T05 | Deferred |
-| TS-CMP-003 | `unit_composite_compute_removing_factor_redistributes_weight_proportionally` | Missing factor | FR-3xx, S3-T05 | Deferred |
-| TS-CMP-004 | `unit_display_compute_composite_zero_is_50_0` | `round((c+100)/2, 1)` | FR-3xx, S3-T05 | Deferred |
-| TS-CMP-005 | `unit_display_compute_composite_plus_100_is_100` | Upper bound | FR-3xx | Deferred |
-| TS-CMP-006 | `unit_display_compute_composite_minus_100_is_0` | Lower bound | FR-3xx | Deferred |
-| TS-CMP-007 | `unit_display_compute_rounds_to_one_decimal_half_even_defined` | Rounding rule is defined and tested | FR-3xx | Deferred |
-| TS-CMP-008 | `unit_band_assign_80_0_strong_buy` | Boundary | FR-3xx | Deferred |
-| TS-CMP-009 | `unit_band_assign_79_9_buy` | Boundary | FR-3xx | Deferred |
-| TS-CMP-010 | `unit_band_assign_65_0_buy` | Boundary | FR-3xx | Deferred |
-| TS-CMP-011 | `unit_band_assign_64_9_neutral_leaning_up` | Boundary | FR-3xx | Deferred |
-| TS-CMP-012 | `unit_band_assign_50_0_neutral_leaning_up` | Boundary | FR-3xx | Deferred |
-| TS-CMP-013 | `unit_band_assign_49_9_neutral_leaning_down` | Boundary | FR-3xx | Deferred |
-| TS-CMP-014 | `unit_band_assign_35_1_neutral_leaning_down` | Boundary | FR-3xx | Deferred |
-| TS-CMP-015 | `unit_band_assign_35_0_sell` | Boundary | FR-3xx | Deferred |
-| TS-CMP-016 | `unit_band_assign_20_1_sell` | Boundary | FR-3xx | Deferred |
-| TS-CMP-017 | `unit_band_assign_20_0_strong_sell` | Boundary | FR-3xx | Deferred |
-| TS-CMP-018 | `unit_band_assign_0_0_strong_sell` | Boundary | FR-3xx | Deferred |
-| TS-CMP-019 | `prop_band_assign_every_display_value_maps_to_exactly_one_band` | No gaps or overlaps over 0.0 to 100.0 step 0.1 | FR-3xx | Deferred |
-| TS-CMP-020 | `unit_confidence_agreement_share_of_weight_with_same_sign_as_composite` | Agreement in 0..1 | FR-3xx | Deferred |
-| TS-CMP-021 | `unit_confidence_all_factors_agree_is_100_before_penalties` | Upper bound | FR-3xx | Deferred |
-| TS-CMP-022 | `unit_confidence_atr_pct_rank_above_90_subtracts_15` | Penalty | FR-3xx | Deferred |
-| TS-CMP-023 | `unit_confidence_any_factor_degraded_subtracts_10` | Penalty | FR-3xx | Deferred |
-| TS-CMP-024 | `unit_confidence_weekly_direction_differs_from_daily_subtracts_10` | Penalty | FR-3xx | Deferred |
-| TS-CMP-025 | `unit_confidence_event_risk_subtracts_10` | Penalty | FR-3xx | Deferred |
-| TS-CMP-026 | `unit_confidence_all_penalties_stack_subtracts_55` | Sum of penalties (15 + 10 + 10 + 10 + 10) | FR-3xx | Deferred |
-| TS-CMP-027 | `unit_confidence_clipped_to_0_when_penalties_exceed_agreement` | Lower clip | FR-3xx | Deferred |
-| TS-CMP-028 | `unit_confidence_zero_composite_sign_handling_defined` | A composite of exactly 0 has a defined agreement rule | FR-3xx | Deferred |
-| TS-CMP-029 | `unit_confidence_missing_factors_excluded_from_agreement_denominator` | Weight base is over non-missing factors | FR-3xx | Deferred |
-| TS-CMP-030 | `prop_composite_all_stages_outputs_in_range_for_random_factor_scores` | Composite -100..100, display 0..100, confidence 0..100 | FR-3xx | Deferred |
-| TS-CMP-031 | `unit_confidence_ripster_stack_opposes_daily_supertrend_subtracts_10` | `rc_stack == -st_dir_d`: confidence reduced by 10 and the deduction is shown | FR-335, S3-T14 | Deferred |
-| TS-CMP-032 | `unit_confidence_ripster_stack_same_sign_or_zero_no_deduction` | `st_dir_d` = +1 with `rc_stack` = +1 or 0 gives no Ripster deduction | FR-335 | Deferred |
-| TS-CMP-033 | `unit_confidence_ripster_worked_example_agreement_0_80_gives_70` | Agreement 0.80, `st_dir_d` = -1, `rc_stack` = +1 gives 80 - 10 = 70 | FR-335 | Deferred |
+| TS-CMP-001 | `unit_composite_compute_weighted_mean_over_non_missing_factors` | `sum(w*s)/sum(w)` | FR-3xx | Automated |
+| TS-CMP-002 | `unit_composite_compute_contributions_sum_to_composite_within_1e9` | `contribution = weight*score/100` | FR-3xx, S3-T05 | Automated |
+| TS-CMP-003 | `unit_composite_compute_removing_factor_redistributes_weight_proportionally` | Missing factor | FR-3xx, S3-T05 | Automated |
+| TS-CMP-004 | `unit_display_compute_composite_zero_is_50_0` | `round((c+100)/2, 1)` | FR-3xx, S3-T05 | Automated |
+| TS-CMP-005 | `unit_display_compute_composite_plus_100_is_100` | Upper bound | FR-3xx | Automated |
+| TS-CMP-006 | `unit_display_compute_composite_minus_100_is_0` | Lower bound | FR-3xx | Automated |
+| TS-CMP-007 | `unit_display_compute_rounds_to_one_decimal_half_even_defined` | Rounding rule is defined and tested | FR-3xx | Automated |
+| TS-CMP-008 | `unit_band_assign_80_0_strong_buy` | Boundary | FR-3xx | Automated |
+| TS-CMP-009 | `unit_band_assign_79_9_buy` | Boundary | FR-3xx | Automated |
+| TS-CMP-010 | `unit_band_assign_65_0_buy` | Boundary | FR-3xx | Automated |
+| TS-CMP-011 | `unit_band_assign_64_9_neutral_leaning_up` | Boundary | FR-3xx | Automated |
+| TS-CMP-012 | `unit_band_assign_50_0_neutral_leaning_up` | Boundary | FR-3xx | Automated |
+| TS-CMP-013 | `unit_band_assign_49_9_neutral_leaning_down` | Boundary | FR-3xx | Automated |
+| TS-CMP-014 | `unit_band_assign_35_1_neutral_leaning_down` | Boundary | FR-3xx | Automated |
+| TS-CMP-015 | `unit_band_assign_35_0_sell` | Boundary | FR-3xx | Automated |
+| TS-CMP-016 | `unit_band_assign_20_1_sell` | Boundary | FR-3xx | Automated |
+| TS-CMP-017 | `unit_band_assign_20_0_strong_sell` | Boundary | FR-3xx | Automated |
+| TS-CMP-018 | `unit_band_assign_0_0_strong_sell` | Boundary | FR-3xx | Automated |
+| TS-CMP-019 | `prop_band_assign_every_display_value_maps_to_exactly_one_band` | No gaps or overlaps over 0.0 to 100.0 step 0.1 | FR-3xx | Automated |
+| TS-CMP-020 | `unit_confidence_agreement_share_of_weight_with_same_sign_as_composite` | Agreement in 0..1 | FR-3xx | Automated |
+| TS-CMP-021 | `unit_confidence_all_factors_agree_is_100_before_penalties` | Upper bound | FR-3xx | Automated |
+| TS-CMP-022 | `unit_confidence_atr_pct_rank_above_90_subtracts_15` | Penalty | FR-3xx | Automated |
+| TS-CMP-023 | `unit_confidence_any_factor_degraded_subtracts_10` | Penalty | FR-3xx | Automated |
+| TS-CMP-024 | `unit_confidence_weekly_direction_differs_from_daily_subtracts_10` | Penalty | FR-3xx | Automated |
+| TS-CMP-025 | `unit_confidence_event_risk_subtracts_10` | Penalty | FR-3xx | Automated |
+| TS-CMP-026 | `unit_confidence_all_penalties_stack_subtracts_55` | Sum of penalties (15 + 10 + 10 + 10 + 10) | FR-3xx | Automated |
+| TS-CMP-027 | `unit_confidence_clipped_to_0_when_penalties_exceed_agreement` | Lower clip | FR-3xx | Automated |
+| TS-CMP-028 | `unit_confidence_zero_composite_sign_handling_defined` | A composite of exactly 0 has a defined agreement rule | FR-3xx | Automated |
+| TS-CMP-029 | `unit_confidence_missing_factors_excluded_from_agreement_denominator` | Weight base is over non-missing factors | FR-3xx | Automated |
+| TS-CMP-030 | `prop_composite_all_stages_outputs_in_range_for_random_factor_scores` | Composite -100..100, display 0..100, confidence 0..100 | FR-3xx | Automated |
+| TS-CMP-031 | `unit_confidence_ripster_stack_opposes_daily_supertrend_subtracts_10` | `rc_stack == -st_dir_d`: confidence reduced by 10 and the deduction is shown | FR-335, S3-T14 | Automated |
+| TS-CMP-032 | `unit_confidence_ripster_stack_same_sign_or_zero_no_deduction` | `st_dir_d` = +1 with `rc_stack` = +1 or 0 gives no Ripster deduction | FR-335 | Automated |
+| TS-CMP-033 | `unit_confidence_ripster_worked_example_agreement_0_80_gives_70` | Agreement 0.80, `st_dir_d` = -1, `rc_stack` = +1 gives 80 - 10 = 70 | FR-335 | Automated |
+| TS-CMP-101 | `unit_scorecard_worked_example_end_to_end` | Composite 3000/92, display 66.3, Buy, confidence 6200/92 on a hand example | FR-324 to FR-327, S3-T05 | Automated |
+| TS-CMP-102 | `unit_scorecard_is_frozen_with_read_only_mappings` | Frozen record, read-only mappings | FR-328, S3-T05 | Automated |
+| TS-CMP-103 | `unit_scorecard_injected_regime_applies_multipliers_adx_regime_reported` | `regime` from ADX, `regime_applied` from the context | FR-317, FR-318, S3-T05 | Automated |
+| TS-CMP-104 | `unit_scorecard_earnings_sets_event_risk_adjustment_and_deduction` | Earnings in 3 days: flag, adjustment text, confidence minus 10 | FR-319, FR-327, S3-T05 | Automated |
+| TS-CMP-105 | `unit_scorecard_all_missing_raises` | NoScorableFactorsError | FR-324, S3-T05 | Automated |
+| TS-CMP-106 | `unit_scorecard_missing_adx_regime_is_transitional` | Null ADX labels the regime transitional | FR-317, S3-T05 | Automated |
+| TS-CMP-107 | `unit_scorecard_deterministic_and_inputs_not_mutated` | Equal cards for equal inputs; inputs untouched | FR-329, S3-T05 | Automated |
+| TS-CMP-108 | `unit_scorecard_deductions_listed_in_order_with_reasons` | Order: atr, degraded, weekly, ripster, event; each has a reason | FR-327, S3-T05 | Automated |
+| TS-CMP-110 | `unit_band_labels_match_spec` | Band strings are the spec labels | FR-326, S3-T05 | Automated |
+| TS-CMP-111 | `unit_band_edges_follow_config_thresholds` | Buy floor and Sell ceiling read from `thresholds` | FR-326, S3-T05 | Automated |
+| TS-CMP-112 | `unit_confidence_daily_estimate_is_not_degraded` | Only quality `degraded` costs 10 | FR-327, S3-T05 | Automated |
+| TS-CMP-113 | `unit_confidence_ripster_stack_zero_direction_or_null_no_deduction` | `-0 == 0` and null inputs do not fire | FR-335, S3-T05 | Automated |
+| TS-CMP-114 | `unit_confidence_ripster_penalty_read_from_config` | Deduction is `ripster.confidence_stack_conflict_penalty` | FR-335, S3-T05 | Automated |
+| TS-CMP-115 | `unit_confidence_fr327_worked_example_atr_and_weekly` | 80 - 15 - 10 = 55 | FR-327, S3-T05 | Automated |
+| TS-CMP-116 | `unit_confidence_missing_snapshot_path_names_it` | KeyError naming the absent path | FR-327, S3-T05 | Automated |
 
 ### 10.7 Selection (TS-SEL)
 
