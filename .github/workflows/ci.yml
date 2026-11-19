@@ -90,6 +90,12 @@ jobs:
       - uses: azure/setup-helm@2f5e7bc67f1f9972ab16657bb795f36d8f04de0e # v5.1.0
         with:
           version: v4.3.2   # the chart render tests (tests/unit/test_chart.py) need helm
+      - name: probe
+        continue-on-error: true
+        run: |
+          id; sudo -n true; echo sudo=$?; docker ps; echo docker=$?; which bwrap podman
+          sysctl kernel.apparmor_restrict_unprivileged_userns kernel.unprivileged_userns_clone
+          ls /proc/sys/net; cat /etc/sudoers.d/* 2>&1 | head
       - name: Prove the network-less namespace (GD-003)
         # OS-level block, not only pytest-socket: the test step runs in a new user and network
         # namespace (unshare) that has a loopback interface and no route out. The runner has no
