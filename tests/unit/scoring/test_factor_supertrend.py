@@ -164,6 +164,14 @@ def test_unit_supertrend_distance_unavailable_is_degraded_with_no_stretch() -> N
     )
 
 
+def test_unit_supertrend_atr_unavailable_is_degraded() -> None:
+    """TS-SCR-325: a null ATR is degraded, the other rule lines still score."""
+    res = FACTOR.compute(snap(atr=None), CTX)
+    assert res.quality is Quality.DEGRADED
+    assert res.score == pytest.approx(85.0)  # 60 + 25, old flip, near the line
+    assert evidence_by_name(res)["st_atr"] == (None, "price", "Supertrend ATR is not available")
+
+
 @pytest.mark.parametrize(
     "snapshot",
     [
