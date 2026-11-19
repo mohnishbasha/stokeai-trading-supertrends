@@ -209,9 +209,9 @@ def test_unit_volatility_missing_direction_or_rank_is_missing(ctx: FactorContext
 def test_unit_volatility_evidence_and_reasons_use_templates(ctx: FactorContext) -> None:
     """TS-SCR-384: rendered reasons for squeeze, expansion, against, extreme and the risk items."""
     sq = {e.name: e for e in FACTOR.compute(snap(1, 10.0, atr_rank=95.5), ctx).evidence}
-    assert sq["squeeze"].reason == "Band width rank 10.00 is below 15: volatility is compressed"
+    assert sq["squeeze"].reason == "Band width rank 10.00 is below 15.00: volatility is compressed"
     assert sq["atr_pct_rank"].reason == (
-        "ATR rank 95.50 is above 90: the score is halved in extreme volatility"
+        "ATR rank 95.50 is above 90.00: the score is halved in extreme volatility"
     )
     assert sq["atr_pct"].reason == "ATR is 2.34 percent of the close"
     assert sq["hv20"].reason == "20-day historical volatility is 31.00 percent annualized"
@@ -220,11 +220,11 @@ def test_unit_volatility_evidence_and_reasons_use_templates(ctx: FactorContext) 
         e.name: e for e in FACTOR.compute(snap(1, 90.0, expansion=1.0, close=103.0), ctx).evidence
     }
     assert ex["expansion"].reason == (
-        "Band width rank 90.00 is above 85 and rising, and the close moved with the trend"
+        "Band width rank 90.00 is above 85.00 and rising, and the close moved with the trend"
     )
     ag = {e.name: e for e in FACTOR.compute(snap(1, 90.0, expansion=1.0, close=97.0), ctx).evidence}
     assert ag["expansion"].reason == (
-        "Band width rank 90.00 is above 85 and rising, but the close moved against the trend"
+        "Band width rank 90.00 is above 85.00 and rising, but the close moved against the trend"
     )
     quiet = {e.name: e for e in FACTOR.compute(snap(1, 50.0), ctx).evidence}
     assert quiet["bbw_rank"].reason == "Band width rank 50.00 is neither a squeeze nor an expansion"
@@ -251,3 +251,13 @@ def test_unit_volatility_on_real_snapshots_agrees_with_snapshot_flags(
         if d["atr_pct_rank"] > 90:
             expected *= 0.5
         assert res.score == pytest.approx(expected)
+
+
+def test_unit_volatility_null_risk_inputs_are_left_out_of_the_evidence(ctx: FactorContext) -> None:
+    """TS-SCR-386: null ATR %, HV20 and band width drop their items; the score is unchanged."""
+    doc = snap(1, 10.0)
+    for key in ("atr_pct", "hv20", "bandwidth"):
+        doc["daily"][key] = None
+    res = FACTOR.compute(doc, ctx)
+    assert res.score == 30.0
+    assert not {"atr_pct", "hv20", "bandwidth"} & {e.name for e in res.evidence}

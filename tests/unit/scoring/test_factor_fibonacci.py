@@ -345,3 +345,12 @@ def test_unit_fib_on_real_snapshots_scores_in_range(ctx: FactorContext, cfg: Sco
         assert (res.quality is Quality.OK) is has_leg
         seen.add(has_leg)
     assert True in seen
+
+
+def test_unit_fib_absent_extensions_leave_out_the_target_evidence(ctx: FactorContext) -> None:
+    """TS-SCR-368: with no extensions in the snapshot the score is unchanged, targets omitted."""
+    doc = snap(170.0, 169.0, 168.0, 171.0)
+    doc["fib"]["extensions"] = []
+    res = FACTOR.compute(doc, ctx)
+    assert res.score == 0.0
+    assert not {"fib_next_level_127_2", "fib_level_161_8"} & {e.name for e in res.evidence}

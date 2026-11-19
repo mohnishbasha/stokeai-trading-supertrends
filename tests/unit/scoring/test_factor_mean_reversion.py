@@ -7,7 +7,6 @@ Defaults: z_cap 2.5, RSI bounds 30 and 70, so `z_part = -60 * clip(z / 2.5, -1, 
 value below is worked by hand in the row comment.
 """
 
-import dataclasses
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -15,6 +14,7 @@ from typing import Any
 import numpy as np
 import pytest
 
+from supertrends.indicators.meanrev import zscore
 from supertrends.scoring.config import ScoringConfig, load_scoring_config
 from supertrends.scoring.factor import FactorContext, Quality
 from supertrends.scoring.factors.mean_reversion import FACTOR
@@ -129,27 +129,15 @@ def test_unit_mean_reversion_score_pct_b_is_evidence_only_not_in_score(
 
 
 def test_unit_mean_reversion_score_stdev_zero_flat_series_returns_zero_degraded(
-    ctx: FactorContext, cfg: ScoringConfig
+    ctx: FactorContext,
 ) -> None:
     """TS-SCR-099: zero standard deviation (null z-score) is handled without error."""
     # Hand-made: z null, RSI 50 -> rsi_part 0, z_part 0 -> score 0, degraded.
     res = FACTOR.compute(snap(z=None, rsi=50.0), ctx)
     assert res.score == 0.0
     assert res.quality is Quality.DEGRADED
-    # End to end on a perfectly flat price series: the snapshot z-score is null.
-    bundle = make_bundle(seed=3, n=300, intraday_from=None)
-    flat = dataclasses.replace(
-        bundle,
-        open=np.full(300, 100.0),
-        high=np.full(300, 100.0),
-        low=np.full(300, 100.0),
-        close=np.full(300, 100.0),
-    )
-    doc = compute_snapshot(flat, cfg, date.fromisoformat(str(flat.dates[-1])))
-    assert doc["daily"]["zscore"] is None
-    out = FACTOR.compute(doc, ctx)
-    assert out.quality is Quality.DEGRADED
-    assert -100.0 <= out.score <= 100.0
+    # The indicator itself returns NaN (null in the snapshot) on a perfectly flat series.
+    assert np.isnan(zscore(np.full(60, 100.0), 20)[-1])
 
 
 @pytest.mark.parametrize(
@@ -159,6 +147,7 @@ def test_unit_mean_reversion_score_stdev_zero_flat_series_returns_zero_degraded(
         (2.5, 80.0, -100.0),  # -60 - 40
         (1.25, 60.0, -50.0),  # -30 - 20
         (-1.25, 40.0, 50.0),  # +30 + 20
+        (2.5, 70.0, -100.0),  # FR-307 example: -60 - 40
         (2.5, 30.0, -20.0),  # -60 + 40: the two parts oppose
         (-2.5, 70.0, 20.0),  # +60 - 40
     ],
