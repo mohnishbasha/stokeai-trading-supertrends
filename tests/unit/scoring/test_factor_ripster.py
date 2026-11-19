@@ -243,9 +243,7 @@ UP = [110.0] * 5  # lows well above the cloud top (100): no test
 HIGH_UP = [115.0] * 5
 
 
-def test_unit_ripster_score_pullback_held_stack_plus_1_low_2_bars_ago_close_above_bot_c1_adds_10() -> (
-    None
-):  # noqa: E501
+def test_unit_ripster_score_pullback_held_low_2_bars_ago_close_above_bot_c1_adds_10() -> None:
     """TS-SCR-193 (end to end): bar t-2 low 99.5 <= top(c1) 100, close 105 > bot(c1) 98: +10."""
     low = [110.0, 110.0, 99.5, 110.0, 110.0]
     assert _pullback_score(1.0, low, HIGH_UP, [112.0, 112.0, 105.0, 112.0, 105.0]) == 10
