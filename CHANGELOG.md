@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Helm chart `deploy/helm/stokeai-supertrends` (API, daily-run CronJob, migration hook, bundled Postgres and `values-kind.yaml`, Helm test), kind loop Makefile targets, CI job `kind-e2e`, and an OS-level outbound network block for unit tests (S3-T11).
 - Indicator snapshots: `scoring.snapshot.compute_snapshot` (every per-bar indicator daily and weekly, levels, Fibonacci, divergences, flow; canonical JSON, NaN as null, no look-ahead), insert-only persistence with idempotent retry and conflict detection in `data.snapshots`, and `compute_and_store` for the `computing` step; the 10-digit canonicalizer moved into `indicators.registry` (S2-T09).
 - No-look-ahead and determinism harness: indicator registry, truncation and perturbation property tests with a negative control, determinism and synthetic dataset hashes, `scripts/regen-golden.sh`, `scripts/validate-fixtures.sh`, the 200-ticker compute benchmark, and unique-ID checks for specs; `supertrends.indicators.supertrend` is now the function (S2-T08).
 - Volume indicators (`volume_oscillator`, `relative_volume`, `obv_slope_sign`, `cmf`, `accumulation_distribution_days`) and estimated order flow (`split_volume`, `estimate_order_flow` with `intraday`, `daily_estimate`, and `trades` quality) (S2-T07).

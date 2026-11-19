@@ -87,7 +87,85 @@ jobs:
       - run: uv sync --locked
       - run: npm --prefix ui ci
       - run: npm --prefix ui run build
-      - run: make test
+      - uses: azure/setup-helm@2f5e7bc67f1f9972ab16657bb795f36d8f04de0e # v5.1.0
+        with:
+          version: v4.3.2   # the chart render tests (tests/unit/test_chart.py) need helm
+      - name: Block outbound network for the test step (GD-003)
+        # OS-level block, not only pytest-socket: processes in the nonet group may reach loopback
+        # and answer established connections, nothing else. The runner agent (other group) keeps
+        # its own connections to GitHub.
+        run: |
+          sudo groupadd nonet
+          sudo iptables -A OUTPUT -o lo -j ACCEPT
+          sudo iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+          sudo iptables -A OUTPUT -m owner --gid-owner nonet -j REJECT
+          sudo ip6tables -A OUTPUT -o lo -j ACCEPT
+          sudo ip6tables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+          sudo ip6tables -A OUTPUT -m owner --gid-owner nonet -j REJECT
+          # Prove it: loopback works and the internet does not, for the group the tests run in.
+          sudo -u "$USER" -g nonet python3 - <<'PY'
+          import socket
+          server = socket.socket()
+          server.bind(("127.0.0.1", 0))
+          server.listen()
+          socket.create_connection(server.getsockname(), timeout=3).close()
+          try:
+              socket.create_connection(("1.1.1.1", 443), timeout=5).close()
+          except OSError:
+              print("outbound blocked, loopback open")
+          else:
+              raise SystemExit("x outbound network is still open")
+          PY
+      - name: make test (as the nonet group)
+        run: sudo -E -u "$USER" -g nonet env "PATH=$PATH" make test
+
+  kind-e2e:
+    # Real image, kind cluster, chart install with the kind profile, Helm tests, smoke suite.
+    # Sprint 3 part 2 adds the run trigger and the recommendations checks.
+    name: ci / kind-e2e
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      SUPERTRENDS_HOST_PORT: "18080"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: azure/setup-helm@2f5e7bc67f1f9972ab16657bb795f36d8f04de0e # v5.1.0
+        with:
+          version: v4.3.2
+      - uses: helm/kind-action@ea822c7bf1874f08e5a491df991c228edffc3376 # v1.15.2
+        with:
+          install_only: true
+          version: v0.33.0
+      - name: Lint and template every chart profile
+        run: make helm-lint
+      - name: Build the image
+        run: make image
+      - name: Create the kind cluster
+        run: make kind-up
+      - name: Load the image into kind
+        run: make kind-load
+      - name: Install the chart (kind profile)
+        run: make helm-install
+      - name: Helm tests
+        run: make helm-test
+      - name: Smoke suite against the cluster
+        run: |
+          uv sync --locked
+          make smoke
+      - name: Diagnostics
+        if: failure()
+        run: |
+          kubectl --context "kind-supertrends" get all,pvc,events -A || true
+          kubectl --context "kind-supertrends" -n supertrends describe pods || true
+          kubectl --context "kind-supertrends" -n supertrends logs --all-containers --prefix -l app.kubernetes.io/instance=supertrends --tail=200 || true
+      - name: Delete the kind cluster
+        if: always()
+        run: make kind-down
 
   coverage:
     runs-on: ubuntu-24.04

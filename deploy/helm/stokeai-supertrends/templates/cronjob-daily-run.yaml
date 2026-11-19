@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright 2026 Serverless Ventures LLC
+{{- if .Values.dailyRun.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "st.fullname" . }}-daily-run
+  labels:
+    {{- include "st.labels" . | nindent 4 }}
+    app.kubernetes.io/component: daily-run
+spec:
+  schedule: {{ .Values.dailyRun.schedule | quote }}
+  timeZone: {{ .Values.dailyRun.timeZone | quote }}
+  concurrencyPolicy: Forbid
+  suspend: {{ .Values.dailyRun.suspend }}
+  startingDeadlineSeconds: {{ .Values.dailyRun.startingDeadlineSeconds }}
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: {{ .Values.dailyRun.backoffLimit }}
+      activeDeadlineSeconds: {{ .Values.dailyRun.activeDeadlineSeconds }}
+      template:
+        metadata:
+          labels:
+            {{- include "st.labels" . | nindent 12 }}
+            app.kubernetes.io/component: daily-run
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: daily-run
+              image: {{ include "st.image" . | quote }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              command: ["supertrends"]
+              args: ["run", "daily"]
+              env:
+                {{- include "st.env" . | nindent 16 }}
+              envFrom:
+                {{- include "st.envFrom" . | nindent 16 }}
+              resources:
+                {{- toYaml .Values.dailyRun.resources | nindent 16 }}
+              securityContext:
+                {{- toYaml .Values.securityContext | nindent 16 }}
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir: {}
+          {{- include "st.scheduling" . | nindent 10 }}
+{{- end }}

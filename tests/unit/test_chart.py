@@ -52,6 +52,10 @@ def one(docs: list[Doc], kind: str, name_part: str = "") -> Doc:
     return found[0]
 
 
+def api_service(docs: list[Doc]) -> Doc:
+    return next(d for d in of_kind(docs, "Service") if d["metadata"]["name"] == "supertrends")
+
+
 def pod_specs(docs: list[Doc]) -> list[tuple[str, Doc]]:
     specs: list[tuple[str, Doc]] = []
     for d in docs:
@@ -138,7 +142,7 @@ def test_chart_api_deployment_probes_tmp_and_rolling_update() -> None:
     assert container["readinessProbe"]["httpGet"]["path"] == "/readyz"
     assert container["livenessProbe"]["httpGet"]["path"] == "/healthz"
     assert container["startupProbe"]["httpGet"]["path"] == "/healthz"
-    assert {"name": "tmp", "mountPath": "/tmp"} in container["volumeMounts"]
+    assert {"name": "tmp", "mountPath": "/tmp"} in container["volumeMounts"]  # noqa: S108
     assert {"name": "tmp", "emptyDir": {}} in spec["volumes"]
     assert container["args"] == ["serve", "--bind", "0.0.0.0:8080"]
 
@@ -146,7 +150,7 @@ def test_chart_api_deployment_probes_tmp_and_rolling_update() -> None:
 def test_chart_api_service_and_allowed_hosts() -> None:
     """TS-DEP-107: Service exposes 8080; allowed hosts include the in-cluster DNS names."""
     docs = render("kind")
-    svc = one(docs, "Service", "supertrends")
+    svc = api_service(docs)
     assert svc["spec"]["ports"][0]["port"] == 8080
     container = one(docs, "Deployment")["spec"]["template"]["spec"]["containers"][0]
     env = {e["name"]: e.get("value") for e in container["env"]}
@@ -163,7 +167,7 @@ def test_chart_api_service_and_allowed_hosts() -> None:
 
 
 def test_chart_migration_job_is_a_pre_install_pre_upgrade_hook_that_waits_for_postgres() -> None:
-    """TS-DEP-108: migration Job hook annotations, `db migrate`, init container waits for Postgres."""
+    """TS-DEP-108: migration Job hook annotations, `db migrate`, waits for Postgres."""
     job = one(render("kind"), "Job", "migrate")
     ann = job["metadata"]["annotations"]
     assert ann["helm.sh/hook"] == "pre-install,pre-upgrade"
@@ -176,7 +180,7 @@ def test_chart_migration_job_is_a_pre_install_pre_upgrade_hook_that_waits_for_po
 
 
 def test_chart_bundled_postgres_resources_are_hooks_ordered_before_the_migration() -> None:
-    """TS-DEP-109: bundled Postgres Secret, Service, StatefulSet are created before the migration."""
+    """TS-DEP-109: bundled Postgres Secret, Service, StatefulSet precede the migration."""
     docs = render("kind")
     weights: dict[str, int] = {}
     for d in docs:
@@ -190,7 +194,7 @@ def test_chart_bundled_postgres_resources_are_hooks_ordered_before_the_migration
 
 
 def test_chart_bundled_postgres_only_in_kind_profile() -> None:
-    """TS-DEP-110: default (production-like) values render no Postgres; kind renders it by digest."""
+    """TS-DEP-110: defaults render no Postgres; kind renders it."""
     default = render(None)
     assert of_kind(default, "StatefulSet") == []
     assert [d for d in of_kind(default, "Service") if "postgres" in d["metadata"]["name"]] == []
@@ -210,7 +214,7 @@ def test_chart_postgres_digest_matches_ci_and_compose() -> None:
 
 
 def test_chart_generated_secret_only_with_bundled_postgres() -> None:
-    """TS-DEP-112: the chart creates a Secret only when bundled Postgres is on; prod uses existing."""
+    """TS-DEP-112: the chart creates a Secret only when bundled Postgres is on."""
     assert of_kind(render(None), "Secret") == []
     secret = one(render("kind"), "Secret")
     assert set(secret["stringData"]) >= {
@@ -222,7 +226,7 @@ def test_chart_generated_secret_only_with_bundled_postgres() -> None:
     url = secret["stringData"]["SUPERTRENDS_DATABASE_URL"]
     assert url.startswith("postgresql+psycopg://supertrends:")
     assert secret["stringData"]["POSTGRES_PASSWORD"] in url
-    assert secret["stringData"]["SUPERTRENDS_API_TOKEN"] != "dev-token"
+    assert secret["stringData"]["SUPERTRENDS_API_TOKEN"] != "dev-token"  # noqa: S105
 
 
 def test_chart_default_values_read_credentials_from_existing_secret() -> None:
@@ -281,7 +285,7 @@ def test_chart_kind_profile_uses_fixture_provider_and_local_image() -> None:
 
 def test_chart_kind_service_is_nodeport_30080_matching_kind_cluster_config() -> None:
     """TS-DEP-116: kind exposes the API on NodePort 30080, mapped to the host by cluster.yaml."""
-    svc = one(render("kind"), "Service", "supertrends")
+    svc = api_service(render("kind"))
     assert svc["spec"]["type"] == "NodePort"
     assert svc["spec"]["ports"][0]["nodePort"] == 30080
     cluster = yaml.safe_load((REPO / "deploy" / "kind" / "cluster.yaml").read_text())
