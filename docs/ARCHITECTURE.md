@@ -551,6 +551,13 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** `indicators/ripster_clouds.py` is registered with the no-look-ahead harness; the parity test is skipped with a visible reason until the owner supplies the export (OWNER_CHECKLIST item 3).
 - **Status:** Accepted pending owner confirmation.
 
+### ADR-059: Factor framework, quality vocabulary, and snapshot audit (PRD A-25)
+- **Context:** Four parallel Sprint 3 tasks (S3-T02, S3-T03, S3-T04, S3-T14) each write factors and must not touch shared code. Spec 1.1.0 adds Factor 12 and its config block, and an audit of every rule input against the snapshot found gaps.
+- **Decision:** `scoring.factor` holds the shared framework: `FactorResult` (score in -100 to 100, never NaN, frozen, strict), `EvidenceItem` (name, scalar value, unit, reason), `FactorContext` (config, as-of date, and injectable regime, fundamentals, days to earnings, event risk), the `Factor` protocol (`id`, `input_paths`, `compute(snapshot, context)`), `ReasonTemplate` with one number format, and `FactorRegistry`. Quality is `ok`, `degraded`, `missing`, or `daily_estimate`, the same vocabulary as the `factor_scores.quality` CHECK. A `missing` result has score 0 and is left out of the composite. The weight discount (flow `daily_estimate` x 0.6, stale fundamentals x 0.5) rides on `FactorResult.weight_multiplier` and is applied by the weights step (S3-T05). Confidence deducts for `degraded`; how `daily_estimate` counts is left to S3-T05. The registry is built from the explicit list `scoring.factors.ALL_FACTORS`, ordered by the config `weights` order; there is no import-side-effect registration, and `validate_against` rejects a mismatch both ways. Each factor lives in `scoring/factors/<id>.py` with `FACTOR`, `FACTOR_ID`, `INPUT_PATHS`, and a docstring listing the paths. The snapshot (schema 2) gained `daily.prev_close`, `high`, `low`, `close_lag_3`, `ret_5`, `avg_dollar_volume_20d`, and a `ripster` block (five clouds, bias, stack, bars since stack flip, pullback, c2 and c3 direction, c3 levels, weekly direction). `daily.sma_cross` was SMA20 vs SMA50; Factor 2 needs SMA50 vs SMA200, so it now uses the second and third `sma.periods`. Config spec 1.1.0 equals Appendix E with `scoring.version` 2 and a strict `ripster` model.
+- **Alternatives rejected:** A decorator registry (order depends on import order and a missed import silently drops a factor); one shared factors module (the four tasks would conflict); applying the weight multiplier inside each factor (the composite owns weights).
+- **Consequences:** Each factor task edits one module and its tests. `snapshot.SCHEMA_VERSION` is 2, so stored version 1 snapshots stay valid history but do not carry the new fields. The determinism hash covers indicators only and is unchanged. TS-SCR-196 (a test 3 bars ago counts) conflicts with the indicator window t-2 to t; PRD A-25 records the window and S3-T14 resolves the row.
+- **Status:** Accepted.
+
 ---
 
 ## 4. Data Flows
@@ -2784,11 +2791,11 @@ Rules: `private/`, `logs/`, `.env`, `demo-report/`, `dist/`, and `ui/dist/` are 
 
 Three layers: the scoring config (`config/scoring.yaml`, versioned and hashed), environment settings (`SUPERTRENDS_*`, pydantic-settings), and Helm values (section 10.6) that render settings and the scoring ConfigMap.
 
-### 13.1 `config/scoring.yaml` (seed, verbatim from BUILD_PROMPT Appendix E)
+### 13.1 `config/scoring.yaml` (spec 1.1.0, verbatim from BUILD_PROMPT Appendix E with `scoring.version` 2)
 
 ```yaml
 scoring:
-  version: 1
+  version: 2
 min_history_bars: 250
 liquidity:
   min_avg_dollar_volume_20d: 20000000
@@ -2912,7 +2919,8 @@ track_record:
 The pydantic model `scoring.config.ScoringConfig` (exported as `docs/schemas/scoring.schema.json` by `supertrends config export-schema`) validates the document. Rules:
 
 - Unknown keys at any level are rejected (`extra = "forbid"`). Every key in the seed is required; there are no silent defaults in code for values that the file defines (exception: omitted regime multipliers, below).
-- `scoring.version` is an integer >= 1.
+- `scoring.version` is an integer >= 1. The seed is 2: spec 1.1.0 added the `ripster` block and weight and changed the other weights (Spec Change Protocol, option B; S3-T01).
+- `ripster` (Factor 12) is strict: `source` is `hl2`, `ma_type` is `ema`; `clouds.c1` to `c5` are `[short, long]` pairs of positive integers with short < long (8/9, 5/12, 34/50, 72/89, 180/200); `points` has `bias`, `trend`, `stack`, `mid`, `long`, `pullback` (numbers >= 0, summing to 100 in the seed); `pullback_lookback_bars` is an integer >= 1 (the window includes the as-of bar); `confidence_stack_conflict_penalty` is a number >= 0; `selection_bias_gate` is a boolean.
 - `weights` has exactly the twelve factor IDs `supertrend`, `sma`, `macd`, `divergence`, `mean_reversion`, `fibonacci`, `levels`, `volatility`, `volume_osc`, `flow`, `fundamentals`, `ripster`; each weight is a number >= 0; the sum must equal 100 (tolerance 1e-9). Every weight key maps to a registered factor and every registered factor has a weight (S3-T01).
 - `regime.multipliers` has exactly the three regimes `trending`, `ranging`, `transitional`; each maps a subset of the twelve factor IDs to a multiplier > 0. A factor omitted from a regime has multiplier 1.00, which matches the specification table (the seed lists only the cells that differ from 1.00, and `transitional: {}`). This is the one documented default; it is applied by the model, so it is part of the validated document and of the hash (ADR-037).
 - Periods and lengths are positive integers; `regime.ranging_max <= regime.trending_min`; `thresholds.sell_display_max < thresholds.buy_display_min`; display thresholds are within 0..100; `min_confidence` within 0..100; `selection.max_buys` and `max_sells` are integers 0..10; `correlation_max` within (0, 1]; `track_record.horizons_days` is a non-empty ascending list of positive integers.

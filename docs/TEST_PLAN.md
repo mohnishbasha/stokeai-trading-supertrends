@@ -731,13 +731,32 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-001 | `unit_factor_result_score_101_raises_validation_error` | A factor returning 101 raises | FR-3xx, S3-T01 | Deferred |
-| TS-SCR-002 | `unit_factor_result_score_minus_101_raises_validation_error` | A factor returning -101 raises | FR-3xx, S3-T01 | Deferred |
-| TS-SCR-003 | `unit_factor_registry_every_config_factor_id_registered_and_reverse` | Config ids and registered factors match both ways | FR-3xx, S3-T01 | Deferred |
-| TS-SCR-004 | `unit_factor_result_contains_evidence_items_name_value_unit_reason_and_quality` | FactorResult shape | FR-3xx | Deferred |
+| TS-SCR-001 | `unit_factor_result_score_101_raises_validation_error` | A factor returning 101 raises | FR-3xx, S3-T01 | Automated |
+| TS-SCR-002 | `unit_factor_result_score_minus_101_raises_validation_error` | A factor returning -101 raises | FR-3xx, S3-T01 | Automated |
+| TS-SCR-003 | `unit_factor_registry_every_config_factor_id_registered_and_reverse` | Config ids and registered factors match both ways | FR-3xx, S3-T01 | Automated |
+| TS-SCR-004 | `unit_factor_result_contains_evidence_items_name_value_unit_reason_and_quality` | FactorResult shape | FR-3xx | Automated |
 | TS-SCR-005 | `prop_factors_all_scores_within_minus_100_and_100_for_random_snapshots` | Range property for all 12 factors | FR-3xx | Deferred |
 | TS-SCR-006 | `unit_factor_reasons_one_deterministic_template_per_rule_that_fired` | Reasons come from templates, one per fired rule | FR-5xx | Deferred |
 | TS-SCR-007 | `prop_factors_all_truncation_does_not_change_score_at_t` | Factor-level no-look-ahead (section 6.2) | NFR-007 | Deferred |
+| TS-SCR-301 | `unit_config_equals_appendix_e_ignoring_comments_and_the_version_bump` | `config/scoring.yaml` equals BUILD_PROMPT Appendix E line for line (comments ignored, `scoring.version` 2) | spec 1.1.0, S3-T01 | Automated |
+| TS-SCR-302 | `unit_config_scoring_version_is_2_for_spec_1_1_0` | The Ripster weights and block are a scoring change, so `scoring.version` is 2 | Spec Change Protocol, S3-T01 | Automated |
+| TS-SCR-303 | `unit_config_ripster_block_values_match_appendix_e` | The `ripster` block parses into typed values (pairs, points summing to 100, lookback 3, penalty 10, gate) | FR-333, S3-T01 | Automated |
+| TS-SCR-304 | `unit_config_ripster_block_is_strict` | Unknown, missing, or out-of-range `ripster` keys are rejected naming the key | FR-3xx, S3-T01 | Automated |
+| TS-SCR-305 | `unit_config_twelve_factor_ids_in_weights_order_and_regime_multipliers_cover_ripster` | Twelve IDs in `weights` order; regime multipliers carry ripster | FR-316, S3-T01 | Automated |
+| TS-SCR-306 | `unit_factor_quality_vocabulary_is_ok_degraded_missing_daily_estimate` | Quality vocabulary matches `factor_scores.quality`; registry iterates in config weight order | ADR-059, S3-T01 | Automated |
+| TS-SCR-307 | `unit_factor_stub_raises_not_implemented_naming_its_owner_task` | Registry get, duplicate and empty IDs, Protocol, and the eleven stubs raising `NotImplementedError("S3-T0x")` | ADR-059, S3-T01 | Automated |
+| TS-SCR-308 | `unit_factor_fundamentals_stub_returns_missing_with_score_zero` | Sprint 3 fundamentals is always `missing`, score 0, weight dropped | FR-315, S3-T01 | Automated |
+| TS-SCR-309 | `unit_factor_result_missing_helper_scores_zero_with_missing_quality` | `FactorResult.missing`; a `missing` result with a nonzero score is rejected | FR-315, S3-T01 | Automated |
+| TS-SCR-310 | `unit_snapshot_contains_every_input_path_of_the_factor` | Every declared input path of each factor exists in the snapshot and is non-null unless legitimately absent | S3-T01 audit | Automated |
+| TS-SCR-311 | `unit_snapshot_new_daily_fields_match_independent_computations` | `prev_close`, `high`, `low`, `close_lag_3`, `ret_5`, `avg_dollar_volume_20d` hand-derived; null in warm-up | S3-T01 audit | Automated |
+| TS-SCR-312 | `unit_snapshot_sma_cross_is_sma50_against_sma200_over_the_config_lookback` | Golden and death cross is SMA50 vs SMA200 (Factor 2) | FR-3xx, S3-T01 | Automated |
+| TS-SCR-313 | `unit_snapshot_ripster_block_matches_independent_ema_clouds` | Ripster block (clouds, bias, stack, flip count, pullback, weekly direction) vs independent loops; warm-up null; configured lookback; schema 2 | FR-333, S3-T01 | Automated |
+| TS-SCR-314 | `unit_factor_result_nan_inf_and_just_out_of_range_scores_raise` | NaN and infinities never become a score; results are frozen and strict; weight multiplier is positive and finite | ADR-059, S3-T01 | Automated |
+| TS-SCR-315 | `unit_reason_number_formatting_is_consistent` | One number format in reasons (ints as is, floats 2 decimals); NaN rejected | FR-5xx, S3-T01 | Automated |
+| TS-SCR-316 | `unit_factor_context_defaults_and_immutability` | `FactorContext` defaults and immutability; each factor module docstring lists its input paths | ADR-059, S3-T01 | Automated |
+| TS-SCR-317 | `unit_config_architecture_13_1_mirrors_the_config_file` | The yaml in ARCHITECTURE 13.1 equals `config/scoring.yaml`, comments ignored | S3-T01 | Automated |
+| TS-SCR-318 | `unit_factors_registry_is_complete_in_a_fresh_interpreter_without_other_imports` | One module per factor; the explicit list builds the full registry with no import side effects | ADR-059, S3-T01 | Automated |
+| TS-SCR-319 | `unit_snapshot_contains_regime_confidence_and_selection_inputs` | ADX, the confidence deductions, and the selection gate inputs are in the snapshot | FR-3xx, S3-T01 | Automated |
 
 #### 10.4.1 Factor 1: Supertrend
 
