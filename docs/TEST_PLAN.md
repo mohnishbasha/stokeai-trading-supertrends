@@ -950,31 +950,44 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-180 | `unit_ripster_score_close_above_c3_bias_adds_30` | `bias` = +30 | FR-333 | Deferred |
-| TS-SCR-181 | `unit_ripster_score_close_below_c3_bias_subtracts_30` | `bias` = -30 | FR-333 | Deferred |
-| TS-SCR-182 | `unit_ripster_score_close_inside_c3_pos_0_bias_is_0` | `pos(c3)` = 0 scores 0 for `bias` | FR-333, S3-T14 | Deferred |
-| TS-SCR-183 | `unit_ripster_score_c2_bullish_trend_adds_20` | `trend` = +20 | FR-333 | Deferred |
-| TS-SCR-184 | `unit_ripster_score_c2_bearish_trend_subtracts_20` | `trend` = -20 | FR-333 | Deferred |
-| TS-SCR-185 | `unit_ripster_score_c2_fully_above_c3_stacking_adds_20` | `stack` = +1 | FR-333 | Deferred |
-| TS-SCR-186 | `unit_ripster_score_c2_fully_below_c3_stacking_subtracts_20` | `stack` = -1 | FR-333 | Deferred |
-| TS-SCR-187 | `unit_ripster_score_c2_overlapping_c3_stacking_is_0` | Overlapping clouds give 0 | FR-333 | Deferred |
-| TS-SCR-188 | `unit_ripster_score_c3_bullish_mid_adds_10` | `mid` = +10 | FR-333 | Deferred |
-| TS-SCR-189 | `unit_ripster_score_c3_bearish_mid_subtracts_10` | `mid` = -10 | FR-333 | Deferred |
-| TS-SCR-190 | `unit_ripster_score_close_above_c5_long_adds_10` | `long` = +10 | FR-333 | Deferred |
-| TS-SCR-191 | `unit_ripster_score_close_below_c5_long_subtracts_10` | `long` = -10 | FR-333 | Deferred |
-| TS-SCR-192 | `unit_ripster_score_close_inside_c5_long_is_0` | `pos(c5)` = 0 | FR-333 | Deferred |
-| TS-SCR-193 | `unit_ripster_score_pullback_held_stack_plus_1_low_2_bars_ago_close_above_bot_c1_adds_10` | Held bullish pullback | FR-333, S3-T14 | Deferred |
-| TS-SCR-194 | `unit_ripster_score_pullback_failed_close_at_or_below_bot_c1_is_0` | Failed bullish pullback | FR-333, S3-T14 | Deferred |
-| TS-SCR-195 | `unit_ripster_score_pullback_stale_test_4_bars_ago_is_0` | Stale test (4 bars ago) does not count | FR-333, S3-T14 | Deferred |
-| TS-SCR-196 | `unit_ripster_score_pullback_test_3_bars_ago_counts` | Boundary: `pullback_lookback_bars` = 3 is inclusive | FR-333 | Deferred |
-| TS-SCR-197 | `unit_ripster_score_pullback_bearish_held_stack_minus_1_high_at_or_above_bot_c1_close_below_top_c1_subtracts_10` | Held bearish pullback | FR-333 | Deferred |
-| TS-SCR-198 | `unit_ripster_score_pullback_bearish_failed_close_at_or_above_top_c1_is_0` | Failed bearish pullback | FR-333 | Deferred |
-| TS-SCR-199 | `unit_ripster_score_pullback_stack_0_is_0_even_when_c1_tested` | Pullback requires `stack != 0` | FR-333 | Deferred |
-| TS-SCR-200 | `unit_ripster_score_all_components_bullish_maximum_30_20_20_10_10_10_is_100` | Upper bound | FR-333 | Deferred |
-| TS-SCR-201 | `unit_ripster_score_all_components_bearish_maximum_is_minus_100` | Lower bound | FR-333 | Deferred |
-| TS-SCR-202 | `unit_ripster_score_c4_72_89_cloud_is_evidence_only_not_scored` | Changing the 72/89 cloud leaves the score unchanged | FR-333 | Deferred |
-| TS-SCR-203 | `unit_ripster_score_pullback_lookback_read_from_config_ripster_key` | `ripster.pullback_lookback_bars` | FR-333, A§13 | Deferred |
-| TS-SCR-204 | `unit_ripster_score_evidence_lists_six_components_and_derived_rc_values` | Components and `rc_*` values in the evidence | FR-333, FR-5xx | Deferred |
+| TS-SCR-180 | `unit_ripster_score_close_above_c3_bias_adds_30` | `bias` = +30 | FR-333 | Automated |
+| TS-SCR-181 | `unit_ripster_score_close_below_c3_bias_subtracts_30` | `bias` = -30 | FR-333 | Automated |
+| TS-SCR-182 | `unit_ripster_score_close_inside_c3_pos_0_bias_is_0` | `pos(c3)` = 0 scores 0 for `bias` | FR-333, S3-T14 | Automated |
+| TS-SCR-183 | `unit_ripster_score_c2_bullish_trend_adds_20` | `trend` = +20 | FR-333 | Automated |
+| TS-SCR-184 | `unit_ripster_score_c2_bearish_trend_subtracts_20` | `trend` = -20 | FR-333 | Automated |
+| TS-SCR-185 | `unit_ripster_score_c2_fully_above_c3_stacking_adds_20` | `stack` = +1 | FR-333 | Automated |
+| TS-SCR-186 | `unit_ripster_score_c2_fully_below_c3_stacking_subtracts_20` | `stack` = -1 | FR-333 | Automated |
+| TS-SCR-187 | `unit_ripster_score_c2_overlapping_c3_stacking_is_0` | Overlapping clouds give 0 | FR-333 | Automated |
+| TS-SCR-188 | `unit_ripster_score_c3_bullish_mid_adds_10` | `mid` = +10 | FR-333 | Automated |
+| TS-SCR-189 | `unit_ripster_score_c3_bearish_mid_subtracts_10` | `mid` = -10 | FR-333 | Automated |
+| TS-SCR-190 | `unit_ripster_score_close_above_c5_long_adds_10` | `long` = +10 | FR-333 | Automated |
+| TS-SCR-191 | `unit_ripster_score_close_below_c5_long_subtracts_10` | `long` = -10 | FR-333 | Automated |
+| TS-SCR-192 | `unit_ripster_score_close_inside_c5_long_is_0` | `pos(c5)` = 0 | FR-333 | Automated |
+| TS-SCR-193 | `unit_ripster_score_pullback_held_low_2_bars_ago_close_above_bot_c1_adds_10` | Held bullish pullback | FR-333, S3-T14 | Automated |
+| TS-SCR-194 | `unit_ripster_score_pullback_failed_close_at_or_below_bot_c1_is_0` | Failed bullish pullback | FR-333, S3-T14 | Automated |
+| TS-SCR-195 | `unit_ripster_score_pullback_stale_test_4_bars_ago_is_0` | Stale test (4 bars ago) does not count | FR-333, S3-T14 | Automated |
+| TS-SCR-196 | `unit_ripster_score_pullback_test_3_bars_ago_counts` | Boundary, resolved with PRD A-25: the window is t-2..t, so a test 2 bars ago (the oldest bar of the 3-bar window) counts and a test 3 bars ago (t-3) does not | FR-333 | Automated |
+| TS-SCR-197 | `unit_ripster_score_pullback_bearish_held_stack_minus_1_high_at_or_above_bot_c1_close_below_top_c1_subtracts_10` | Held bearish pullback | FR-333 | Automated |
+| TS-SCR-198 | `unit_ripster_score_pullback_bearish_failed_close_at_or_above_top_c1_is_0` | Failed bearish pullback | FR-333 | Automated |
+| TS-SCR-199 | `unit_ripster_score_pullback_stack_0_is_0_even_when_c1_tested` | Pullback requires `stack != 0` | FR-333 | Automated |
+| TS-SCR-200 | `unit_ripster_score_all_components_bullish_maximum_30_20_20_10_10_10_is_100` | Upper bound | FR-333 | Automated |
+| TS-SCR-201 | `unit_ripster_score_all_components_bearish_maximum_is_minus_100` | Lower bound | FR-333 | Automated |
+| TS-SCR-202 | `unit_ripster_score_c4_72_89_cloud_is_evidence_only_not_scored` | Changing the 72/89 cloud leaves the score unchanged | FR-333 | Automated |
+| TS-SCR-203 | `unit_ripster_score_pullback_lookback_read_from_config_ripster_key` | `ripster.pullback_lookback_bars` | FR-333, A§13 | Automated |
+| TS-SCR-204 | `unit_ripster_score_evidence_lists_six_components_and_derived_rc_values` | Components and `rc_*` values in the evidence | FR-333, FR-5xx | Automated |
+| TS-SCR-420 | `unit_ripster_score_clip_to_plus_minus_100_when_points_exceed` | Sum above 100 or below -100 is clipped | FR-333, S3-T14 | Automated |
+| TS-SCR-421 | `unit_ripster_score_points_read_from_config_ripster_key` | `ripster.points` sets every component | FR-333, S3-T14 | Automated |
+| TS-SCR-422 | `unit_ripster_score_reasons_are_deterministic_and_name_the_rule` | Reason templates, one per rule line | FR-333, S3-T14 | Automated |
+| TS-SCR-423 | `unit_ripster_score_missing_core_input_is_missing_quality_score_zero` | Null bias, stack, c2 or c3 direction (under 50 bars) gives `missing`, score 0 | FR-333, A-31, S3-T14 | Automated |
+| TS-SCR-424 | `unit_ripster_score_c5_not_defined_yet_scores_long_zero_and_is_degraded` | Null 180/200 position (50 to 199 bars): `long` 0, quality `degraded` | FR-333, A-31, S3-T14 | Automated |
+| TS-SCR-425 | `unit_ripster_score_is_pure_and_does_not_mutate_the_snapshot` | Purity | FR-333, S3-T14 | Automated |
+| TS-SCR-426 | `unit_ripster_score_pullback_bearish_end_to_end_held_failed_and_stale` | Bearish held, failed and stale tests from hand-built bars | FR-333, S3-T14 | Automated |
+| TS-SCR-427 | `unit_ripster_score_on_computed_snapshot_reads_every_declared_input` | Factor on `compute_snapshot` output equals an independent evaluation of the rule lines | FR-333, S3-T14 | Automated |
+| TS-SCR-428 | `unit_ripster_score_registry_factor_is_the_module_factor` | Registry `ripster` is the implemented factor, not the stub | FR-333, S3-T14 | Automated |
+| TS-SCR-430 | `unit_confidence_stack_penalty_rule_lines (opposing)` | `confidence_stack_penalty` is 10 when `rc_stack == -st_dir_d`, both signs (helper for TS-CMP-031) | FR-335, S3-T14 | Automated |
+| TS-SCR-431 | `unit_confidence_stack_penalty_rule_lines (same sign or zero)` | No deduction for same sign or `rc_stack` 0 (helper for TS-CMP-032) | FR-335, S3-T14 | Automated |
+| TS-SCR-432 | `unit_confidence_stack_penalty_reads_amount_from_config` | `ripster.confidence_stack_conflict_penalty` | FR-335, S3-T14 | Automated |
+| TS-SCR-433 | `unit_confidence_stack_penalty_null_input_gives_no_deduction` | Warm-up nulls never deduct | FR-335, S3-T14 | Automated |
 
 ### 10.5 Regime and weights (TS-REG)
 
@@ -1101,6 +1114,16 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-SEL-043 | `unit_selection_sell_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the sell gate | FR-334, S3-T14 | Deferred |
 | TS-SEL-044 | `unit_selection_sell_candidate_rc_bias_minus_1_passes_ripster_gate` | Close below the cloud passes the sell gate | FR-334 | Deferred |
 | TS-SEL-045 | `unit_selection_ripster_gate_rejection_listed_in_nearest_miss_reasons` | A gate rejection appears as the nearest-miss reason when a side is empty | FR-334, FR-4xx | Deferred |
+| TS-SEL-150 | `unit_selection_bias_gate_rule_lines (buy, close below cloud)` | `selection_bias_gate(snapshot, 'buy')` rejects with reason `close below the 34/50 cloud` (helper for TS-SEL-039) | FR-334, S3-T14 | Automated |
+| TS-SEL-151 | `unit_selection_bias_gate_rule_lines (buy, inside)` | Buy passes inside the cloud (helper for TS-SEL-040) | FR-334, S3-T14 | Automated |
+| TS-SEL-152 | `unit_selection_bias_gate_rule_lines (buy, above)` | Buy passes above the cloud (helper for TS-SEL-041) | FR-334, S3-T14 | Automated |
+| TS-SEL-153 | `unit_selection_bias_gate_rule_lines (sell, close above cloud)` | Sell rejected with reason `close above the 34/50 cloud` (helper for TS-SEL-042) | FR-334, S3-T14 | Automated |
+| TS-SEL-154 | `unit_selection_bias_gate_rule_lines (sell, inside)` | Sell passes inside the cloud (helper for TS-SEL-043) | FR-334, S3-T14 | Automated |
+| TS-SEL-155 | `unit_selection_bias_gate_rule_lines (sell, below)` | Sell passes below the cloud (helper for TS-SEL-044) | FR-334, S3-T14 | Automated |
+| TS-SEL-156 | `unit_selection_bias_gate_disabled_passes_everything` | `ripster.selection_bias_gate: false` disables the gate | FR-334, S3-T14 | Automated |
+| TS-SEL-157 | `unit_selection_bias_gate_null_bias_fails_closed_with_reason` | Undefined bias rejects with `34/50 cloud bias not available` | FR-334, A-31, S3-T14 | Automated |
+| TS-SEL-158 | `unit_selection_bias_gate_unknown_side_raises` | Side other than buy or sell raises ValueError | FR-334, S3-T14 | Automated |
+| TS-SEL-159 | `unit_selection_bias_gate_does_not_read_other_fields_or_mutate` | Verdict depends on `ripster.bias` only; no mutation | FR-334, S3-T14 | Automated |
 
 ### 10.8 Justification and narrative (TS-NAR)
 
@@ -1145,6 +1168,11 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-NAR-037 | `unit_narrative_prompt_versioned_in_prompts_directory_version_in_record` | Prompt versioning | FR-5xx | Deferred |
 | TS-NAR-038 | `unit_narrative_disclaimer_present_in_every_narrative_payload` | Disclaimer attached | FR-5xx, A§9 | Deferred |
 | TS-NAR-039 | `unit_evidence_build_includes_ripster_block_and_levels_cloud_34_50` | `ripster` block and `levels.cloud_34_50` validate against the committed schema | FR-5xx, S3-T14 | Deferred |
+| TS-NAR-150 | `unit_evidence_ripster_block_has_exactly_the_spec_keys_with_integer_signs` | `ripster_evidence` keys and int/float types match the spec example | FR-5xx, S3-T14 | Automated |
+| TS-NAR-151 | `unit_evidence_ripster_block_bearish_values` | Negative signs and zero stack | FR-5xx, S3-T14 | Automated |
+| TS-NAR-152 | `unit_evidence_ripster_block_null_fields_stay_null_never_zero` | Nulls stay None | FR-5xx, S3-T14 | Automated |
+| TS-NAR-153 | `unit_evidence_ripster_block_is_json_serializable_and_pure` | Plain JSON types, no aliasing or mutation | FR-5xx, S3-T14 | Automated |
+| TS-NAR-154 | `unit_evidence_ripster_block_from_computed_snapshot_matches_its_fields` | On a real snapshot every key equals the snapshot field | FR-5xx, S3-T14 | Automated |
 
 ### 10.9 Track record (TS-TRK)
 

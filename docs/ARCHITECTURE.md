@@ -558,6 +558,13 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** Each factor task edits one module and its tests. `snapshot.SCHEMA_VERSION` is 2, so stored version 1 snapshots stay valid history but do not carry the new fields. The determinism hash covers indicators only and is unchanged. TS-SCR-196 (a test 3 bars ago counts) conflicts with the indicator window t-2 to t; PRD A-25 records the window and S3-T14 resolves the row.
 - **Status:** Accepted.
 
+### ADR-063: Ripster rules outside the factor score (PRD A-31)
+- **Context:** Factor 12 touches three modules that do not exist yet in S3-T14 (composite and confidence, selection, evidence), and the spec leaves open what happens before the clouds are defined.
+- **Decision:** `scoring/factors/ripster.py` holds the score rules and reads the snapshot's `ripster.pullback` flag (window t-2 to t, ADR-059). `scoring/ripster_rules.py` holds three pure helpers for the later tasks: `confidence_stack_penalty(snapshot, config) -> float`, `selection_bias_gate(snapshot, side, config) -> (passed, reason)`, and `ripster_evidence(snapshot) -> dict`. They read only snapshot paths already declared in `CONFIDENCE_INPUT_PATHS`, `SELECTION_INPUT_PATHS` and the factor's `INPUT_PATHS`. Null core inputs make the factor `missing`; a null 180/200 position makes it `degraded` with `long` 0; the gate fails closed on an undefined bias.
+- **Alternatives rejected:** Putting the rules inside the composite and selection modules (three tasks would each re-derive the Ripster rule text); treating a null 180/200 cloud as `missing` (it would drop the whole factor for tickers with 50 to 199 bars although four of six components are defined).
+- **Consequences:** S3-T05 calls `confidence_stack_penalty`, S3-T06 calls `selection_bias_gate` and records its reason, S3-T08 embeds `ripster_evidence` as the `ripster` block. Helpers are pure and covered by TS-SCR-430 to 433, TS-SEL-150 to 159 and TS-NAR-150 to 154.
+- **Status:** Accepted.
+
 ---
 
 ## 4. Data Flows
