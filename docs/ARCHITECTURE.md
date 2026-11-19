@@ -560,9 +560,9 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 
 ### ADR-071: OS-level outbound network block for unit tests in CI (GD-003, GD-017)
 - **Context:** pytest-socket blocks sockets only inside the Python process; a dependency that spawns a subprocess could still reach the network.
-- **Decision:** The CI unit-test job adds a `nonet` group, installs iptables and ip6tables rules that accept loopback and established connections and reject all other output for that group, proves the block (loopback works, `1.1.1.1:443` fails), then runs `make test` as that group. The runner agent is in another group and keeps its GitHub connection.
-- **Alternatives rejected:** A container with `--network none` (the job needs the host toolchain); blocking for all users (breaks the runner agent and artifact upload).
-- **Consequences:** The integration and coverage jobs, which need Postgres, are not blocked. Only GitHub-hosted Linux runners are covered.
+- **Decision:** The CI unit-test job proves, then uses, an unprivileged user and network namespace (`unshare --user --map-root-user --net`) that has loopback up and no route out: a loopback connection works and `1.1.1.1:443` fails, then `make test` runs inside it. iptables was tried first and rejected: the runner has no passwordless sudo.
+- **Alternatives rejected:** iptables with an owner-match group (needs root); a container with `--network none` (the job needs the host toolchain).
+- **Consequences:** The integration and coverage jobs, which need Postgres, are not blocked. Only runners that allow unprivileged user namespaces are covered (ubuntu-24.04 does for unshare when AppArmor restriction is off; if it is on, the proof step fails visibly and GD-017 stays open).
 - **Status:** Accepted.
 
 ---

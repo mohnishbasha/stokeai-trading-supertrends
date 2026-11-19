@@ -1417,7 +1417,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-DEP-043 | `it_ci_lint_error_in_pr_fails_lint_and_typecheck_job` | CI guard | S0-T05 | Automated |
 | TS-DEP-044 | `it_ci_workflows_use_pull_request_not_pull_request_target_and_pinned_actions` | Workflow lint | A§9 | Automated |
 | TS-DEP-045 | `it_ci_openapi_drift_fails_when_docs_openapi_json_stale` | Drift | S3-T09 | Deferred |
-| TS-DEP-046 | `it_ci_test_step_runs_with_outbound_network_blocked` | No network in tests (iptables, ADR-071) | S1 checklist, S3-T11 | Automated |
+| TS-DEP-046 | `it_ci_test_step_runs_with_outbound_network_blocked` | No network in tests (network namespace, ADR-071) | S1 checklist, S3-T11 | Automated |
 | TS-DEP-101 | `unit_chart_version_equals_version_file` | Chart version and appVersion | S3-T11 | Automated |
 | TS-DEP-102 | `unit_chart_daily_run_cronjob_schedule_timezone_forbid` | `30 17 * * 1-5` America/New_York, Forbid, `supertrends run daily` | S3-T11 | Automated |
 | TS-DEP-103 | `unit_chart_daily_run_suspend_and_disable` | dailyRun.suspend and enabled | S3-T11 | Automated |
@@ -1446,7 +1446,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-DEP-126 | `unit_ci_kind_e2e_runs_whole_loop` | CI job `kind-e2e` | S3-T11 | Automated |
 | TS-DEP-127 | `unit_ci_kind_e2e_actions_pinned` | SHA-pinned actions, tool versions | S3-T11 | Automated |
 | TS-DEP-128 | `unit_ci_kind_e2e_diagnostics_on_failure` | Diagnostics step | S3-T11 | Automated |
-| TS-DEP-129 | `unit_ci_unit_tests_run_network_blocked` | OS-level block ordering and proof (see TS-DEP-046) | S3-T11 | Automated |
+| TS-DEP-129 | `unit_ci_unit_tests_run_network_blocked` | Network namespace ordering and proof (see TS-DEP-046) | S3-T11 | Automated |
 | TS-DEP-130 | `smoke_latest_recommendations_bounded_with_evidence` | At most 3 buys and 2 sells with evidence; skips on 404 or no run until S3-T07/T09 | S3-T11 | Automated (skips until the API exists) |
 
 ### 10.17 Security (TS-SEC)

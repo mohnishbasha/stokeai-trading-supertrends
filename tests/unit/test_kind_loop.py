@@ -136,16 +136,19 @@ def test_ci_kind_e2e_collects_diagnostics_on_failure() -> None:
 
 
 def test_ci_unit_tests_run_with_outbound_network_blocked_at_the_os_level() -> None:
-    """TS-DEP-046, TS-DEP-129: iptables and ip6tables allow loopback, drop the rest."""
+    """TS-DEP-046, TS-DEP-129: make test runs in a network namespace that has only loopback."""
     job = ci_jobs()["unit-tests"]
-    block = step_index(job, "iptables")
+    block = step_index(job, "1.1.1.1")
     run = job["steps"][block]["run"]
-    for tool in ("iptables", "ip6tables"):
-        assert f"{tool} -A OUTPUT -o lo -j ACCEPT" in run
-        assert f"{tool} -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT" in run
-        assert f"{tool} -A OUTPUT -m owner --gid-owner nonet -j REJECT" in run
-    assert "1.1.1.1" in run, "the step proves the block before the tests run"
-    runner = job["steps"][step_index(job, "-g nonet env")]["run"]
-    assert "make test" in runner, "the tests run in the blocked group"
-    assert block < step_index(job, "make test")
+    assert "unshare" in run
+    assert "--net" in run
+    assert "ip link set lo up" in run, "loopback stays open"
+    assert "create_connection" in run, "the step proves the block before the tests run"
+    runner = job["steps"][
+        step_index(
+            job, "unshare --user --map-root-user --net sh -c 'ip link set lo up && make test"
+        )
+    ]
+    assert runner["run"].count("unshare") == 1
+    assert block < job["steps"].index(runner)
     assert block > step_index(job, "npm --prefix ui run build")
