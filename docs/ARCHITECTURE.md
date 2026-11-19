@@ -560,9 +560,9 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 
 ### ADR-071: OS-level outbound network block for unit tests in CI (GD-003, GD-017)
 - **Context:** pytest-socket blocks sockets only inside the Python process; a dependency that spawns a subprocess could still reach the network.
-- **Decision:** The CI unit-test job proves, then uses, an unprivileged user and network namespace (`unshare --user --map-root-user --net`) that has loopback up and no route out: a loopback connection works and `1.1.1.1:443` fails, then `make test` runs inside it. iptables was tried first and rejected: the runner has no passwordless sudo.
-- **Alternatives rejected:** iptables with an owner-match group (needs root); a container with `--network none` (the job needs the host toolchain).
-- **Consequences:** The integration and coverage jobs, which need Postgres, are not blocked. Only runners that allow unprivileged user namespaces are covered (ubuntu-24.04 does for unshare when AppArmor restriction is off; if it is on, the proof step fails visibly and GD-017 stays open).
+- **Decision:** The CI unit-test job proves, then uses, a network namespace (`sudo unshare --net`) that has loopback up and no route out: a loopback connection works and `1.1.1.1:443` fails, then `make test` runs inside it as the runner user (`runuser -u $SUDO_USER -p`, environment preserved). Unprivileged `unshare --user` was tried and rejected: ubuntu-24.04 restricts unprivileged user namespaces (AppArmor), so the uid_map write fails.
+- **Alternatives rejected:** iptables with an owner-match group (`sudo -g nonet` is not permitted by the runner sudoers, which allows runas users only); a container with `--network none` (the job needs the host toolchain).
+- **Consequences:** The integration and coverage jobs, which need Postgres, are not blocked. Needs passwordless sudo, which GitHub-hosted runners have; on a runner without it the proof step fails visibly and GD-017 stays open.
 - **Status:** Accepted.
 
 ---

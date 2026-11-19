@@ -144,11 +144,10 @@ def test_ci_unit_tests_run_with_outbound_network_blocked_at_the_os_level() -> No
     assert "--net" in run
     assert "ip link set lo up" in run, "loopback stays open"
     assert "create_connection" in run, "the step proves the block before the tests run"
-    runner = job["steps"][
-        step_index(
-            job, "unshare --user --map-root-user --net sh -c 'ip link set lo up && make test"
-        )
-    ]
+    runner = job["steps"][step_index(job, "-- make test")]
+    assert "-- make test" in runner["run"], "the tests run inside the namespace"
+    assert "sudo" in runner["run"], "root only creates the namespace"
+    assert "-p" in runner["run"], "the runner environment is preserved"
     assert runner["run"].count("unshare") == 1
     assert block < job["steps"].index(runner)
     assert block > step_index(job, "npm --prefix ui run build")
