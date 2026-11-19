@@ -120,9 +120,7 @@ def test_ts_scr_154_multiplier_is_read_from_the_config(cfg: ScoringConfig) -> No
 
 
 @pytest.mark.parametrize("quality", ["intraday", "daily_estimate", "trades"])
-def test_ts_scr_155_quality_stored_and_shown_in_evidence(
-    ctx: FactorContext, quality: str
-) -> None:
+def test_ts_scr_155_quality_stored_and_shown_in_evidence(ctx: FactorContext, quality: str) -> None:
     """TS-SCR-155: a flow_quality item carries the snapshot quality and shows it in the reason."""
     result = FACTOR.compute(snap(0.1, 0.1, quality, sessions=7), ctx)
     item = {e.name: e for e in result.evidence}["flow_quality"]

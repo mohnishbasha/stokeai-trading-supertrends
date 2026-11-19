@@ -180,6 +180,8 @@ def test_unit_factor_stub_raises_not_implemented_naming_its_owner_task(
 ) -> None:
     """TS-SCR-307: each stub raises NotImplementedError whose message is the owning task."""
     assert OWNER_TASKS[factor_id] == task
+    if factor_id in {"volume_osc", "flow"}:
+        pytest.skip("implemented by S3-T04")
     with pytest.raises(NotImplementedError) as err:
         default_registry().get(factor_id).compute({}, ctx)
     assert str(err.value) == task
