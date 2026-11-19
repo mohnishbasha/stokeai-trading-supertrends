@@ -164,7 +164,7 @@ def test_config_hash_int_and_float_normalized(raw: dict[str, Any]) -> None:
 
 def test_config_hash_changes_with_scoring_version(raw: dict[str, Any]) -> None:
     bumped = copy.deepcopy(raw)
-    bumped["scoring"]["version"] = 2
+    bumped["scoring"]["version"] = raw["scoring"]["version"] + 1
     assert config_hash(parse_scoring_config(raw)) != config_hash(parse_scoring_config(bumped))
 
 

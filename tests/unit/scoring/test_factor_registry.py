@@ -170,9 +170,7 @@ def test_unit_factors_registry_is_complete_in_a_fresh_interpreter_without_other_
         "from supertrends.scoring.factors import default_registry;"
         "print(','.join(default_registry().ids()))"
     )
-    out = subprocess.run(  # noqa: S603 - fixed argv, no shell
-        [sys.executable, "-c", code], capture_output=True, text=True, check=True
-    )
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
     assert out.stdout.strip().split(",") == list(FACTOR_IDS)
 
 
