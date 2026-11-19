@@ -984,6 +984,7 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-SCR-426 | `unit_ripster_score_pullback_bearish_end_to_end_held_failed_and_stale` | Bearish held, failed and stale tests from hand-built bars | FR-333, S3-T14 | Automated |
 | TS-SCR-427 | `unit_ripster_score_on_computed_snapshot_reads_every_declared_input` | Factor on `compute_snapshot` output equals an independent evaluation of the rule lines | FR-333, S3-T14 | Automated |
 | TS-SCR-428 | `unit_ripster_score_registry_factor_is_the_module_factor` | Registry `ripster` is the implemented factor, not the stub | FR-333, S3-T14 | Automated |
+| TS-SCR-429 | `unit_ripster_score_null_cloud_edges_and_weekly_direction_stay_null_in_evidence` | Null edges and weekly direction stay null in the evidence | FR-333, FR-5xx, S3-T14 | Automated |
 | TS-SCR-430 | `unit_confidence_stack_penalty_rule_lines (opposing)` | `confidence_stack_penalty` is 10 when `rc_stack == -st_dir_d`, both signs (helper for TS-CMP-031) | FR-335, S3-T14 | Automated |
 | TS-SCR-431 | `unit_confidence_stack_penalty_rule_lines (same sign or zero)` | No deduction for same sign or `rc_stack` 0 (helper for TS-CMP-032) | FR-335, S3-T14 | Automated |
 | TS-SCR-432 | `unit_confidence_stack_penalty_reads_amount_from_config` | `ripster.confidence_stack_conflict_penalty` | FR-335, S3-T14 | Automated |

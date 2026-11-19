@@ -197,6 +197,15 @@ def test_unit_ripster_score_c5_not_defined_yet_scores_long_zero_and_is_degraded(
     assert "180/200" in next(e.reason for e in res.evidence if e.name == "long")
 
 
+def test_unit_ripster_score_null_cloud_edges_and_weekly_direction_stay_null_in_evidence() -> None:
+    """TS-SCR-429: a null 34/50 edge or weekly direction is reported as null, never as 0."""
+    res = _score(snapshot(bias=1.0, c3_top=None, c3_bot=None, dir_w=None))
+    by_name = {e.name: e for e in res.evidence}
+    for name in ("rc_c3_top", "rc_c3_bot", "rc_dir_w"):
+        assert by_name[name].value is None
+        assert "not available" in by_name[name].reason
+
+
 def test_unit_ripster_score_is_pure_and_does_not_mutate_the_snapshot() -> None:
     """TS-SCR-425: same snapshot in, same result out, snapshot untouched."""
     import copy  # noqa: PLC0415
