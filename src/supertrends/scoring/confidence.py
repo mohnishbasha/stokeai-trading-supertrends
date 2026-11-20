@@ -30,6 +30,7 @@ from typing import Any
 
 from supertrends.scoring.config import ScoringConfig
 from supertrends.scoring.factor import FactorResult, Quality, format_number, get_path
+from supertrends.scoring.ripster_rules import confidence_stack_penalty
 
 __all__ = [
     "ATR_RANK_PENALTY",
@@ -143,11 +144,12 @@ def compute_confidence(  # noqa: PLR0913
                 f"{format_number(st_d)}",
             )
         )
-    if rc_stack and st_d and rc_stack == -st_d:
+    stack_penalty = confidence_stack_penalty(snapshot, config)
+    if stack_penalty and rc_stack and st_d:  # non-zero only when both are set
         deductions.append(
             ConfidenceDeduction(
                 "ripster_stack_conflict",
-                float(config.ripster.confidence_stack_conflict_penalty),
+                stack_penalty,
                 f"Ripster 5/12 vs 34/50 stack {format_number(rc_stack)} opposes the daily "
                 f"Supertrend direction {format_number(st_d)}",
             )
