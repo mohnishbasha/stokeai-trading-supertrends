@@ -3,6 +3,7 @@
 """Factor registry and the twelve stub factors (S3-T01; ARCHITECTURE section 2, 13.2)."""
 
 import importlib
+import inspect
 import subprocess
 import sys
 from collections.abc import Mapping
@@ -174,15 +175,19 @@ def test_unit_factors_registry_is_complete_in_a_fresh_interpreter_without_other_
     assert out.stdout.strip().split(",") == list(FACTOR_IDS)
 
 
-@pytest.mark.parametrize(("factor_id", "task"), sorted(EXPECTED_OWNERS.items()))
-def test_unit_factor_stub_raises_not_implemented_naming_its_owner_task(
-    factor_id: str, task: str, ctx: FactorContext
-) -> None:
-    """TS-SCR-307: each stub raises NotImplementedError whose message is the owning task."""
-    assert OWNER_TASKS[factor_id] == task
-    with pytest.raises(NotImplementedError) as err:
-        default_registry().get(factor_id).compute({}, ctx)
-    assert str(err.value) == task
+# Every factor owner task has landed (S3-T02: factors 1 to 4; S3-T03: factors 5 to 8; S3-T04:
+# factors 9 and 10; S3-T14: Factor 12), so no stub raising NotImplementedError is left.
+IMPLEMENTED = set(EXPECTED_OWNERS)
+
+
+def test_unit_factor_stub_raises_not_implemented_naming_its_owner_task() -> None:
+    """TS-SCR-307: the owner map is complete and every owned factor is implemented (no stubs)."""
+    assert OWNER_TASKS == {**EXPECTED_OWNERS, "fundamentals": "S5-T04"}
+    assert set(FACTOR_IDS) - {"fundamentals"} == IMPLEMENTED
+    for factor_id in IMPLEMENTED:
+        assert "NotImplementedError" not in inspect.getsource(
+            type(default_registry().get(factor_id)).compute
+        )
 
 
 def test_unit_factor_fundamentals_stub_returns_missing_with_score_zero(ctx: FactorContext) -> None:
