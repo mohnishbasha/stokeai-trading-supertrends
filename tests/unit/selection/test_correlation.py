@@ -189,12 +189,13 @@ def test_unit_selection_correlation_undefined_never_skips() -> None:
 def test_unit_selection_return_correlation_rejects_bad_input() -> None:
     """TS-SEL-111: a non-positive or non-finite close and a window below 2 are ValueErrors."""
     good = closes_from_returns(random_returns(8))
+    last = max(good)  # only the last window + 1 shared dates are read
     bad = dict(good)
-    bad[START] = 0.0
+    bad[last] = 0.0
     with pytest.raises(ValueError, match="close"):
         return_correlation(bad, good, 60)
     nan = dict(good)
-    nan[START] = math.nan
+    nan[last] = math.nan
     with pytest.raises(ValueError, match="close"):
         return_correlation(good, nan, 60)
     with pytest.raises(ValueError, match="window"):

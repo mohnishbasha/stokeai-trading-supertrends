@@ -39,6 +39,7 @@ from tests.unit.selection.sel_support import (
     buy,
     cfg,
     independent_closes,
+    near_duplicate_closes,
     sell,
     with_selection,
 )
@@ -310,8 +311,12 @@ def test_unit_selection_nearest_miss_absent_when_full_or_nothing_missed() -> Non
     misses; with only those left the nearest miss is None."""
     full = _run([buy("A", 70.0), buy("B", 71.0), buy("C", 72.0), buy("D", 60.0)])
     assert full.nearest_miss["buy"] is None
-    only_stale = _run([buy("A", 70.0), sell("OLD", 30.0, quality="stale")])
-    assert only_stale.nearest_miss["sell"] is None
+    only_stale = _run([sell("OLD", 30.0, quality="stale")])
+    assert only_stale.nearest_miss == {"buy": None, "sell": None}
+    dup_closes = near_duplicate_closes(7, ["SPY", "VOO"])
+    dups = select([buy("SPY", 80.0), buy("VOO", 79.0)], dup_closes, cfg())
+    assert [p.ticker for p in dups.buys] == ["SPY"]
+    assert dups.nearest_miss["buy"] is None  # VOO qualified; it is not a miss
     assert nearest_miss([buy("Q", 70.0)], "buy", cfg()) is None
 
 
