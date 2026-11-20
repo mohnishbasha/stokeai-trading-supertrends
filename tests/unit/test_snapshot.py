@@ -59,7 +59,7 @@ def test_unit_snapshot_has_daily_weekly_levels_fib_divergence_flow_sections(
     """TS-IND-250: the document carries every section and the daily and weekly values."""
     doc = compute_snapshot(bundle, cfg, _date(bundle, N - 1))
     assert {"schema", "as_of", "bar_date", "bars", "config_hash"} <= doc.keys()
-    assert {"daily", "weekly", "levels", "fib", "divergences", "flow"} <= doc.keys()
+    assert {"daily", "weekly", "levels", "fib", "divergences", "flow", "ripster"} <= doc.keys()
     assert doc["config_hash"] == config_hash(cfg)
     assert doc["bars"] == N
     assert doc["bar_date"] == str(bundle.dates[N - 1])

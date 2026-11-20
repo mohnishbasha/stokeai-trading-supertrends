@@ -6,7 +6,7 @@
 # Any change to a weight, threshold, or formula bumps scoring.version (Spec Change Protocol, option B).
 
 scoring:
-  version: 1
+  version: 2
 min_history_bars: 250
 liquidity:
   min_avg_dollar_volume_20d: 20000000
@@ -69,25 +69,39 @@ flow:
 fundamentals:
   stale_days: 120
   stale_weight_multiplier: 0.5
+ripster:
+  source: hl2
+  ma_type: ema
+  clouds:
+    c1: [8, 9]
+    c2: [5, 12]
+    c3: [34, 50]
+    c4: [72, 89]
+    c5: [180, 200]
+  points: { bias: 30, trend: 20, stack: 20, mid: 10, long: 10, pullback: 10 }
+  pullback_lookback_bars: 3
+  confidence_stack_conflict_penalty: 10
+  selection_bias_gate: true
 weights:
   supertrend: 20
-  sma: 10
-  macd: 10
-  divergence: 10
-  mean_reversion: 8
-  fibonacci: 6
-  levels: 8
-  volatility: 5
+  sma: 7
+  macd: 8
+  divergence: 9
+  mean_reversion: 7
+  fibonacci: 5
+  levels: 7
+  volatility: 4
   volume_osc: 6
   flow: 9
   fundamentals: 8
+  ripster: 10
 regime:
   adx_length: 14
   trending_min: 25
   ranging_max: 20
   multipliers:
-    trending:     { supertrend: 1.25, sma: 1.20, macd: 1.10, divergence: 0.90, mean_reversion: 0.50, fibonacci: 1.00, levels: 0.90 }
-    ranging:      { supertrend: 0.70, sma: 0.70, macd: 0.90, divergence: 1.20, mean_reversion: 1.60, fibonacci: 1.10, levels: 1.40 }
+    trending:     { supertrend: 1.25, sma: 1.20, macd: 1.10, divergence: 0.90, mean_reversion: 0.50, fibonacci: 1.00, levels: 0.90, ripster: 1.20 }
+    ranging:      { supertrend: 0.70, sma: 0.70, macd: 0.90, divergence: 1.20, mean_reversion: 1.60, fibonacci: 1.10, levels: 1.40, ripster: 0.70 }
     transitional: {}
 events:
   earnings_window_days: 5
