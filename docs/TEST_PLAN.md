@@ -1260,6 +1260,7 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-NAR-110 | `unit_numeric_guard_number_matching_within_rounding_accepts` | Match within the narrative number's own rounding | FR-5xx, S3-T08 | Automated |
 | TS-NAR-111 | `unit_numeric_guard_percent_and_decimal_formats_extracted` | Extraction of percent, thousands comma, signs, 34/50 | FR-5xx, S3-T08 | Automated |
 | TS-NAR-112 | `unit_numeric_guard_collects_numbers_from_values_and_reason_strings` | Evidence pool: numeric leaves and numbers inside strings | FR-5xx, S3-T08 | Automated |
+| TS-NAR-113 | `unit_evidence_schema_is_shipped_as_package_data_and_matches_the_committed_file` | `evidence_schema()` reads the packaged schema | FR-5xx, S3-T08 | Automated |
 | TS-NAR-150 | `unit_evidence_ripster_block_has_exactly_the_spec_keys_with_integer_signs` | `ripster_evidence` keys and int/float types match the spec example | FR-5xx, S3-T14 | Automated |
 | TS-NAR-151 | `unit_evidence_ripster_block_bearish_values` | Negative signs and zero stack | FR-5xx, S3-T14 | Automated |
 | TS-NAR-152 | `unit_evidence_ripster_block_null_fields_stay_null_never_zero` | Nulls stay None | FR-5xx, S3-T14 | Automated |
@@ -1629,7 +1630,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | Regime and weights | TS-REG | 33 |
 | Composite and confidence | TS-CMP | 33 |
 | Selection | TS-SEL | 45 |
-| Justification and narrative | TS-NAR | 56 |
+| Justification and narrative | TS-NAR | 57 |
 | Track record | TS-TRK | 23 |
 | Backtest | TS-BKT | 14 |
 | API | TS-API | 35 |

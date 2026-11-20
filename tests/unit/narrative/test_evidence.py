@@ -12,7 +12,7 @@ import math
 import jsonschema
 import pytest
 
-from supertrends.narrative.evidence import RULE_BUY, RULE_SELL, build_evidence
+from supertrends.narrative.evidence import RULE_BUY, RULE_SELL, build_evidence, evidence_schema
 from supertrends.scoring.config import FACTOR_IDS, config_hash
 from supertrends.scoring.ripster_rules import ripster_evidence
 from supertrends.selection.ranking import AlsoQualified, Selection
@@ -184,3 +184,8 @@ def test_unit_evidence_build_rejects_results_that_do_not_match_the_card() -> Non
     short = {k: v for k, v in s.results.items() if k != "macd"}
     with pytest.raises(ValueError, match="macd"):
         build_evidence(s.pick, snapshot=s.snapshot, results=short, config=cfg(), trade_date=s.as_of)
+
+
+def test_unit_evidence_schema_is_shipped_as_package_data_and_matches_the_committed_file() -> None:
+    """TS-NAR-113."""
+    assert evidence_schema() == schema()
