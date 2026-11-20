@@ -551,6 +551,20 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** `indicators/ripster_clouds.py` is registered with the no-look-ahead harness; the parity test is skipped with a visible reason until the owner supplies the export (OWNER_CHECKLIST item 3).
 - **Status:** Accepted pending owner confirmation.
 
+### ADR-070: Minimal chart with a bundled Postgres for kind and a migration hook (PRD A-39)
+- **Context:** Sprint 3 needs a deployable loop (`kind-up image kind-load helm-install helm-test smoke`) before the full Sprint 8 chart (NetworkPolicy, ingress, signing). The run orchestrator and recommendations API ship in parallel tasks.
+- **Decision:** `deploy/helm/stokeai-supertrends` holds the API Deployment and Service, the daily-run CronJob (`30 17 * * 1-5`, `America/New_York`, `concurrencyPolicy: Forbid`, `supertrends run daily`), a migration Job as a pre-install/pre-upgrade hook, and a Helm test Pod. Default values expect an existing Secret and an external database; `values-kind.yaml` turns on a bundled Postgres StatefulSet (pinned by digest, the same as CI and Compose) whose Secret and Service are hooks ordered before the migration. The kind profile uses the fixture provider and template narratives, a kind-loaded image, and NodePort 30080 mapped to the host by `deploy/kind/cluster.yaml`. The smoke check on `/api/v1/recommendations/latest` skips until S3-T07 and S3-T09 land.
+- **Alternatives rejected:** A subchart for Postgres (a new dependency and image for a test-only database); Compose in CI instead of kind (does not exercise the chart).
+- **Consequences:** Sprint 8 extends this chart rather than replacing it; production never bundles Postgres.
+- **Status:** Accepted.
+
+### ADR-071: OS-level outbound network block for unit tests in CI (GD-003, GD-017)
+- **Context:** pytest-socket blocks sockets only inside the Python process; a dependency that spawns a subprocess could still reach the network.
+- **Decision:** The CI unit-test job proves, then uses, a network namespace (`sudo unshare --net`) that has loopback up and no route out: a loopback connection works and `1.1.1.1:443` fails, then `make test` runs inside it as the runner user (`runuser -u $SUDO_USER -p`, environment preserved). Unprivileged `unshare --user` was tried and rejected: ubuntu-24.04 restricts unprivileged user namespaces (AppArmor), so the uid_map write fails.
+- **Alternatives rejected:** iptables with an owner-match group (`sudo -g nonet` is not permitted by the runner sudoers, which allows runas users only); a container with `--network none` (the job needs the host toolchain).
+- **Consequences:** The integration and coverage jobs, which need Postgres, are not blocked. Needs passwordless sudo, which GitHub-hosted runners have; on a runner without it the proof step fails visibly and GD-017 stays open.
+- **Status:** Accepted.
+
 ---
 
 ## 4. Data Flows

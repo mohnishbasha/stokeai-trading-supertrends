@@ -1,0 +1,93 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright 2026 Serverless Ventures LLC
+#
+# Production-like defaults (ARCHITECTURE section 10.6). No secret values live in any values file:
+# credentials come from an existing Secret named by secrets.existingSecret.
+# Sprint 3 ships the minimal chart; Sprint 8 adds ingress, NetworkPolicy, HPA, PDB, metrics, schema.
+global:
+  imageRegistry: ""
+
+image:
+  repository: ghcr.io/mohnishbasha/stokeai-supertrends
+  tag: ""            # defaults to .Chart.AppVersion
+  digest: ""         # when set, wins over tag
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+
+replicaCount: 1
+env: prod
+
+api:
+  port: 8080
+  allowedHosts: ["localhost", "127.0.0.1"]
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: "1", memory: 512Mi }
+  terminationGracePeriodSeconds: 30
+
+service:
+  type: ClusterIP
+  port: 8080
+  nodePort: null
+
+dailyRun:
+  enabled: true
+  schedule: "30 17 * * 1-5"
+  timeZone: America/New_York
+  suspend: false
+  startingDeadlineSeconds: 3600
+  activeDeadlineSeconds: 3600
+  backoffLimit: 1
+  resources:
+    requests: { cpu: 500m, memory: 512Mi }
+    limits: { cpu: "2", memory: 1536Mi }
+
+migration:
+  backoffLimit: 6
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+providers:
+  market: massive          # fixture | massive | alternate
+  fundamentals: massive
+  massiveBaseUrl: https://api.massive.com
+  ratePerMinute: 5
+
+llm:
+  narrativeProvider: template   # template | openai_compatible
+  baseUrl: ""
+  model: ""
+  timeoutSeconds: 8
+
+secrets:
+  # Keys: SUPERTRENDS_API_TOKEN, SUPERTRENDS_MASSIVE_API_KEY, SUPERTRENDS_LLM_API_KEY, SUPERTRENDS_DATABASE_URL
+  existingSecret: supertrends-secrets
+
+postgres:
+  enabled: false           # bundled Postgres is for the kind and self-host profiles only
+  image:
+    repository: postgres
+    tag: 17-bookworm
+    digest: sha256:40865bc877a289da75963d97d72b59633f639fc5af7a4e856bfa3714cae5b536
+  database: supertrends
+  user: supertrends
+  storage: { size: 1Gi, storageClass: "" }
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: "1", memory: 1Gi }
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile: { type: RuntimeDefault }
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities: { drop: ["ALL"] }
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
