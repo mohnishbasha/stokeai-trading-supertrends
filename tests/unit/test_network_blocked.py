@@ -14,7 +14,9 @@ def test_unit_network_outbound_connection_attempt_fails_blocked() -> None:
 
 
 def test_unit_network_outbound_hostname_connection_attempt_fails_blocked() -> None:
-    with pytest.raises(SocketConnectBlockedError):
+    # pytest-socket blocks the connect; inside CI's network namespace (GD-003) name resolution
+    # fails first with socket.gaierror. Either way the hostname is unreachable.
+    with pytest.raises((SocketConnectBlockedError, socket.gaierror)):
         socket.create_connection(("example.com", 443), timeout=1)
 
 
