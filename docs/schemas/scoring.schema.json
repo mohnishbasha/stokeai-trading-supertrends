@@ -359,6 +359,192 @@
       "title": "Regime",
       "type": "object"
     },
+    "Ripster": {
+      "additionalProperties": false,
+      "properties": {
+        "clouds": {
+          "$ref": "#/$defs/RipsterCloudPairs"
+        },
+        "confidence_stack_conflict_penalty": {
+          "minimum": 0,
+          "title": "Confidence Stack Conflict Penalty",
+          "type": "number"
+        },
+        "ma_type": {
+          "const": "ema",
+          "title": "Ma Type",
+          "type": "string"
+        },
+        "points": {
+          "$ref": "#/$defs/RipsterPoints"
+        },
+        "pullback_lookback_bars": {
+          "exclusiveMinimum": 0,
+          "title": "Pullback Lookback Bars",
+          "type": "integer"
+        },
+        "selection_bias_gate": {
+          "title": "Selection Bias Gate",
+          "type": "boolean"
+        },
+        "source": {
+          "const": "hl2",
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "ma_type",
+        "clouds",
+        "points",
+        "pullback_lookback_bars",
+        "confidence_stack_conflict_penalty",
+        "selection_bias_gate"
+      ],
+      "title": "Ripster",
+      "type": "object"
+    },
+    "RipsterCloudPairs": {
+      "additionalProperties": false,
+      "description": "The five EMA clouds as (short, long) pairs (Factor 12).",
+      "properties": {
+        "c1": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          ],
+          "title": "C1",
+          "type": "array"
+        },
+        "c2": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          ],
+          "title": "C2",
+          "type": "array"
+        },
+        "c3": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          ],
+          "title": "C3",
+          "type": "array"
+        },
+        "c4": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          ],
+          "title": "C4",
+          "type": "array"
+        },
+        "c5": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          ],
+          "title": "C5",
+          "type": "array"
+        }
+      },
+      "required": [
+        "c1",
+        "c2",
+        "c3",
+        "c4",
+        "c5"
+      ],
+      "title": "RipsterCloudPairs",
+      "type": "object"
+    },
+    "RipsterPoints": {
+      "additionalProperties": false,
+      "properties": {
+        "bias": {
+          "minimum": 0,
+          "title": "Bias",
+          "type": "number"
+        },
+        "long": {
+          "minimum": 0,
+          "title": "Long",
+          "type": "number"
+        },
+        "mid": {
+          "minimum": 0,
+          "title": "Mid",
+          "type": "number"
+        },
+        "pullback": {
+          "minimum": 0,
+          "title": "Pullback",
+          "type": "number"
+        },
+        "stack": {
+          "minimum": 0,
+          "title": "Stack",
+          "type": "number"
+        },
+        "trend": {
+          "minimum": 0,
+          "title": "Trend",
+          "type": "number"
+        }
+      },
+      "required": [
+        "bias",
+        "trend",
+        "stack",
+        "mid",
+        "long",
+        "pullback"
+      ],
+      "title": "RipsterPoints",
+      "type": "object"
+    },
     "ScoringMeta": {
       "additionalProperties": false,
       "properties": {
@@ -664,6 +850,11 @@
           "title": "Mean Reversion",
           "type": "number"
         },
+        "ripster": {
+          "minimum": 0,
+          "title": "Ripster",
+          "type": "number"
+        },
         "sma": {
           "minimum": 0,
           "title": "Sma",
@@ -696,7 +887,8 @@
         "volatility",
         "volume_osc",
         "flow",
-        "fundamentals"
+        "fundamentals",
+        "ripster"
       ],
       "title": "Weights",
       "type": "object"
@@ -748,6 +940,9 @@
     "regime": {
       "$ref": "#/$defs/Regime"
     },
+    "ripster": {
+      "$ref": "#/$defs/Ripster"
+    },
     "scoring": {
       "$ref": "#/$defs/ScoringMeta"
     },
@@ -791,6 +986,7 @@
     "volume",
     "flow",
     "fundamentals",
+    "ripster",
     "weights",
     "regime",
     "events",

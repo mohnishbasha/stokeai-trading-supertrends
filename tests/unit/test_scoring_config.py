@@ -41,7 +41,7 @@ def _reverse_keys(value: Any) -> Any:
 def test_config_load_default_file_succeeds() -> None:
     cfg = load_scoring_config(DEFAULT_PATH)
     assert isinstance(cfg, ScoringConfig)
-    assert cfg.scoring.version == 1
+    assert cfg.scoring.version == 2
     assert cfg.supertrend.atr_length == 10
     assert cfg.supertrend.factor == 3.0
     assert sum(cfg.weights.as_dict().values()) == pytest.approx(100)
@@ -51,16 +51,17 @@ def test_config_default_matches_appendix_e_values() -> None:
     cfg = load_scoring_config(DEFAULT_PATH)
     assert cfg.weights.as_dict() == {
         "supertrend": 20,
-        "sma": 10,
-        "macd": 10,
-        "divergence": 10,
-        "mean_reversion": 8,
-        "fibonacci": 6,
-        "levels": 8,
-        "volatility": 5,
+        "sma": 7,
+        "macd": 8,
+        "divergence": 9,
+        "mean_reversion": 7,
+        "fibonacci": 5,
+        "levels": 7,
+        "volatility": 4,
         "volume_osc": 6,
         "flow": 9,
         "fundamentals": 8,
+        "ripster": 10,
     }
     assert cfg.thresholds.buy_display_min == 65
     assert cfg.thresholds.sell_display_max == 35
@@ -84,7 +85,7 @@ def test_config_unknown_nested_key_fails_naming_key(raw: dict[str, Any]) -> None
 
 def test_config_negative_weight_fails_naming_key(raw: dict[str, Any]) -> None:
     raw["weights"]["sma"] = -5
-    raw["weights"]["supertrend"] = 35
+    raw["weights"]["supertrend"] = 32
     with pytest.raises(ConfigError, match=r"weights\.sma"):
         parse_scoring_config(raw)
 
@@ -163,7 +164,7 @@ def test_config_hash_int_and_float_normalized(raw: dict[str, Any]) -> None:
 
 def test_config_hash_changes_with_scoring_version(raw: dict[str, Any]) -> None:
     bumped = copy.deepcopy(raw)
-    bumped["scoring"]["version"] = 2
+    bumped["scoring"]["version"] = raw["scoring"]["version"] + 1
     assert config_hash(parse_scoring_config(raw)) != config_hash(parse_scoring_config(bumped))
 
 
