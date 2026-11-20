@@ -1134,51 +1134,66 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SEL-001 | `unit_selection_buy_candidate_all_conditions_met_qualifies` | display, direction, confidence, quality, liquidity | FR-4xx | Deferred |
-| TS-SEL-002 | `unit_selection_buy_candidate_display_64_9_not_qualified` | Boundary of 65 | FR-4xx | Deferred |
-| TS-SEL-003 | `unit_selection_buy_candidate_display_65_0_qualifies` | Boundary | FR-4xx | Deferred |
-| TS-SEL-004 | `unit_selection_buy_candidate_st_dir_down_not_qualified` | Direction condition | FR-4xx | Deferred |
-| TS-SEL-005 | `unit_selection_buy_candidate_confidence_49_not_qualified` | Boundary of 50 | FR-4xx | Deferred |
-| TS-SEL-006 | `unit_selection_buy_candidate_confidence_50_qualifies` | Boundary | FR-4xx | Deferred |
-| TS-SEL-007 | `unit_selection_buy_candidate_stale_data_not_qualified` | Data quality | FR-4xx, US-020 | Deferred |
-| TS-SEL-008 | `unit_selection_buy_candidate_dollar_volume_below_20m_not_qualified` | Liquidity floor | FR-4xx | Deferred |
-| TS-SEL-009 | `unit_selection_buy_candidate_dollar_volume_exactly_20m_qualifies` | Boundary | FR-4xx | Deferred |
-| TS-SEL-010 | `unit_selection_buy_candidate_threshold_adjustments_raise_bar_to_75` | Uses per-ticker adjusted threshold | FR-4xx, FR-3xx | Deferred |
-| TS-SEL-011 | `unit_selection_sell_candidate_all_conditions_met_qualifies` | Mirror rules | FR-4xx | Deferred |
-| TS-SEL-012 | `unit_selection_sell_candidate_display_35_0_qualifies` | Boundary | FR-4xx | Deferred |
-| TS-SEL-013 | `unit_selection_sell_candidate_display_35_1_not_qualified` | Boundary | FR-4xx | Deferred |
-| TS-SEL-014 | `unit_selection_sell_candidate_st_dir_up_not_qualified` | Direction | FR-4xx | Deferred |
-| TS-SEL-015 | `unit_selection_sell_candidate_threshold_adjustments_lower_bar_to_25` | Adjusted threshold | FR-4xx | Deferred |
-| TS-SEL-016 | `unit_selection_rank_buys_by_display_descending` | Buy ranking | FR-4xx | Deferred |
-| TS-SEL-017 | `unit_selection_rank_sells_by_display_ascending` | Sell ranking | FR-4xx | Deferred |
-| TS-SEL-018 | `unit_selection_tiebreak_equal_display_higher_confidence_wins` | Tie-breaker 1 | FR-4xx | Deferred |
-| TS-SEL-019 | `unit_selection_tiebreak_equal_confidence_more_recent_flip_wins` | Tie-breaker 2 | FR-4xx | Deferred |
-| TS-SEL-020 | `unit_selection_tiebreak_equal_flip_higher_relative_volume_wins` | Tie-breaker 3 | FR-4xx | Deferred |
-| TS-SEL-021 | `unit_selection_tiebreak_all_equal_alphabetical_ticker_wins` | Tie-breaker 4 | FR-4xx | Deferred |
-| TS-SEL-022 | `prop_selection_rank_independent_of_input_order` | Shuffled input gives the same result | FR-4xx, NFR-002 | Deferred |
-| TS-SEL-023 | `unit_selection_publish_top_3_buys_and_top_2_sells_by_default` | Max counts | FR-4xx | Deferred |
-| TS-SEL-024 | `unit_selection_max_counts_read_from_config_selection_keys` | `max_buys`, `max_sells` | FR-4xx, A§13 | Deferred |
-| TS-SEL-025 | `unit_selection_only_one_qualifying_buy_result_has_one_buy_not_three` | Never pad | FR-4xx, S3-T06 | Deferred |
-| TS-SEL-026 | `unit_selection_zero_qualifying_sells_result_has_empty_sell_side` | Empty side is valid | FR-4xx | Deferred |
-| TS-SEL-027 | `unit_selection_empty_side_records_nearest_miss_with_reason` | Nearest-miss record | FR-4xx, S3-T06 | Deferred |
-| TS-SEL-028 | `unit_selection_correlation_guard_skips_candidate_above_0_9_with_selected_pick` | Guard | FR-4xx | Deferred |
-| TS-SEL-029 | `unit_selection_correlation_guard_exactly_0_9_is_not_skipped` | Boundary: "above 0.9" | FR-4xx | Deferred |
-| TS-SEL-030 | `unit_selection_correlation_guard_spy_voo_ivv_only_top_one_selected` | Three near-duplicates qualify | FR-4xx, S3-T06 | Deferred |
-| TS-SEL-031 | `unit_selection_correlation_guard_skipped_listed_as_also_qualified_with_duplicate_of` | "Also qualified" entry names the duplicated pick | FR-4xx | Deferred |
-| TS-SEL-032 | `unit_selection_correlation_guard_applied_per_side_not_across_sides` | Buy and sell sides independent | FR-4xx | Deferred |
-| TS-SEL-033 | `unit_selection_correlation_guard_uses_60_day_return_window` | Window | FR-4xx, A§13 | Deferred |
-| TS-SEL-034 | `unit_selection_correlation_guard_walks_past_skipped_to_fill_side` | Continue until full or exhausted | FR-4xx | Deferred |
-| TS-SEL-035 | `unit_selection_excluded_stale_and_insufficient_history_listed_with_reasons` | Exclusions never silently dropped | FR-4xx, US-020 | Deferred |
-| TS-SEL-036 | `unit_selection_stickiness_none_ticker_may_repeat_consecutive_days` | No stickiness rule | FR-4xx | Deferred |
-| TS-SEL-037 | `unit_selection_day_n_on_list_counter_counts_consecutive_days` | "day N on the list" | FR-4xx, FR-7xx | Deferred |
-| TS-SEL-038 | `unit_selection_sell_is_bearish_label_no_short_instruction_in_output` | No shorting, sizing, instrument advice in payload text | FR-4xx, FR-5xx | Deferred |
-| TS-SEL-039 | `unit_selection_buy_candidate_rc_bias_minus_1_not_qualified_reason_close_below_34_50_cloud` | Close below the 34/50 cloud rejects a buy and records the reason | FR-334, S3-T14 | Deferred |
-| TS-SEL-040 | `unit_selection_buy_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the buy gate | FR-334, S3-T14 | Deferred |
-| TS-SEL-041 | `unit_selection_buy_candidate_rc_bias_plus_1_passes_ripster_gate` | Close above the cloud passes the buy gate | FR-334 | Deferred |
-| TS-SEL-042 | `unit_selection_sell_candidate_rc_bias_plus_1_not_qualified_reason_close_above_34_50_cloud` | Close above the 34/50 cloud rejects a sell and records the reason | FR-334, S3-T14 | Deferred |
-| TS-SEL-043 | `unit_selection_sell_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the sell gate | FR-334, S3-T14 | Deferred |
-| TS-SEL-044 | `unit_selection_sell_candidate_rc_bias_minus_1_passes_ripster_gate` | Close below the cloud passes the sell gate | FR-334 | Deferred |
-| TS-SEL-045 | `unit_selection_ripster_gate_rejection_listed_in_nearest_miss_reasons` | A gate rejection appears as the nearest-miss reason when a side is empty | FR-334, FR-4xx | Deferred |
+| TS-SEL-001 | `unit_selection_buy_candidate_all_conditions_met_qualifies` | display, direction, confidence, quality, liquidity | FR-4xx | Automated |
+| TS-SEL-002 | `unit_selection_buy_candidate_display_64_9_not_qualified` | Boundary of 65 | FR-4xx | Automated |
+| TS-SEL-003 | `unit_selection_buy_candidate_display_65_0_qualifies` | Boundary | FR-4xx | Automated |
+| TS-SEL-004 | `unit_selection_buy_candidate_st_dir_down_not_qualified` | Direction condition | FR-4xx | Automated |
+| TS-SEL-005 | `unit_selection_buy_candidate_confidence_49_not_qualified` | Boundary of 50 | FR-4xx | Automated |
+| TS-SEL-006 | `unit_selection_buy_candidate_confidence_50_qualifies` | Boundary | FR-4xx | Automated |
+| TS-SEL-007 | `unit_selection_buy_candidate_stale_data_not_qualified` | Data quality | FR-4xx, US-020 | Automated |
+| TS-SEL-008 | `unit_selection_buy_candidate_dollar_volume_below_20m_not_qualified` | Liquidity floor | FR-4xx | Automated |
+| TS-SEL-009 | `unit_selection_buy_candidate_dollar_volume_exactly_20m_qualifies` | Boundary | FR-4xx | Automated |
+| TS-SEL-010 | `unit_selection_buy_candidate_threshold_adjustments_raise_bar_to_75` | Uses per-ticker adjusted threshold | FR-4xx, FR-3xx | Automated |
+| TS-SEL-011 | `unit_selection_sell_candidate_all_conditions_met_qualifies` | Mirror rules | FR-4xx | Automated |
+| TS-SEL-012 | `unit_selection_sell_candidate_display_35_0_qualifies` | Boundary | FR-4xx | Automated |
+| TS-SEL-013 | `unit_selection_sell_candidate_display_35_1_not_qualified` | Boundary | FR-4xx | Automated |
+| TS-SEL-014 | `unit_selection_sell_candidate_st_dir_up_not_qualified` | Direction | FR-4xx | Automated |
+| TS-SEL-015 | `unit_selection_sell_candidate_threshold_adjustments_lower_bar_to_25` | Adjusted threshold | FR-4xx | Automated |
+| TS-SEL-016 | `unit_selection_rank_buys_by_display_descending` | Buy ranking | FR-4xx | Automated |
+| TS-SEL-017 | `unit_selection_rank_sells_by_display_ascending` | Sell ranking | FR-4xx | Automated |
+| TS-SEL-018 | `unit_selection_tiebreak_equal_display_higher_confidence_wins` | Tie-breaker 1 | FR-4xx | Automated |
+| TS-SEL-019 | `unit_selection_tiebreak_equal_confidence_more_recent_flip_wins` | Tie-breaker 2 | FR-4xx | Automated |
+| TS-SEL-020 | `unit_selection_tiebreak_equal_flip_higher_relative_volume_wins` | Tie-breaker 3 | FR-4xx | Automated |
+| TS-SEL-021 | `unit_selection_tiebreak_all_equal_alphabetical_ticker_wins` | Tie-breaker 4 | FR-4xx | Automated |
+| TS-SEL-022 | `prop_selection_rank_independent_of_input_order` | Shuffled input gives the same result | FR-4xx, NFR-002 | Automated |
+| TS-SEL-023 | `unit_selection_publish_top_3_buys_and_top_2_sells_by_default` | Max counts | FR-4xx | Automated |
+| TS-SEL-024 | `unit_selection_max_counts_read_from_config_selection_keys` | `max_buys`, `max_sells` | FR-4xx, A§13 | Automated |
+| TS-SEL-025 | `unit_selection_only_one_qualifying_buy_result_has_one_buy_not_three` | Never pad | FR-4xx, S3-T06 | Automated |
+| TS-SEL-026 | `unit_selection_zero_qualifying_sells_result_has_empty_sell_side` | Empty side is valid | FR-4xx | Automated |
+| TS-SEL-027 | `unit_selection_empty_side_records_nearest_miss_with_reason` | Nearest-miss record | FR-4xx, S3-T06 | Automated |
+| TS-SEL-028 | `unit_selection_correlation_guard_skips_candidate_above_0_9_with_selected_pick` | Guard | FR-4xx | Automated |
+| TS-SEL-029 | `unit_selection_correlation_guard_exactly_0_9_is_not_skipped` | Boundary: "above 0.9" | FR-4xx | Automated |
+| TS-SEL-030 | `unit_selection_correlation_guard_spy_voo_ivv_only_top_one_selected` | Three near-duplicates qualify | FR-4xx, S3-T06 | Automated |
+| TS-SEL-031 | `unit_selection_correlation_guard_skipped_listed_as_also_qualified_with_duplicate_of` | "Also qualified" entry names the duplicated pick | FR-4xx | Automated |
+| TS-SEL-032 | `unit_selection_correlation_guard_applied_per_side_not_across_sides` | Buy and sell sides independent | FR-4xx | Automated |
+| TS-SEL-033 | `unit_selection_correlation_guard_uses_60_day_return_window` | Window | FR-4xx, A§13 | Automated |
+| TS-SEL-034 | `unit_selection_correlation_guard_walks_past_skipped_to_fill_side` | Continue until full or exhausted | FR-4xx | Automated |
+| TS-SEL-035 | `unit_selection_excluded_stale_and_insufficient_history_listed_with_reasons` | Exclusions never silently dropped | FR-4xx, US-020 | Automated |
+| TS-SEL-036 | `unit_selection_stickiness_none_ticker_may_repeat_consecutive_days` | No stickiness rule | FR-4xx | Automated |
+| TS-SEL-037 | `unit_selection_day_n_on_list_counter_counts_consecutive_days` | "day N on the list" | FR-4xx, FR-7xx | Automated |
+| TS-SEL-038 | `unit_selection_sell_is_bearish_label_no_short_instruction_in_output` | No shorting, sizing, instrument advice in payload text | FR-4xx, FR-5xx | Automated |
+| TS-SEL-039 | `unit_selection_buy_candidate_rc_bias_minus_1_not_qualified_reason_close_below_34_50_cloud` | Close below the 34/50 cloud rejects a buy and records the reason | FR-334, S3-T14 | Automated |
+| TS-SEL-040 | `unit_selection_buy_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the buy gate | FR-334, S3-T14 | Automated |
+| TS-SEL-041 | `unit_selection_buy_candidate_rc_bias_plus_1_passes_ripster_gate` | Close above the cloud passes the buy gate | FR-334 | Automated |
+| TS-SEL-042 | `unit_selection_sell_candidate_rc_bias_plus_1_not_qualified_reason_close_above_34_50_cloud` | Close above the 34/50 cloud rejects a sell and records the reason | FR-334, S3-T14 | Automated |
+| TS-SEL-043 | `unit_selection_sell_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the sell gate | FR-334, S3-T14 | Automated |
+| TS-SEL-044 | `unit_selection_sell_candidate_rc_bias_minus_1_passes_ripster_gate` | Close below the cloud passes the sell gate | FR-334 | Automated |
+| TS-SEL-045 | `unit_selection_ripster_gate_rejection_listed_in_nearest_miss_reasons` | A gate rejection appears as the nearest-miss reason when a side is empty | FR-334, FR-4xx | Automated |
+| TS-SEL-101 | `unit_selection_input_from_snapshot_reads_selection_input_paths` | The selection input builder reads exactly `SELECTION_INPUT_PATHS`; a null or NaN value (warm-up) becomes None, never 0; an absent path is a KeyError naming it | FR-4xx, ADR-065, S3-T06 | Automated |
+| TS-SEL-102 | `unit_selection_candidate_reasons_in_rule_order` | Every failing rule is listed, in the order of the selection rules | FR-4xx, ADR-050 | Automated |
+| TS-SEL-103 | `unit_selection_candidate_null_inputs_fail_with_reasons` | Null direction, bias or dollar volume fail closed with a reason; an unrounded confidence prints with up to two decimals | FR-4xx, ADR-065 | Automated |
+| TS-SEL-104 | `unit_selection_rc_bias_gate_disabled_and_unknown_side` | `ripster.selection_bias_gate: false` passes everything; a bad side, empty ticker, or a negative or non-finite threshold shift raises | FR-334, S3-T06 | Automated |
+| TS-SEL-105 | `unit_selection_nearest_miss_score_clearing_threshold_is_distance_zero` | Nearest-miss distance is the score shortfall against the adjusted threshold, 0 when the score clears it and another rule failed; ties use the side's ranking | FR-4xx, ADR-065 | Automated |
+| TS-SEL-106 | `unit_selection_nearest_miss_absent_when_full_or_nothing_missed` | A full side has no nearest miss; stale and guard-skipped candidates are not misses | FR-4xx, ADR-065 | Automated |
+| TS-SEL-107 | `unit_selection_correlation_undefined_never_skips` | Too little shared history, a flat series, or no closes has no correlation and is never "above 0.9" | FR-4xx, A-33 | Automated |
+| TS-SEL-108 | `unit_selection_return_correlation_uses_shared_dates_only` | Simple returns and Pearson on hand values; only dates both series share are used | FR-4xx, A-33 | Automated |
+| TS-SEL-109 | `unit_selection_duplicate_names_most_correlated_pick` | A guard-skipped candidate correlated with two picks is listed under the more correlated one | FR-4xx, ADR-065 | Automated |
+| TS-SEL-110 | `unit_selection_candidates_after_side_full_not_walked` | The walk stops when the side is full, so a later duplicate is not listed as also qualified | FR-4xx, ADR-065 | Automated |
+| TS-SEL-111 | `unit_selection_select_rejects_duplicate_tickers_and_bad_side` | The same ticker twice, an unknown side, a non-positive or non-finite close, or a window below 2 is a ValueError | FR-4xx | Automated |
+| TS-SEL-112 | `unit_selection_select_is_pure_and_deterministic` | Same inputs give an equal result; inputs are not mutated | FR-4xx, NFR-002 | Automated |
+| TS-SEL-113 | `unit_selection_import_boundary_no_api_cli_mcp_data_runs` | Selection imports nothing from api, cli, mcp, data, runs or narrative | A§2 | Automated |
+| TS-SEL-114 | `unit_selection_null_tie_breakers_rank_last` | An unknown flip age or relative volume ranks after any known one | FR-4xx, ADR-065 | Automated |
+| TS-SEL-115 | `unit_selection_max_zero_publishes_nothing_and_no_nearest_miss` | `max_buys: 0` publishes no buys; the side is full, so no nearest miss | FR-4xx, A§13 | Automated |
 | TS-SEL-150 | `unit_selection_bias_gate_rule_lines (buy, close below cloud)` | `selection_bias_gate(snapshot, 'buy')` rejects with reason `close below the 34/50 cloud` (helper for TS-SEL-039) | FR-334, S3-T14 | Automated |
 | TS-SEL-151 | `unit_selection_bias_gate_rule_lines (buy, inside)` | Buy passes inside the cloud (helper for TS-SEL-040) | FR-334, S3-T14 | Automated |
 | TS-SEL-152 | `unit_selection_bias_gate_rule_lines (buy, above)` | Buy passes above the cloud (helper for TS-SEL-041) | FR-334, S3-T14 | Automated |

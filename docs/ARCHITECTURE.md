@@ -586,6 +586,13 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** Selection reads `card.display_score`, `card.confidence` and `card.band`; the evidence task reads `contributions`, `weights`, `weight_detail`, `deductions` and `adjustments`. Threshold shifts (fundamentals, market regime) and the market regime classification are not part of this task (S5-T05).
 - **Status:** Accepted pending owner confirmation.
 
+### ADR-065: Selection details beyond the spec (PRD A-33)
+- **Context:** The selection rules (BUILD_PROMPT, "Selection rules") and ADR-050 leave open how a warm-up null affects a candidate rule, how far a candidate is from the threshold when its score clears it but another rule failed, which pick an "also qualified" entry duplicates when it correlates with two picks, how unknown tie-breakers rank, and what an undefined correlation means.
+- **Decision:** `selection.candidates.selection_input_from_snapshot` builds a frozen `SelectionInput` from a score card and the snapshot, reading exactly `scoring.factor.SELECTION_INPUT_PATHS`; a null or NaN becomes None, never 0, and an absent path is a `KeyError`. A None direction, bias or dollar volume fails its rule with a reason (fail closed). The `rc_bias` gate delegates to `scoring.ripster_rules.selection_bias_gate` (S3-T14). The nearest-miss distance is the score shortfall against the adjusted threshold, 0 when the score clears it; stale and guard-skipped tickers are never misses; ties use the side's ranking. A guard-skipped candidate is listed under the pick it correlates with most. The walk stops when the side is full, so later candidates are not tested. A None `bars_since_flip` or relative volume ranks after any known value. Correlation follows PRD A-33. `selection.ranking.select` is pure and deterministic.
+- **Alternatives rejected:** Treating a null as 0 (passes the inside-the-cloud gate on a ticker with no cloud yet); measuring the nearest miss across all failed rules (needs a scale per rule); skipping on undefined correlation (drops new listings for no evidence).
+- **Consequences:** The orchestrator (S3-T07) builds `SelectionInput`s and passes the closes for the correlation window; the evidence and API layers read `also_qualified` (with the duplicated pick in `duplicates` and its correlation) and `nearest_miss` from the selection result.
+- **Status:** Accepted pending owner confirmation.
+
 ---
 
 ## 4. Data Flows

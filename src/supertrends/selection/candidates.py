@@ -23,6 +23,12 @@ from typing import Any, Literal
 from supertrends.scoring.composite import ScoreCard
 from supertrends.scoring.config import ScoringConfig
 from supertrends.scoring.factor import SELECTION_INPUT_PATHS, get_path
+from supertrends.scoring.ripster_rules import (
+    REJECT_BUY_REASON,
+    REJECT_SELL_REASON,
+    REJECT_UNAVAILABLE_REASON,
+    selection_bias_gate,
+)
 
 __all__ = [
     "REASON_DIRECTION_UNAVAILABLE",
@@ -48,10 +54,10 @@ __all__ = [
 Side = Literal["buy", "sell"]
 SIDES: tuple[Side, ...] = ("buy", "sell")
 
-# Same wording as the S3-T14 helper `scoring.ripster_rules.selection_bias_gate`.
-REASON_RC_BUY = "close below the 34/50 cloud"
-REASON_RC_SELL = "close above the 34/50 cloud"
-REASON_RC_UNAVAILABLE = "34/50 cloud bias not available"
+# The wording of the S3-T14 helper `scoring.ripster_rules.selection_bias_gate`.
+REASON_RC_BUY = REJECT_BUY_REASON
+REASON_RC_SELL = REJECT_SELL_REASON
+REASON_RC_UNAVAILABLE = REJECT_UNAVAILABLE_REASON
 REASON_STALE = "data quality is stale"
 REASON_LIQUIDITY = "liquidity below the floor"
 REASON_DIRECTION_UNAVAILABLE = "Supertrend direction not available"
@@ -209,20 +215,9 @@ def rc_bias_gate(rc_bias: int | None, side: Side, config: ScoringConfig) -> tupl
     above (`rc_bias > 0`); inside the cloud (0) passes both. With `ripster.selection_bias_gate`
     false everything passes; an undefined bias fails closed. Raises ValueError for another side.
 
-    Kept self-contained with the same verdicts and wording as the S3-T14 helper
-    `scoring.ripster_rules.selection_bias_gate`; at integration this can delegate to it with
-    `{"ripster": {"bias": rc_bias}}` as the snapshot.
+    Delegates to the S3-T14 helper `scoring.ripster_rules.selection_bias_gate`.
     """
-    side = check_side(side)
-    if not config.ripster.selection_bias_gate:
-        return True, None
-    if rc_bias is None:
-        return False, REASON_RC_UNAVAILABLE
-    if side == "buy" and rc_bias < 0:
-        return False, REASON_RC_BUY
-    if side == "sell" and rc_bias > 0:
-        return False, REASON_RC_SELL
-    return True, None
+    return selection_bias_gate({"ripster": {"bias": rc_bias}}, check_side(side), config)
 
 
 def _side_check(entry: SelectionInput, side: Side, config: ScoringConfig) -> SideCheck:

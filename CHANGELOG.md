@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Selection (S3-T06): candidate rules with every failing reason in rule order and the Ripster 34/50 cloud gate on both sides, ranking with the full tie-breaker chain, `max_buys` and `max_sells` without padding, the 60-day return correlation guard per side with an also-qualified list, the nearest miss per side, and the days-on-list counter (ADR-065, PRD A-33).
 - Composite and confidence (S3-T05): `scoring.regime` (ADX regimes and the multiplier table), `scoring.weights` (base x regime x earnings x quality, missing factors dropped and renormalized to 100), `scoring.composite` (composite, contributions, display score, bands, and the frozen `ScoreCard` from `score_ticker`), and `scoring.confidence` (agreement and the five deductions, with reasons) (ADR-064).
 - Factor 12, Ripster EMA Clouds (S3-T14): the score rules (bias, trend, stacking, mid, long, pullback), and the pure helpers `confidence_stack_penalty`, `selection_bias_gate` and `ripster_evidence` in `scoring/ripster_rules.py` for the composite, selection and evidence tasks (ADR-063, PRD A-31).
 - Factors 9 and 10 (S3-T04): `volume_osc` (vo part by the sign of the 5-bar return plus the OBV slope part) and `flow` (order flow delta plus CMF; `daily_estimate` quality returns the 0.6 weight multiplier from config; accumulation and distribution days as evidence) (PRD A-30).
