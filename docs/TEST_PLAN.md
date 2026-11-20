@@ -762,74 +762,81 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-010 | `unit_supertrend_score_daily_up_base_plus_60` | `base = +60` when `st_dir_d == +1` | FR-3xx | Deferred |
-| TS-SCR-011 | `unit_supertrend_score_daily_down_base_minus_60` | `base = -60` when down | FR-3xx | Deferred |
-| TS-SCR-012 | `unit_supertrend_score_weekly_agrees_up_adds_25` | Weekly agreement, up | FR-3xx | Deferred |
-| TS-SCR-013 | `unit_supertrend_score_weekly_agrees_down_adds_minus_25` | Weekly agreement, down (`+25 * st_dir_d`) | FR-3xx | Deferred |
-| TS-SCR-014 | `unit_supertrend_score_weekly_conflict_up_adds_minus_15` | Weekly conflict, daily up | FR-3xx | Deferred |
-| TS-SCR-015 | `unit_supertrend_score_weekly_conflict_down_adds_plus_15` | Weekly conflict, daily down (`-15 * -1`) | FR-3xx | Deferred |
-| TS-SCR-016 | `unit_supertrend_score_flip_5_bars_ago_adds_freshness_15` | Boundary `bars_since_flip == 5` | FR-3xx, S3-T02 | Deferred |
-| TS-SCR-017 | `unit_supertrend_score_flip_6_bars_ago_adds_freshness_0` | Boundary `bars_since_flip == 6` | FR-3xx, S3-T02 | Deferred |
-| TS-SCR-018 | `unit_supertrend_score_fresh_flip_down_adds_minus_15` | Freshness sign follows direction | FR-3xx | Deferred |
-| TS-SCR-019 | `unit_supertrend_score_distance_4_0_atr_no_stretch_penalty` | Boundary: `|distance| == 4` is not over 4 | FR-3xx | Deferred |
-| TS-SCR-020 | `unit_supertrend_score_distance_4_01_atr_up_subtracts_10` | Stretch penalty, up | FR-3xx | Deferred |
-| TS-SCR-021 | `unit_supertrend_score_distance_4_01_atr_down_adds_10` | Stretch penalty, down | FR-3xx | Deferred |
-| TS-SCR-022 | `unit_supertrend_score_max_case_up_fresh_weekly_agree_equals_100` | 60 + 25 + 15 = 100, clipped | FR-3xx | Deferred |
-| TS-SCR-023 | `unit_supertrend_score_max_case_down_equals_minus_100` | Mirror extreme | FR-3xx | Deferred |
-| TS-SCR-024 | `unit_supertrend_score_evidence_includes_line_direction_bars_since_flip_distance` | Evidence content | FR-3xx, FR-5xx | Deferred |
+| TS-SCR-010 | `unit_supertrend_score_daily_up_base_plus_60` | `base = +60` when `st_dir_d == +1` | FR-3xx | Automated |
+| TS-SCR-011 | `unit_supertrend_score_daily_down_base_minus_60` | `base = -60` when down | FR-3xx | Automated |
+| TS-SCR-012 | `unit_supertrend_score_weekly_agrees_up_adds_25` | Weekly agreement, up | FR-3xx | Automated |
+| TS-SCR-013 | `unit_supertrend_score_weekly_agrees_down_adds_minus_25` | Weekly agreement, down (`+25 * st_dir_d`) | FR-3xx | Automated |
+| TS-SCR-014 | `unit_supertrend_score_weekly_conflict_up_adds_minus_15` | Weekly conflict, daily up | FR-3xx | Automated |
+| TS-SCR-015 | `unit_supertrend_score_weekly_conflict_down_adds_plus_15` | Weekly conflict, daily down (`-15 * -1`) | FR-3xx | Automated |
+| TS-SCR-016 | `unit_supertrend_score_flip_5_bars_ago_adds_freshness_15` | Boundary `bars_since_flip == 5` | FR-3xx, S3-T02 | Automated |
+| TS-SCR-017 | `unit_supertrend_score_flip_6_bars_ago_adds_freshness_0` | Boundary `bars_since_flip == 6` | FR-3xx, S3-T02 | Automated |
+| TS-SCR-018 | `unit_supertrend_score_fresh_flip_down_adds_minus_15` | Freshness sign follows direction | FR-3xx | Automated |
+| TS-SCR-019 | `unit_supertrend_score_distance_4_0_atr_no_stretch_penalty` | Boundary: `|distance| == 4` is not over 4 | FR-3xx | Automated |
+| TS-SCR-020 | `unit_supertrend_score_distance_4_01_atr_up_subtracts_10` | Stretch penalty, up | FR-3xx | Automated |
+| TS-SCR-021 | `unit_supertrend_score_distance_4_01_atr_down_adds_10` | Stretch penalty, down | FR-3xx | Automated |
+| TS-SCR-022 | `unit_supertrend_score_max_case_up_fresh_weekly_agree_equals_100` | 60 + 25 + 15 = 100, clipped | FR-3xx | Automated |
+| TS-SCR-023 | `unit_supertrend_score_max_case_down_equals_minus_100` | Mirror extreme | FR-3xx | Automated |
+| TS-SCR-024 | `unit_supertrend_score_evidence_includes_line_direction_bars_since_flip_distance` | Evidence content | FR-3xx, FR-5xx | Automated |
 
 #### 10.4.2 Factor 2: SMA analysis
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-030 | `unit_sma_score_close_above_sma200_adds_30` | +30 | FR-3xx | Deferred |
-| TS-SCR-031 | `unit_sma_score_close_below_sma200_subtracts_30` | -30 | FR-3xx | Deferred |
-| TS-SCR-032 | `unit_sma_score_sma50_above_sma200_adds_25` | +25 | FR-3xx | Deferred |
-| TS-SCR-033 | `unit_sma_score_sma50_below_sma200_subtracts_25` | -25 | FR-3xx | Deferred |
-| TS-SCR-034 | `unit_sma_score_close_above_sma50_adds_20` | +20 | FR-3xx | Deferred |
-| TS-SCR-035 | `unit_sma_score_close_below_sma50_subtracts_20` | -20 | FR-3xx | Deferred |
-| TS-SCR-036 | `unit_sma_score_sma20_slope_5_bars_positive_adds_15` | +15 | FR-3xx | Deferred |
-| TS-SCR-037 | `unit_sma_score_sma20_slope_5_bars_negative_subtracts_15` | -15 | FR-3xx | Deferred |
-| TS-SCR-038 | `unit_sma_score_golden_cross_10_bars_ago_adds_10` | Boundary: cross exactly 10 bars ago counts | FR-3xx | Deferred |
-| TS-SCR-039 | `unit_sma_score_golden_cross_11_bars_ago_adds_0` | Boundary: 11 bars does not count | FR-3xx | Deferred |
-| TS-SCR-040 | `unit_sma_score_death_cross_within_10_bars_subtracts_10` | -10 | FR-3xx | Deferred |
-| TS-SCR-041 | `unit_sma_score_all_bullish_sum_100_clipped` | 30 + 25 + 20 + 15 + 10 = 100 | FR-3xx | Deferred |
-| TS-SCR-042 | `unit_sma_score_all_bearish_sum_minus_100_clipped` | Mirror | FR-3xx | Deferred |
-| TS-SCR-043 | `unit_sma_score_close_equal_to_sma_adds_neither_sign` | Tie handling is defined and tested (equal is neither above nor below) | FR-3xx | Deferred |
+| TS-SCR-030 | `unit_sma_score_close_above_sma200_adds_30` | +30 | FR-3xx | Automated |
+| TS-SCR-031 | `unit_sma_score_close_below_sma200_subtracts_30` | -30 | FR-3xx | Automated |
+| TS-SCR-032 | `unit_sma_score_sma50_above_sma200_adds_25` | +25 | FR-3xx | Automated |
+| TS-SCR-033 | `unit_sma_score_sma50_below_sma200_subtracts_25` | -25 | FR-3xx | Automated |
+| TS-SCR-034 | `unit_sma_score_close_above_sma50_adds_20` | +20 | FR-3xx | Automated |
+| TS-SCR-035 | `unit_sma_score_close_below_sma50_subtracts_20` | -20 | FR-3xx | Automated |
+| TS-SCR-036 | `unit_sma_score_sma20_slope_5_bars_positive_adds_15` | +15 | FR-3xx | Automated |
+| TS-SCR-037 | `unit_sma_score_sma20_slope_5_bars_negative_subtracts_15` | -15 | FR-3xx | Automated |
+| TS-SCR-038 | `unit_sma_score_golden_cross_10_bars_ago_adds_10` | Boundary: a cross on the 10th bar of the window (as-of bar is bar 1) counts (A-26) | FR-3xx | Automated |
+| TS-SCR-039 | `unit_sma_score_golden_cross_11_bars_ago_adds_0` | Boundary: the 11th bar does not count (A-26) | FR-3xx | Automated |
+| TS-SCR-040 | `unit_sma_score_death_cross_within_10_bars_subtracts_10` | -10 | FR-3xx | Automated |
+| TS-SCR-041 | `unit_sma_score_all_bullish_sum_100_clipped` | 30 + 25 + 20 + 15 + 10 = 100 | FR-3xx | Automated |
+| TS-SCR-042 | `unit_sma_score_all_bearish_sum_minus_100_clipped` | Mirror | FR-3xx | Automated |
+| TS-SCR-043 | `unit_sma_score_close_equal_to_sma_adds_neither_sign` | Tie handling is defined and tested (equal is neither above nor below) | FR-3xx | Automated |
 
 #### 10.4.3 Factor 3: MACD
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-050 | `unit_macd_score_line_above_signal_adds_35` | +35 | FR-3xx | Deferred |
-| TS-SCR-051 | `unit_macd_score_line_below_signal_subtracts_35` | -35 | FR-3xx | Deferred |
-| TS-SCR-052 | `unit_macd_score_line_above_zero_adds_25` | +25 | FR-3xx | Deferred |
-| TS-SCR-053 | `unit_macd_score_line_below_zero_subtracts_25` | -25 | FR-3xx | Deferred |
-| TS-SCR-054 | `unit_macd_score_hist_rising_3_bars_adds_25` | +25 | FR-3xx | Deferred |
-| TS-SCR-055 | `unit_macd_score_hist_rising_2_bars_adds_0` | Boundary: 2 consecutive is not 3 | FR-3xx | Deferred |
-| TS-SCR-056 | `unit_macd_score_hist_falling_3_bars_subtracts_25` | -25 | FR-3xx | Deferred |
-| TS-SCR-057 | `unit_macd_score_bullish_cross_3_bars_ago_adds_15` | Boundary: within last 3 bars | FR-3xx | Deferred |
-| TS-SCR-058 | `unit_macd_score_bullish_cross_4_bars_ago_adds_0` | Boundary: 4 bars | FR-3xx | Deferred |
-| TS-SCR-059 | `unit_macd_score_bearish_cross_within_3_bars_subtracts_15` | -15 | FR-3xx | Deferred |
-| TS-SCR-060 | `unit_macd_score_weekly_disagrees_with_daily_multiplies_by_0_75` | Weekly line versus signal disagrees | FR-3xx | Deferred |
-| TS-SCR-061 | `unit_macd_score_weekly_agrees_with_daily_multiplier_1_0` | No change when weekly agrees | FR-3xx | Deferred |
-| TS-SCR-062 | `unit_macd_score_weekly_macd_reported_as_evidence` | Weekly MACD values in evidence | FR-3xx | Deferred |
+| TS-SCR-050 | `unit_macd_score_line_above_signal_adds_35` | +35 | FR-3xx | Automated |
+| TS-SCR-051 | `unit_macd_score_line_below_signal_subtracts_35` | -35 | FR-3xx | Automated |
+| TS-SCR-052 | `unit_macd_score_line_above_zero_adds_25` | +25 | FR-3xx | Automated |
+| TS-SCR-053 | `unit_macd_score_line_below_zero_subtracts_25` | -25 | FR-3xx | Automated |
+| TS-SCR-054 | `unit_macd_score_hist_rising_3_bars_adds_25` | +25 | FR-3xx | Automated |
+| TS-SCR-055 | `unit_macd_score_hist_rising_2_bars_adds_0` | Boundary: 2 consecutive is not 3 | FR-3xx | Automated |
+| TS-SCR-056 | `unit_macd_score_hist_falling_3_bars_subtracts_25` | -25 | FR-3xx | Automated |
+| TS-SCR-057 | `unit_macd_score_bullish_cross_3_bars_ago_adds_15` | Boundary: a cross on the 3rd bar of the window counts (A-26) | FR-3xx | Automated |
+| TS-SCR-058 | `unit_macd_score_bullish_cross_4_bars_ago_adds_0` | Boundary: the 4th bar does not count (A-26) | FR-3xx | Automated |
+| TS-SCR-059 | `unit_macd_score_bearish_cross_within_3_bars_subtracts_15` | -15 | FR-3xx | Automated |
+| TS-SCR-060 | `unit_macd_score_weekly_disagrees_with_daily_multiplies_by_0_75` | Weekly line versus signal disagrees | FR-3xx | Automated |
+| TS-SCR-061 | `unit_macd_score_weekly_agrees_with_daily_multiplier_1_0` | No change when weekly agrees | FR-3xx | Automated |
+| TS-SCR-062 | `unit_macd_score_weekly_macd_reported_as_evidence` | Weekly MACD values in evidence | FR-3xx | Automated |
 
 #### 10.4.4 Factor 4: Divergences
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-070 | `unit_divergence_score_regular_bullish_rsi_adds_40` | RSI +40 | FR-3xx | Deferred |
-| TS-SCR-071 | `unit_divergence_score_regular_bearish_rsi_subtracts_40` | RSI -40 | FR-3xx | Deferred |
-| TS-SCR-072 | `unit_divergence_score_regular_bullish_macd_hist_adds_35` | MACD hist +35 | FR-3xx | Deferred |
-| TS-SCR-073 | `unit_divergence_score_regular_bullish_obv_adds_25` | OBV +25 | FR-3xx | Deferred |
-| TS-SCR-074 | `unit_divergence_score_hidden_bullish_rsi_counts_half_value_20` | Hidden counts at half | FR-3xx | Deferred |
-| TS-SCR-075 | `unit_divergence_score_hidden_bearish_obv_counts_half_value_minus_12_5` | Hidden bearish OBV | FR-3xx | Deferred |
-| TS-SCR-076 | `unit_divergence_score_same_type_on_weekly_multiplies_total_by_1_25` | Weekly confirmation multiplier | FR-3xx | Deferred |
-| TS-SCR-077 | `unit_divergence_score_sum_over_100_clipped_to_100` | Clip | FR-3xx | Deferred |
-| TS-SCR-078 | `unit_divergence_score_none_present_returns_zero` | No divergence | FR-3xx | Deferred |
-| TS-SCR-079 | `unit_divergence_score_opposite_signs_net_out` | Bullish RSI and bearish OBV combine | FR-3xx | Deferred |
-| TS-SCR-080 | `unit_divergence_score_second_pivot_16_bars_ago_not_counted` | Recency boundary 15 versus 16 | FR-3xx | Deferred |
+| TS-SCR-070 | `unit_divergence_score_regular_bullish_rsi_adds_40` | RSI +40 | FR-3xx | Automated |
+| TS-SCR-071 | `unit_divergence_score_regular_bearish_rsi_subtracts_40` | RSI -40 | FR-3xx | Automated |
+| TS-SCR-072 | `unit_divergence_score_regular_bullish_macd_hist_adds_35` | MACD hist +35 | FR-3xx | Automated |
+| TS-SCR-073 | `unit_divergence_score_regular_bullish_obv_adds_25` | OBV +25 | FR-3xx | Automated |
+| TS-SCR-074 | `unit_divergence_score_hidden_bullish_rsi_counts_half_value_20` | Hidden counts at half | FR-3xx | Automated |
+| TS-SCR-075 | `unit_divergence_score_hidden_bearish_obv_counts_half_value_minus_12_5` | Hidden bearish OBV | FR-3xx | Automated |
+| TS-SCR-076 | `unit_divergence_score_same_type_on_weekly_multiplies_total_by_1_25` | Weekly confirmation multiplier | FR-3xx | Automated |
+| TS-SCR-077 | `unit_divergence_score_sum_over_100_clipped_to_100` | Clip | FR-3xx | Automated |
+| TS-SCR-078 | `unit_divergence_score_none_present_returns_zero` | No divergence | FR-3xx | Automated |
+| TS-SCR-079 | `unit_divergence_score_opposite_signs_net_out` | Bullish RSI and bearish OBV combine | FR-3xx | Automated |
+| TS-SCR-080 | `unit_divergence_score_second_pivot_16_bars_ago_not_counted` | Recency boundary: `t - p2` of 15 counts, 16 does not (A-26) | FR-3xx | Automated |
+| TS-SCR-320 | `unit_sma_cross_boundary_10_bars_on_real_snapshots` | Real snapshots against an independent SMA50/SMA200 cross finder: counts on the 10th bar of the window, not the 11th | FR-3xx, S3-T02 | Automated |
+| TS-SCR-321 | `unit_macd_cross_boundary_3_bars_on_real_snapshots` | Real snapshots against an independent MACD loop: counts on the 3rd bar, not the 4th | FR-3xx, S3-T02 | Automated |
+| TS-SCR-322 | `unit_macd_histogram_run_boundary_2_and_3_bars_on_real_snapshots` | Histogram up or down 2 bars gives no run; 3 bars gives +1 or -1 (independent loop) | FR-3xx, S3-T02 | Automated |
+| TS-SCR-323 | `unit_factors_1_to_4_on_real_snapshots_are_in_range_with_evidence` | Factors 1 to 4 on real snapshots: `ok`, in range, evidence with reasons, deterministic | FR-3xx, FR-5xx, S3-T02 | Automated |
+| TS-SCR-324 | `unit_factors_1_to_4_on_a_short_history_degrade_or_go_missing_not_raise` | 40 bars: SMA missing (score 0), MACD degraded without weekly; no exception | FR-3xx, A-27, S3-T02 | Automated |
+| TS-SCR-325 | `unit_factor_missing_and_degraded_inputs_follow_the_policy` | Null warm-up inputs give `missing`; null weekly, slope, ATR or distance give `degraded` with that part 0 (supertrend, sma, macd rows) | A-27, S3-T02 | Automated |
+| TS-SCR-326 | `unit_factor_thresholds_and_points_come_from_the_config` | Freshness, stretch, cross windows, weekly multipliers, divergence points, hidden and weekly multipliers and recency are read from the config | FR-3xx, S3-T02 | Automated |
 
 #### 10.4.5 Factor 5: Mean reversion
 
