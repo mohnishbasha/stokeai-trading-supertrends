@@ -174,14 +174,30 @@ def test_unit_factors_registry_is_complete_in_a_fresh_interpreter_without_other_
     assert out.stdout.strip().split(",") == list(FACTOR_IDS)
 
 
-@pytest.mark.parametrize(("factor_id", "task"), sorted(EXPECTED_OWNERS.items()))
+# Factors whose owner task has landed; they have their own rule tests (S3-T02: factors 1 to 4;
+# S3-T03: factors 5 to 8; S3-T04: factors 9 and 10).
+IMPLEMENTED = {
+    "supertrend",
+    "sma",
+    "macd",
+    "divergence",
+    "mean_reversion",
+    "fibonacci",
+    "levels",
+    "volatility",
+    "volume_osc",
+    "flow",
+}
+
+
+@pytest.mark.parametrize(
+    ("factor_id", "task"), sorted(kv for kv in EXPECTED_OWNERS.items() if kv[0] not in IMPLEMENTED)
+)
 def test_unit_factor_stub_raises_not_implemented_naming_its_owner_task(
     factor_id: str, task: str, ctx: FactorContext
 ) -> None:
     """TS-SCR-307: each stub raises NotImplementedError whose message is the owning task."""
     assert OWNER_TASKS[factor_id] == task
-    if factor_id in {"volume_osc", "flow"}:
-        pytest.skip("implemented by S3-T04")
     with pytest.raises(NotImplementedError) as err:
         default_registry().get(factor_id).compute({}, ctx)
     assert str(err.value) == task
