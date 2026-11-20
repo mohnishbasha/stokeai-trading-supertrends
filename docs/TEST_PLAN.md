@@ -1209,15 +1209,15 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-NAR-001 | `unit_evidence_build_document_validates_against_committed_json_schema` | Evidence JSON schema | FR-5xx, S3-T08 | Deferred |
-| TS-NAR-002 | `unit_evidence_build_contributions_sum_to_composite` | `contribution = weight*score/100` | FR-5xx | Deferred |
-| TS-NAR-003 | `unit_evidence_build_includes_invalidation_level_and_rule` | Supertrend line and rule text | FR-5xx, US-007 | Deferred |
-| TS-NAR-004 | `unit_evidence_build_includes_levels_support_resistance_fib_next_target` | Levels block | FR-5xx | Deferred |
-| TS-NAR-005 | `unit_evidence_build_includes_adjustments_flags_and_config_hash` | Adjustments, flags, `config_hash` | FR-5xx | Deferred |
-| TS-NAR-006 | `unit_narrative_template_leads_with_supertrend_and_34_50_cloud_bias_then_top_two_then_opposing_then_invalidation` | Order: Supertrend state and the 34/50 cloud bias first | FR-5xx | Deferred |
-| TS-NAR-007 | `unit_narrative_template_every_number_appears_in_evidence_document` | Template passes its own guard | FR-5xx, S3-T08 | Deferred |
-| TS-NAR-008 | `unit_narrative_template_three_to_five_sentences` | Length | FR-5xx | Deferred |
-| TS-NAR-009 | `unit_narrative_template_no_opposing_factor_omits_line_without_inventing` | No factor argues against | FR-5xx | Deferred |
+| TS-NAR-001 | `unit_evidence_build_document_validates_against_committed_json_schema` | Evidence JSON schema | FR-5xx, S3-T08 | Automated |
+| TS-NAR-002 | `unit_evidence_build_contributions_sum_to_composite` | `contribution = weight*score/100` | FR-5xx | Automated |
+| TS-NAR-003 | `unit_evidence_build_includes_invalidation_level_and_rule` | Supertrend line and rule text | FR-5xx, US-007 | Automated |
+| TS-NAR-004 | `unit_evidence_build_includes_levels_support_resistance_fib_next_target` | Levels block | FR-5xx | Automated |
+| TS-NAR-005 | `unit_evidence_build_includes_adjustments_flags_and_config_hash` | Adjustments, flags, `config_hash` | FR-5xx | Automated |
+| TS-NAR-006 | `unit_narrative_template_leads_with_supertrend_and_34_50_cloud_bias_then_top_two_then_opposing_then_invalidation` | Order: Supertrend state and the 34/50 cloud bias first | FR-5xx | Automated |
+| TS-NAR-007 | `unit_narrative_template_every_number_appears_in_evidence_document` | Template passes its own guard | FR-5xx, S3-T08 | Automated |
+| TS-NAR-008 | `unit_narrative_template_three_to_five_sentences` | Length | FR-5xx | Automated |
+| TS-NAR-009 | `unit_narrative_template_no_opposing_factor_omits_line_without_inventing` | No factor argues against | FR-5xx | Automated |
 | TS-NAR-010 | `unit_narrative_prompt_token_budget_all_30_fixtures_at_most_900_tokens` | NFR-012 prompt side | NFR-012, S5-T01 | Deferred |
 | TS-NAR-011 | `unit_narrative_request_max_completion_tokens_220_enforced` | Completion cap in the request | NFR-012 | Deferred |
 | TS-NAR-012 | `unit_narrative_prompt_over_budget_fixture_fails_ci_check` | The check can fail | NFR-012 | Deferred |
@@ -1247,7 +1247,19 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-NAR-036 | `it_narrative_mock_endpoint_run_publishes_llm_narratives` | Sprint 5 checklist item | FR-5xx | Deferred |
 | TS-NAR-037 | `unit_narrative_prompt_versioned_in_prompts_directory_version_in_record` | Prompt versioning | FR-5xx | Deferred |
 | TS-NAR-038 | `unit_narrative_disclaimer_present_in_every_narrative_payload` | Disclaimer attached | FR-5xx, A§9 | Deferred |
-| TS-NAR-039 | `unit_evidence_build_includes_ripster_block_and_levels_cloud_34_50` | `ripster` block and `levels.cloud_34_50` validate against the committed schema | FR-5xx, S3-T14 | Deferred |
+| TS-NAR-039 | `unit_evidence_build_includes_ripster_block_and_levels_cloud_34_50` | `ripster` block and `levels.cloud_34_50` validate against the committed schema | FR-5xx, S3-T14 | Automated |
+| TS-NAR-101 | `unit_evidence_build_is_json_serializable_pure_and_deterministic` | Plain JSON, no NaN, no argument mutation, same input same bytes | FR-5xx, S3-T08 | Automated |
+| TS-NAR-102 | `unit_evidence_build_flags_event_risk_degraded_and_estimated_flow` | Flags from the card, factor qualities and data quality | FR-5xx, S3-T08 | Automated |
+| TS-NAR-103 | `unit_evidence_build_embeds_duplicates_from_also_qualified` | Guard-skipped candidates listed under the pick they duplicate; market regime passed through | FR-5xx, S3-T08 | Automated |
+| TS-NAR-104 | `unit_evidence_schema_rejects_missing_and_unknown_fields` | The schema can fail: missing key, extra key, bad side | FR-5xx, S3-T08 | Automated |
+| TS-NAR-105 | `unit_evidence_build_rejects_results_that_do_not_match_the_card` | Results must cover exactly the twelve factors | FR-5xx, S3-T08 | Automated |
+| TS-NAR-106 | `unit_narrative_template_sell_is_bearish_label_without_trade_advice` | Sell reads bearish; no shorting, sizing, options, leverage, "will" | FR-5xx, S3-T08 | Automated |
+| TS-NAR-107 | `unit_narrative_template_is_deterministic_and_reports_numbers` | Same document, same result; numbers and sentence count reported | FR-5xx, S3-T08 | Automated |
+| TS-NAR-108 | `unit_narrative_template_handles_missing_line_and_unknown_cloud_bias` | Nulls never print None or an invented number | FR-5xx, S3-T08 | Automated |
+| TS-NAR-109 | `unit_numeric_guard_number_not_in_evidence_rejects` | Template-side check of the guard (S5-T02 hardens it) | FR-5xx, S3-T08 | Automated |
+| TS-NAR-110 | `unit_numeric_guard_number_matching_within_rounding_accepts` | Match within the narrative number's own rounding | FR-5xx, S3-T08 | Automated |
+| TS-NAR-111 | `unit_numeric_guard_percent_and_decimal_formats_extracted` | Extraction of percent, thousands comma, signs, 34/50 | FR-5xx, S3-T08 | Automated |
+| TS-NAR-112 | `unit_numeric_guard_collects_numbers_from_values_and_reason_strings` | Evidence pool: numeric leaves and numbers inside strings | FR-5xx, S3-T08 | Automated |
 | TS-NAR-150 | `unit_evidence_ripster_block_has_exactly_the_spec_keys_with_integer_signs` | `ripster_evidence` keys and int/float types match the spec example | FR-5xx, S3-T14 | Automated |
 | TS-NAR-151 | `unit_evidence_ripster_block_bearish_values` | Negative signs and zero stack | FR-5xx, S3-T14 | Automated |
 | TS-NAR-152 | `unit_evidence_ripster_block_null_fields_stay_null_never_zero` | Nulls stay None | FR-5xx, S3-T14 | Automated |
@@ -1617,7 +1629,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | Regime and weights | TS-REG | 33 |
 | Composite and confidence | TS-CMP | 33 |
 | Selection | TS-SEL | 45 |
-| Justification and narrative | TS-NAR | 39 |
+| Justification and narrative | TS-NAR | 56 |
 | Track record | TS-TRK | 23 |
 | Backtest | TS-BKT | 14 |
 | API | TS-API | 35 |

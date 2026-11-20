@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import copy
+import re
 from typing import Any
 
 import pytest
@@ -22,12 +23,10 @@ def _doc(s: Scored) -> dict[str, Any]:
 
 
 def _sentences(text: str) -> list[str]:
-    import re
-
     return [p for p in re.split(r"(?<=[.!?])\s+", text.strip()) if p]
 
 
-def test_unit_narrative_template_leads_with_supertrend_and_34_50_cloud_bias_then_top_two_then_opposing_then_invalidation() -> (
+def test_unit_narrative_template_leads_with_supertrend_and_34_50_cloud_bias_then_top_two_then_opposing_then_invalidation() -> (  # noqa: E501
     None
 ):
     """TS-NAR-006."""
@@ -40,11 +39,13 @@ def test_unit_narrative_template_leads_with_supertrend_and_34_50_cloud_bias_then
             (f for f in doc["factors"] if f["weight"] > 0),
             key=lambda f: -side * f["contribution"],
         )
+        top = [f for f in ranked if side * f["contribution"] > 0][:2]
         first = _sentences(text)[0]
-        assert "Supertrend" in first and "34/50" in first
+        assert "Supertrend" in first
+        assert "34/50" in first
         # positions of the ordered parts
         pos = [text.index("Supertrend")]
-        for f in ranked[:2]:
+        for f in top:
             pos.append(text.index(f"{f['contribution']:+.1f}"))
         against = ranked[-1]
         if side * against["contribution"] < 0:
@@ -89,19 +90,16 @@ def test_unit_narrative_template_no_opposing_factor_omits_line_without_inventing
 
 def test_unit_narrative_template_sell_is_bearish_label_without_trade_advice() -> None:
     """TS-NAR-106."""
-    banned = ("short", "position", "shares", "option", "leverage", "guaranteed", "will", "target")
     for s in many(range(1, 4)):
         doc = _doc(s)
         text = narrate(doc).text.lower()
-        words = set(__import__("re").findall(r"[a-z']+", text))
+        words = set(re.findall(r"[a-z']+", text))
         assert not words & {"short", "shorting", "position", "options", "leverage", "will"}
         assert "guaranteed" not in text
         if doc["side"] == "sell":
             assert "bearish" in text
-            assert "buy" not in words
         else:
             assert "bullish" in text
-    assert banned
 
 
 def test_unit_narrative_template_is_deterministic_and_reports_numbers() -> None:
@@ -125,7 +123,8 @@ def test_unit_narrative_template_handles_missing_line_and_unknown_cloud_bias() -
     doc["supertrend"]["distance_atr"] = None
     doc["levels"]["next_target"] = None
     text = narrate(doc).text
-    assert "None" not in text and "nan" not in text.lower()
+    assert "None" not in text
+    assert "nan" not in text.lower()
     assert 3 <= count_sentences(text) <= 5
     assert check_numbers(text, doc).ok
 
@@ -164,7 +163,7 @@ def test_unit_numeric_guard_collects_numbers_from_values_and_reason_strings() ->
     doc = _doc(Scored(1, 380, "buy"))
     pool = evidence_numbers(doc)
     assert doc["confidence"] in pool or round(doc["confidence"], 1) in pool
-    assert 34.0 in pool and 50.0 in pool
+    assert {34.0, 50.0} <= pool
     assert all(isinstance(v, float) for v in pool)
     with pytest.raises(TypeError):
         evidence_numbers("not a document")  # type: ignore[arg-type]

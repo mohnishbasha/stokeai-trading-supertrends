@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 import json
 import math
 
@@ -14,6 +15,7 @@ import pytest
 from supertrends.narrative.evidence import RULE_BUY, RULE_SELL, build_evidence
 from supertrends.scoring.config import FACTOR_IDS, config_hash
 from supertrends.scoring.ripster_rules import ripster_evidence
+from supertrends.selection.ranking import AlsoQualified, Selection
 from tests.unit.narrative.nar_support import Scored, cfg, many, schema
 
 
@@ -122,8 +124,6 @@ def test_unit_evidence_build_flags_event_risk_degraded_and_estimated_flow() -> N
     assert flags <= {"event_risk", "degraded_data", "estimated_order_flow", "data_stale"}
     s = Scored(1, 380, "buy")
     entry = s.pick.entry
-    import dataclasses
-
     stale = dataclasses.replace(s.pick, entry=dataclasses.replace(entry, data_quality="stale"))
     doc = build_evidence(
         stale,
@@ -138,10 +138,6 @@ def test_unit_evidence_build_flags_event_risk_degraded_and_estimated_flow() -> N
 
 def test_unit_evidence_build_embeds_duplicates_from_also_qualified() -> None:
     """TS-NAR-103."""
-    import dataclasses
-
-    from supertrends.selection.ranking import AlsoQualified, Selection
-
     s = Scored(1, 380, "buy")
     other = Scored(2, 380, "buy")
     aq = AlsoQualified(
@@ -187,6 +183,4 @@ def test_unit_evidence_build_rejects_results_that_do_not_match_the_card() -> Non
     s = Scored(1, 380, "buy")
     short = {k: v for k, v in s.results.items() if k != "macd"}
     with pytest.raises(ValueError, match="macd"):
-        build_evidence(
-            s.pick, snapshot=s.snapshot, results=short, config=cfg(), trade_date=s.as_of
-        )
+        build_evidence(s.pick, snapshot=s.snapshot, results=short, config=cfg(), trade_date=s.as_of)
