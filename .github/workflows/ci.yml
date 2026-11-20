@@ -94,7 +94,8 @@ jobs:
         # OS-level block, not only pytest-socket: the test step runs in a new network namespace
         # (sudo unshare --net) that has a loopback interface and no route out, then drops back
         # to the runner user so uv's environment and file ownership are unchanged. Root is only
-        # needed to create the namespace; GitHub-hosted runners have passwordless sudo.
+        # needed to create the namespace; GitHub-hosted runners have passwordless sudo. sudo
+        # resets PATH to secure_path, so the test step passes the runner PATH (with uv) through env.
         run: |
           sudo -E unshare --net sh -c 'ip link set lo up && exec runuser -u "$SUDO_USER" -p -- python3 - <<PY
           import socket
@@ -110,7 +111,7 @@ jobs:
               raise SystemExit("outbound network is still open")
           PY'
       - name: make test (no network namespace)
-        run: sudo -E unshare --net sh -c 'ip link set lo up && exec runuser -u "$SUDO_USER" -p -- make test'
+        run: sudo -E env "PATH=$PATH" unshare --net sh -c 'ip link set lo up && exec runuser -u "$SUDO_USER" -p -- make test'
 
   kind-e2e:
     # Real image, kind cluster, chart install with the kind profile, Helm tests, smoke suite.
