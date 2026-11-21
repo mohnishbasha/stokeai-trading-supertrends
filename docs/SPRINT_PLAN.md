@@ -642,8 +642,8 @@ Implement the scoring rules exactly as specified, each with table-driven tests c
 Same standard as S3-T02.
 
 **Acceptance criteria:**
-- [ ] one test row per rule line
-- [ ] the mirror rules for down legs are covered
+- [x] one test row per rule line (TS-SCR-090 to 099, 100 to 114, 364 to 367 and the levels and volatility rows in TEST_PLAN 10.4.6 to 10.4.8, one parametrized test each)
+- [x] the mirror rules for down legs are covered (TS-SCR-108 to 112 Fibonacci and the levels and volatility mirrors)
 
 ### S3-T04: Factors 9 and 10 (Volume oscillator, Buy / sell volume)
 
