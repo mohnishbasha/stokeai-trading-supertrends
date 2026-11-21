@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright 2026 Serverless Ventures LLC
-"""Scheduled daily run: the market-closed exit and `make run-daily` (TS-OPS-011, 131 to 140; S3-T10).
+"""Scheduled daily run, market-closed exit, `make run-daily` (TS-OPS-011, 131 to 140; S3-T10).
 
 A fake clock stands in for the CronJob firing at 17:30 New York on a holiday. The database is
 never touched, so the same scenario against real Postgres lives in tests/integration.
@@ -112,8 +112,8 @@ def test_unit_runs_daily_before_close_still_exits_3_not_market_closed(
 
 @pytest.mark.skipif(shutil.which("make") is None, reason="make not installed")
 def test_unit_runs_make_run_daily_calls_the_cli_locally_or_in_compose() -> None:
-    local = subprocess.run(  # noqa: S603
-        ["make", "-n", "run-daily"],  # noqa: S607
+    local = subprocess.run(
+        ["make", "-n", "run-daily"],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -122,8 +122,8 @@ def test_unit_runs_make_run_daily_calls_the_cli_locally_or_in_compose() -> None:
     ).stdout
     assert "supertrends run daily" in local
     assert "docker compose" not in local
-    compose = subprocess.run(  # noqa: S603
-        ["make", "-n", "run-daily"],  # noqa: S607
+    compose = subprocess.run(
+        ["make", "-n", "run-daily"],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -137,8 +137,8 @@ def test_unit_runs_make_run_daily_calls_the_cli_locally_or_in_compose() -> None:
 
 @pytest.mark.skipif(shutil.which("make") is None, reason="make not installed")
 def test_unit_runs_make_run_daily_passes_date() -> None:
-    out = subprocess.run(  # noqa: S603
-        ["make", "-n", "run-daily", "DATE=2026-11-13"],  # noqa: S607
+    out = subprocess.run(
+        ["make", "-n", "run-daily", "DATE=2026-11-13"],
         cwd=ROOT,
         capture_output=True,
         text=True,
