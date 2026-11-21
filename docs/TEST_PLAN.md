@@ -1499,18 +1499,18 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-OPS-001 | `it_runs_state_machine_transitions_queued_to_published_in_order` | Each state persisted | FR-9xx, A§8 | Deferred |
+| TS-OPS-001 | `it_runs_state_machine_transitions_queued_to_published_in_order` | Each state persisted | FR-9xx, A§8 | Automated |
 | TS-OPS-002 | `unit_runs_state_machine_illegal_transition_raises` | Cannot skip or reverse | FR-9xx, A§8 | Deferred |
-| TS-OPS-003 | `it_runs_publish_writes_recommendations_and_published_at_in_single_transaction` | Atomic publication | NFR-006, A§8 | Deferred |
-| TS-OPS-004 | `it_runs_publish_midrun_process_kill_previous_run_stays_latest` | Kill during narrating | NFR-006, S3-T07 | Deferred |
+| TS-OPS-003 | `it_runs_publish_writes_recommendations_and_published_at_in_single_transaction` | Atomic publication | NFR-006, A§8 | Automated |
+| TS-OPS-004 | `it_runs_publish_midrun_process_kill_previous_run_stays_latest` | Kill during narrating | NFR-006, S3-T07 | Automated |
 | TS-OPS-005 | `it_runs_publish_failure_during_commit_rolls_back_all_rows` | No partial publication | NFR-006, S9-T02 | Deferred |
-| TS-OPS-006 | `it_runs_failed_run_leaves_previous_published_run_as_latest` | Failed state | NFR-006 | Deferred |
-| TS-OPS-007 | `it_runs_two_simultaneous_triggers_one_run_one_already_running_response` | Advisory lock | FR-9xx, S3-T07 | Deferred |
-| TS-OPS-008 | `it_runs_rerun_same_date_new_row_supersedes_only_on_success_both_stored` | Supersession | FR-9xx, S3-T07 | Deferred |
-| TS-OPS-009 | `it_runs_rerun_same_date_failing_keeps_old_run_published` | Failed rerun | NFR-006 | Deferred |
-| TS-OPS-010 | `it_runs_summary_lists_stale_and_insufficient_history_exclusions_with_reasons` | Exclusions | FR-9xx, US-020 | Deferred |
+| TS-OPS-006 | `it_runs_failed_run_leaves_previous_published_run_as_latest` | Failed state | NFR-006 | Automated |
+| TS-OPS-007 | `it_runs_two_simultaneous_triggers_one_run_one_already_running_response` | Advisory lock | FR-9xx, S3-T07 | Automated |
+| TS-OPS-008 | `it_runs_rerun_same_date_new_row_supersedes_only_on_success_both_stored` | Supersession | FR-9xx, S3-T07 | Automated |
+| TS-OPS-009 | `it_runs_rerun_same_date_failing_keeps_old_run_published` | Failed rerun | NFR-006 | Automated |
+| TS-OPS-010 | `it_runs_summary_lists_stale_and_insufficient_history_exclusions_with_reasons` | Exclusions | FR-9xx, US-020 | Automated |
 | TS-OPS-011 | `unit_runs_daily_non_trading_day_exits_0_publishes_nothing` | Holiday | FR-9xx, S3-T10 | Deferred |
-| TS-OPS-012 | `it_runs_daily_twice_from_clean_databases_identical_picks` | Determinism (live path) | NFR-002, S3 checklist | Deferred |
+| TS-OPS-012 | `it_runs_daily_twice_from_clean_databases_identical_picks` | Determinism (live path) | NFR-002, S3 checklist | Automated |
 | TS-OPS-013 | `it_runs_fault_provider_429_storm_ends_in_correct_publish_or_clean_failure` | Resilience | S9-T02 | Deferred |
 | TS-OPS-014 | `it_runs_fault_provider_outage_midrun_clean_failure_previous_latest` | Resilience | S9-T02 | Deferred |
 | TS-OPS-015 | `it_runs_fault_database_restart_midrun_clean_failure_previous_latest` | Resilience | S9-T02 | Deferred |
@@ -1529,6 +1529,8 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-OPS-028 | `it_ops_full_daily_run_200_symbols_under_10_minutes_on_stoke` | NFR-001 end to end | NFR-001 | Skipped: requires the Stoke cluster; manual: time a staging run with the 200-symbol seed and record in `docs/PERFORMANCE.md` |
 | TS-OPS-029 | `it_ops_cronjob_template_sets_concurrency_forbid_and_time_zone_new_york` | CronJob | FR-9xx, S3-T10 | Deferred |
 | TS-OPS-030 | `it_ops_structured_logs_include_request_id_run_id_and_no_secret_values` | Logging | A§11, NFR-009 | Deferred |
+| TS-OPS-101 | `it_runs_publish_stores_full_evidence_and_template_narrative` | Every stored evidence document validates against the committed schema; each pick has a `template` narrative naming its ticker | FR-901, ADR-069 | Automated |
+| TS-OPS-102 | `it_runs_narrator_failure_falls_back_to_minimal_and_run_publishes` | A narrator that raises does not fail the run; picks keep the minimal evidence and the summary counts errors | ADR-069, A-37 | Automated |
 
 ### 10.16 Deployment and packaging (TS-DEP)
 

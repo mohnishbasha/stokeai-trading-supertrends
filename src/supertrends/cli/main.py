@@ -3,7 +3,7 @@
 """`supertrends` entry point (ARCHITECTURE section 6, CLI).
 
 Sprint 0 commands: --version, serve, healthcheck, config show | validate | export-schema.
-Sprint 1 adds db migrate, ingest, and watchlist. Sprint 3 adds run daily (ADR-066).
+Sprint 1 adds db migrate, ingest, and watchlist. Sprint 3 adds run daily (ADR-068).
 """
 
 import json

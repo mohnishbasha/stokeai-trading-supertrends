@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright 2026 Serverless Ventures LLC
-"""Run states and the allowed edges (FR-901, ARCHITECTURE section 8.1, ADR-066).
+"""Run states and the allowed edges (FR-901, ARCHITECTURE section 8.1, ADR-068).
 
 The database trigger `supertrends_runs_guard` enforces the same edges; this module lets the
 orchestrator refuse an illegal move before it reaches the database.
