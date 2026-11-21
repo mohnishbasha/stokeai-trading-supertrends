@@ -93,6 +93,13 @@ def test_chart_daily_run_cronjob_schedule_timezone_forbid(profile: str | None) -
     assert pod["restartPolicy"] == "Never"
 
 
+def test_chart_daily_run_cronjob_calls_the_no_date_command() -> None:
+    """TS-OPS-138: the scheduled call has no `--date`, so a holiday resolves to market closed."""
+    cron = one(render("kind"), "CronJob")
+    container = cron["spec"]["jobTemplate"]["spec"]["template"]["spec"]["containers"][0]
+    assert container["command"] + container["args"] == ["supertrends", "run", "daily"]
+
+
 def test_chart_daily_run_can_be_suspended_or_disabled() -> None:
     """TS-DEP-103: dailyRun.suspend and dailyRun.enabled are honoured."""
     assert one(render("kind", "dailyRun.suspend=true"), "CronJob")["spec"]["suspend"] is True
