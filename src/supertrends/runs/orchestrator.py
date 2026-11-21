@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright 2026 Serverless Ventures LLC
-"""The daily run orchestrator (FR-901 to FR-906, ARCHITECTURE sections 4.1 and 8, ADR-066).
+"""The daily run orchestrator (FR-901 to FR-906, ARCHITECTURE sections 4.1 and 8, ADR-068).
 
 `execute_run` takes the run advisory lock, reaps abandoned runs, inserts a `queued` run, and
 drives it through `ingesting -> computing -> scoring -> selecting -> narrating -> published`.
@@ -40,7 +40,13 @@ from supertrends.data.quality import Quality
 from supertrends.data.snapshots import compute_and_store, read_snapshot
 from supertrends.errors import IngestError
 from supertrends.runs import pipeline
-from supertrends.runs.narrator import MinimalNarrator, NarratedPick, Narrator, PickContext
+from supertrends.runs.narrator import (
+    MinimalNarrator,
+    NarratedPick,
+    Narrator,
+    PickContext,
+    TemplateNarrator,
+)
 from supertrends.runs.publish import PublishItem, publish
 from supertrends.runs.repo import (
     active_run,
@@ -103,7 +109,7 @@ class RunDeps:
     market: MarketDataProvider
     fundamentals: FundamentalsProvider | None
     config: ScoringConfig
-    narrator: Narrator = field(default_factory=MinimalNarrator)
+    narrator: Narrator = field(default_factory=TemplateNarrator)
     symbols: Sequence[str] | None = None
     registry: FactorRegistry = field(default_factory=default_registry)
     queued_timeout_seconds: int = 600
@@ -333,6 +339,7 @@ def _narrate(deps: RunDeps, work: _Work) -> list[PublishItem]:
             snapshot=st.snapshot,
             factor_results=st.results,
             config=deps.config,
+            selection=work.selection,
         )
         try:
             narrated = deps.narrator.narrate(ctx)

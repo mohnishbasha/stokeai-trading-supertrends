@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright 2026 Serverless Ventures LLC
-"""Run service functions for the API, MCP and worker (ADR-020, ADR-021, ADR-066).
+"""Run service functions for the API, MCP and worker (ADR-020, ADR-021, ADR-068).
 
 Triggering (`trigger_run`) only inserts a `queued` row; a worker executes it with
 `run_next_queued`. Readers follow the read rule: "latest" is the current published run with the

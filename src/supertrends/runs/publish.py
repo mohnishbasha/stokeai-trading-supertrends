@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright 2026 Serverless Ventures LLC
-"""Atomic publication of a run (FR-902, FR-903, ARCHITECTURE section 8.2, ADR-066).
+"""Atomic publication of a run (FR-902, FR-903, ARCHITECTURE section 8.2, ADR-068).
 
 One SERIALIZABLE transaction, retried up to three times on a serialization failure:
 
