@@ -685,9 +685,9 @@ Weighted composite over non-missing factors with weight redistribution, display 
 Candidate rules, ranking with the full tie-breaker chain, max counts, correlation guard, "also qualified" list, and the nearest-miss record for an empty side.
 
 **Acceptance criteria:**
-- [ ] with 1 qualifying buy the result has 1 buy, not 3
-- [ ] ties resolve in the documented order
-- [ ] the correlation guard never lets two picks with correlation above 0.9 onto the same side (tested with SPY, VOO, and IVV stand-ins all qualifying: only the top one is picked)
+- [x] with 1 qualifying buy the result has 1 buy, not 3 (evidence: `test_unit_selection_only_one_qualifying_buy_result_has_one_buy_not_three`)
+- [x] ties resolve in the documented order (evidence: four `test_unit_selection_tiebreak_*` tests in `tests/unit/selection/test_ranking.py`, ADR-065)
+- [x] the correlation guard never lets two picks with correlation above 0.9 onto the same side (evidence: `test_unit_selection_correlation_guard_spy_voo_ivv_only_top_one_selected`; tested with SPY, VOO, and IVV stand-ins all qualifying: only the top one is picked)
 
 ### S3-T07: Run orchestrator and atomic publication
 
