@@ -656,8 +656,8 @@ Same standard as S3-T02.
 Same standard, including the quality-based weight multiplier for `daily_estimate`.
 
 **Acceptance criteria:**
-- [ ] one test row per rule line
-- [ ] sign logic for rising volume on a falling price is covered
+- [x] one test row per rule line (TS-SCR-140 to 14x volume oscillator and TS-SCR-150 to 157, 405 to 409 buy and sell volume, including the daily_estimate multiplier 0.6)
+- [x] sign logic for rising volume on a falling price is covered (TS-SCR-141, vo part is -40 on a falling price)
 
 ### S3-T05: Composite, confidence, bands
 
