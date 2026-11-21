@@ -21,9 +21,11 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, Protocol, runtime_checkable
 
+from supertrends.narrative.evidence import build_evidence
+from supertrends.narrative.template import narrate as template_narrate
 from supertrends.scoring.config import ScoringConfig
 from supertrends.scoring.factor import FactorResult, get_path
-from supertrends.selection.ranking import Pick
+from supertrends.selection.ranking import Pick, Selection
 
 __all__ = [
     "DISCLAIMER",
@@ -32,6 +34,7 @@ __all__ = [
     "NarrativeText",
     "Narrator",
     "PickContext",
+    "TemplateNarrator",
     "minimal_evidence",
 ]
 
@@ -68,6 +71,7 @@ class PickContext:
     snapshot: Mapping[str, Any]
     factor_results: Mapping[str, FactorResult]
     config: ScoringConfig
+    selection: Selection | None = None
 
 
 @dataclass(frozen=True)
@@ -154,3 +158,34 @@ class MinimalNarrator:
 
     def narrate(self, ctx: PickContext) -> NarratedPick:
         return NarratedPick(evidence=minimal_evidence(ctx))
+
+
+class TemplateNarrator:
+    """The S3-T08 narrator (FR-901, ADR-067, ADR-068): the full evidence document and the
+    deterministic template narrative.
+
+    The evidence is built from engine output only, to the committed schema (the test suite
+    validates it; jsonschema is a dev dependency), and then handed to the template, so the
+    narrative reads the stored document and nothing it writes flows back into scoring or
+    selection. A failure raises; the orchestrator falls back to `MinimalNarrator` for that pick.
+    """
+
+    def narrate(self, ctx: PickContext) -> NarratedPick:
+        doc = build_evidence(
+            ctx.pick,
+            snapshot=ctx.snapshot,
+            results=ctx.factor_results,
+            config=ctx.config,
+            trade_date=ctx.trade_date,
+            selection=ctx.selection,
+        )
+        result = template_narrate(doc)
+        return NarratedPick(
+            evidence=doc,
+            narrative=NarrativeText(
+                text=result.text,
+                source=result.source,
+                prompt_version=result.prompt_version or "template-v1",
+                model=result.model,
+            ),
+        )
