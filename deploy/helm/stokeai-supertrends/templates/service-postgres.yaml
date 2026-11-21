@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright 2026 Serverless Ventures LLC
+{{- if .Values.postgres.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "st.postgresName" . }}
+  labels:
+    {{- include "st.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "-20"
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  clusterIP: None
+  selector:
+    {{- include "st.selector" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+{{- end }}

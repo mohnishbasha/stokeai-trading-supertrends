@@ -30,6 +30,11 @@ def sessions_between(start: date, end: date) -> list[date]:
     return [ts.date() for ts in cal.sessions_in_range(lo.isoformat(), hi.isoformat())]
 
 
+def is_session(day: date) -> bool:
+    """True when `day` is an XNYS trading session (holidays and weekends are not)."""
+    return sessions_between(day, day) == [day]
+
+
 def last_completed_session(now: datetime | None = None) -> date:
     """The latest session whose close is at or before `now` (UTC, default the current time)."""
     moment = now or datetime.now(UTC)

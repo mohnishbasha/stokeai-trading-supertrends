@@ -3,7 +3,7 @@
 """`supertrends` entry point (ARCHITECTURE section 6, CLI).
 
 Sprint 0 commands: --version, serve, healthcheck, config show | validate | export-schema.
-Sprint 1 adds db migrate, ingest, and watchlist.
+Sprint 1 adds db migrate, ingest, and watchlist. Sprint 3 adds run daily (ADR-068).
 """
 
 import json
@@ -12,7 +12,7 @@ from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from enum import IntEnum
 from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import httpx
 import typer
@@ -23,6 +23,12 @@ from supertrends.errors import ConfigError
 from supertrends.scoring.config import config_hash, json_schema, load_scoring_config
 from supertrends.settings import load_settings
 from supertrends.version import LICENSE_NOTICE, get_commit, get_version, source_url
+
+if TYPE_CHECKING:
+    from datetime import date
+
+    from supertrends.runs.dates import TradeDateError
+    from supertrends.runs.orchestrator import RunOutcome
 
 DEFAULT_HEALTHCHECK_TIMEOUT_SECONDS = 3.0
 CONFIG_INVALID_EXIT = 2
@@ -35,6 +41,8 @@ db_app = typer.Typer(help="Database operations (local mode only).")
 app.add_typer(db_app, name="db")
 watchlist_app = typer.Typer(help="Watchlist operations (local mode only).")
 app.add_typer(watchlist_app, name="watchlist")
+run_app = typer.Typer(help="Daily runs (local mode executes inline).")
+app.add_typer(run_app, name="run")
 
 
 class HealthExit(IntEnum):
@@ -350,6 +358,187 @@ def ingest(
         )
     counts = " ".join(f"{k}={v}" for k, v in sorted(summary.quality_counts.items()))
     typer.echo(f"quality: {counts or 'none'}")
+
+
+class RunExit(IntEnum):
+    """Exit codes of `supertrends run daily` (ARCHITECTURE section 6, ADR-021, ADR-022)."""
+
+    OK = 0
+    FAILED = 1
+    USAGE = 2
+    NOT_NOW = 3
+
+
+def _run_payload(outcome: "RunOutcome", picks: list[dict[str, object]]) -> dict[str, object]:
+    active = outcome.active_trade_date
+    return {
+        "status": outcome.status,
+        "trade_date": outcome.trade_date.isoformat(),
+        "run_id": outcome.run_id,
+        "summary": dict(outcome.summary),
+        "error_code": outcome.error_code,
+        "error_detail": outcome.error_detail,
+        "active_run_id": outcome.active_run_id,
+        "active_trade_date": None if active is None else active.isoformat(),
+        "picks": picks,
+    }
+
+
+def _report_run(
+    outcome: "RunOutcome", picks: list[dict[str, object]], trade_date: "date", *, as_json: bool
+) -> None:
+    """Print the outcome of `run daily` and exit with its code."""
+    from supertrends.runs.narrator import DISCLAIMER  # noqa: PLC0415
+
+    if as_json:
+        typer.echo(json.dumps(_run_payload(outcome, picks), sort_keys=True, default=str))
+    if outcome.status == "already_running":
+        active = outcome.active_trade_date
+        if active is not None and active != trade_date:
+            if not as_json:
+                typer.echo(f"another run is active for {active.isoformat()}", err=True)
+            raise typer.Exit(RunExit.NOT_NOW)
+        if not as_json:
+            typer.echo(f"already running for {trade_date.isoformat()}")
+        return
+    summary = outcome.summary
+    if outcome.status == "failed":
+        if not as_json:
+            typer.echo(
+                f"failed {outcome.run_id} ({outcome.error_code}): {outcome.error_detail}",
+                err=True,
+            )
+        raise typer.Exit(RunExit.FAILED)
+    if as_json:
+        return
+    typer.echo(
+        f"published {outcome.run_id} for {trade_date.isoformat()}: "
+        f"scored {summary.get('tickers_scored', 0)}, excluded {summary.get('tickers_excluded', 0)}"
+    )
+    for item in summary.get("excluded", []):
+        typer.echo(f"excluded {item['ticker']}: {item['reason']}")
+    for pick in picks:
+        typer.echo(
+            f"{str(pick['side']).upper():<4} {pick['rank']} {pick['ticker']:<6} "
+            f"{pick['display_score']} {pick['band']}"
+        )
+    if not picks:
+        typer.echo("no picks today")
+    typer.echo(DISCLAIMER)
+
+
+def _report_trade_date_error(exc: "TradeDateError", *, as_json: bool) -> None:
+    """Report a trade-date error and exit with its code; market closed returns (ADR-022, ADR-074).
+
+    The CronJob fires on holidays, so a market-closed result is printed, publishes nothing, and
+    lets the command exit 0.
+    """
+    if exc.exit_code != 0:
+        typer.echo(f"{exc.code}: {exc}", err=True)
+        raise typer.Exit(exc.exit_code) from exc
+    if as_json:
+        closed = {
+            "status": exc.code,
+            "trade_date": None if exc.day is None else exc.day.isoformat(),
+            "run_id": None,
+        }
+        typer.echo(json.dumps(closed, sort_keys=True))
+    else:
+        typer.echo(f"market closed: {exc}")
+
+
+@run_app.command("daily")
+def run_daily(
+    date_: Annotated[
+        str | None,
+        typer.Option("--date", help="Trade date YYYY-MM-DD (default: today in New York)."),
+    ] = None,
+    as_json: Annotated[bool, typer.Option("--json", help="Print the outcome as JSON.")] = False,
+) -> None:
+    """Run the daily pipeline inline and publish atomically (FR-901 to FR-906).
+
+    Prints one line per state transition, then the summary. Exit 0 published, market closed
+    (no `--date` and today is not a session), or already running for the same date; 1 failed;
+    2 invalid date; 3 session not complete, another date's run active, or the database
+    unreachable.
+    """
+    import signal  # noqa: PLC0415
+    from datetime import date  # noqa: PLC0415
+    from types import FrameType  # noqa: PLC0415
+
+    from sqlalchemy.exc import SQLAlchemyError  # noqa: PLC0415
+
+    from supertrends.data import db  # noqa: PLC0415
+    from supertrends.data.providers.registry import (  # noqa: PLC0415
+        fundamentals_provider,
+        market_provider,
+    )
+    from supertrends.runs import orchestrator, service  # noqa: PLC0415
+    from supertrends.runs.dates import TradeDateError, resolve_trade_date  # noqa: PLC0415
+    from supertrends.runs.state import RunState  # noqa: PLC0415
+
+    try:
+        requested = date.fromisoformat(date_) if date_ else None
+    except ValueError as exc:
+        typer.echo(f"invalid --date: {date_}", err=True)
+        raise typer.Exit(RunExit.USAGE) from exc
+    try:
+        trade_date = resolve_trade_date(requested)
+    except TradeDateError as exc:
+        _report_trade_date_error(exc, as_json=as_json)
+        return
+    settings = load_settings()
+    try:
+        cfg = load_scoring_config(Path(settings.scoring_config))
+    except ConfigError as exc:
+        typer.echo(f"invalid scoring config: {exc}", err=True)
+        raise typer.Exit(RunExit.USAGE) from exc
+    deps = orchestrator.RunDeps(
+        market=market_provider(settings),
+        fundamentals=fundamentals_provider(settings),
+        config=cfg,
+        queued_timeout_seconds=settings.queued_run_timeout_seconds,
+    )
+
+    def progress(run_id: str, state: RunState) -> None:
+        if not as_json:
+            typer.echo(f"{run_id} {state.value}")
+
+    def on_sigterm(signum: int, frame: FrameType | None) -> None:
+        raise orchestrator.RunTerminated
+
+    previous = signal.signal(signal.SIGTERM, on_sigterm)
+    engine = db.create_db_engine(settings)
+    try:
+        outcome = orchestrator.execute_run(
+            engine, deps, trade_date=trade_date, trigger="cli", progress=progress
+        )
+        picks = (
+            [
+                {
+                    "side": r.side,
+                    "rank": r.rank,
+                    "ticker": r.symbol,
+                    "display_score": r.display_score,
+                    "confidence": r.confidence,
+                    "band": r.band,
+                    "disclaimer": r.disclaimer,
+                }
+                for r in service.recommendations_for_run(engine, outcome.run_id)
+            ]
+            if outcome.status == "published" and outcome.run_id
+            else []
+        )
+    except orchestrator.RunTerminated as exc:
+        typer.echo("run terminated", err=True)
+        raise typer.Exit(RunExit.FAILED) from exc
+    except SQLAlchemyError as exc:
+        typer.echo(f"database error: {type(exc).__name__}", err=True)
+        raise typer.Exit(RunExit.NOT_NOW) from exc
+    finally:
+        signal.signal(signal.SIGTERM, previous)
+        engine.dispose()
+    _report_run(outcome, picks, trade_date, as_json=as_json)
 
 
 def main() -> None:
