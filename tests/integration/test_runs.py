@@ -207,8 +207,9 @@ def test_it_runs_narrator_failure_falls_back_to_minimal_and_run_publishes(
     assert all(r.narrative is None and r.evidence["disclaimer"] for r in recs)
 
 
-_CHILD = textwrap.dedent(
-    """
+_CHILD = (
+    textwrap.dedent(
+        """
     import sys, time
     from datetime import date
     from pathlib import Path
@@ -224,17 +225,19 @@ _CHILD = textwrap.dedent(
             time.sleep(120)
 
     url, root, flag = sys.argv[1], sys.argv[2], sys.argv[3]
-    u = FixtureUniverse(seed=%d, end_date=date(2026, 11, 13))
+    u = FixtureUniverse(seed=__SEED__, end_date=date(2026, 11, 13))
     deps = RunDeps(
         market=FixtureProvider(u),
         fundamentals=FixtureFundamentals(u),
         config=load_scoring_config(root + "/config/scoring.yaml"),
-        symbols=%r,
+        symbols=__SYMBOLS__,
         narrator=Hang(),
     )
     execute_run(db.create_db_engine(url=url), deps, trade_date=date(2026, 11, 13))
     """
-    % (SEED, SYMBOLS)
+    )
+    .replace("__SEED__", str(SEED))
+    .replace("__SYMBOLS__", repr(SYMBOLS))
 )
 
 
@@ -248,7 +251,7 @@ def test_it_runs_publish_midrun_process_kill_previous_run_stays_latest(
     assert before is not None
     assert before.id == first.run_id
     flag = tmp_path / "narrating.flag"
-    proc = subprocess.Popen(  # noqa: S603 - fixed argv, no shell
+    proc = subprocess.Popen(
         [sys.executable, "-c", _CHILD, URL, str(ROOT), str(flag)],
         env={**os.environ, "SUPERTRENDS_IT_DATABASE_URL": URL},
     )
@@ -304,7 +307,8 @@ def test_it_runs_failed_run_leaves_previous_published_run_as_latest(
     assert failed is not None
     assert failed.state == "failed"
     assert failed.published_at is None
-    assert failed.error_detail and "selection exploded" in failed.error_detail
+    assert failed.error_detail
+    assert "selection exploded" in failed.error_detail
     latest = service.latest_published_run(engine)
     assert latest is not None
     assert latest.id == first.run_id
@@ -352,7 +356,9 @@ def test_it_runs_rerun_same_date_new_row_supersedes_only_on_success_both_stored(
     one = execute_run(engine, _deps(universe, config), trade_date=END)
     two = execute_run(engine, _deps(universe, config), trade_date=END)
     assert one.status == two.status == "published"
-    assert one.run_id and two.run_id and one.run_id != two.run_id
+    assert one.run_id
+    assert two.run_id
+    assert one.run_id != two.run_id
     old = service.get_run(engine, one.run_id)
     new = service.get_run(engine, two.run_id)
     assert old is not None

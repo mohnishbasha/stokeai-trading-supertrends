@@ -600,6 +600,20 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** S3-T07 calls `build_evidence` then `narrate` per pick and stores both. S5 reuses the guard and adds the banned-phrase and length checks (S5-T02); the document and its schema are the only input to the LLM prompt (S5-T01). Narrative code imports scoring and selection types but nothing under scoring or selection imports narrative.
 - **Status:** Accepted pending owner confirmation.
 
+### ADR-068: Run orchestrator, executors and atomic publication (PRD A-36, A-38)
+- **Context:** ARCHITECTURE sections 4.1 and 8 fix the states, the advisory lock (ADR-021) and the publication transaction, but not how a trigger is executed, what a killed process leaves behind, how a rerun relates to the run it replaces, or what the run summary lists.
+- **Decision:** `runs.orchestrator.execute_run` (CLI and CronJob) takes the session-level advisory lock, reaps abandoned runs, inserts a `queued` run and drives it through the states; `runs.service.trigger_run` plus `run_next_queued` is the API and worker path over the same `drive_run`. Each step commits its own transaction (`run_transitions` row with the state), so a SIGKILL leaves a non-terminal run and no recommendations; the next executor holding the lock fails it as `abandoned`. A second trigger while the lock is held, or while another run is active, returns `already_running` and inserts nothing. Publication (`runs.publish`) is one SERIALIZABLE transaction retried 3 times: recommendations and narratives are inserted, the previous current run for the date gets `superseded_by`, and the run moves to `published`. Any failure before or inside it ends in `failed` (`error_code`, `error_detail`) and the previous published run stays current, so a failed rerun never supersedes. `runs.summary` holds counts, the exclusions with their reasons (`unresolved`, `no_data`, `insufficient_history`, `stale`), provider errors, picks, also-qualified, nearest misses, narrative counts per source and the duration. The trade date is validated first (`runs.dates`, ADR-022). The outcome of `execute_run` is a frozen `RunOutcome`, and the read functions in `runs.service` return frozen views.
+- **Alternatives rejected:** One long transaction for the whole run (a kill would hold row locks and the run would be invisible to the status API); a heartbeat column to detect dead runs (the advisory lock already proves liveness); deleting the superseded run's rows (the audit trail and track record need both).
+- **Consequences:** The Read API (S3-T09) calls `runs.service` only. The CronJob (S3-T10) runs `supertrends run daily`. Fault-injection scenarios (S9-T02) reuse `RunDeps` to inject providers.
+- **Status:** Accepted pending owner confirmation.
+
+### ADR-069: Narrator plug-in and fallback (PRD A-37)
+- **Context:** The `narrating` step must store the full evidence document and a narrative per pick, from S3-T08 now and an LLM in Sprint 5, and a narrative problem must never fail a run or change a pick (ARCHITECTURE section 4.1).
+- **Decision:** `runs.narrator.Narrator` is a protocol, `narrate(PickContext) -> NarratedPick(evidence, narrative)`. `PickContext` carries only engine output (pick, snapshot, factor results, config, selection). `TemplateNarrator` is the default: `build_evidence` then `narrative.template.narrate`, stored as `source = template`. `MinimalNarrator` (a small deterministic document, no narrative text) is the fallback when a narrator raises; the run publishes and the summary counts `narrative_errors`. The orchestrator calls the narrator after selection and stores the result; nothing it returns is read back by scoring, ranking or selection. The schema is checked by the test suite (`jsonschema` stays a dev dependency), not at run time.
+- **Alternatives rejected:** Failing the run on a narrator error (violates "a narrative problem never fails a run"); validating against the schema at run time (adds a runtime dependency for a check the builder's tests already make); building the evidence in the selection step (blurs the boundary the LLM must not cross).
+- **Consequences:** S5 adds an `LlmNarrator` behind the same protocol with its own template fallback; the disclaimer is attached by `runs.service` views, not stored.
+- **Status:** Accepted pending owner confirmation.
+
 ---
 
 ## 4. Data Flows
@@ -1660,8 +1674,8 @@ Allowed edges: `queued -> ingesting`, `ingesting -> computing`, `computing -> sc
 | `ingesting` | incremental ingest, corporate actions, fundamentals, earnings, data-quality pass | bars, actions, fundamentals, calendar, `provider_calls` |
 | `computing` | indicators daily, weekly, intraday | `indicator_snapshots` |
 | `scoring` | factors, regimes, weights, composite, display, band, confidence; exclusions | `ticker_scores`, `factor_scores` |
-| `selecting` | candidates, ranking, correlation guard, also qualified, nearest misses, evidence documents, `days_on_list` | in memory, plus `runs.summary` |
-| `narrating` | narrative per pick | in memory |
+| `selecting` | candidates, ranking, correlation guard, also qualified, nearest misses, `days_on_list` | in memory, plus `runs.summary` |
+| `narrating` | evidence document and narrative per pick (ADR-069), engine output only | in memory |
 | `published` | publication transaction committed | `recommendations`, `narratives`, `runs` |
 | `failed` | `error_code`, `error_detail` set | `runs` |
 
@@ -1684,6 +1698,7 @@ If any step fails, the transaction rolls back, the run moves to `failed` in a ne
 
 - At most one active run (partial unique index `ux_runs_one_active`) and one executing process (advisory lock), per ADR-021.
 - Reaping: executors reap abandoned non-queued runs on start; queued runs older than `SUPERTRENDS_QUEUED_RUN_TIMEOUT_SECONDS` are failed with `not_picked_up`. The API also reaps stale queued rows when handling `POST /api/v1/runs`, so a missing worker cannot block triggers forever.
+- A killed process (SIGKILL, OOM) leaves its run in a non-terminal state with no recommendations; the previous published run stays latest, and the next executor that takes the lock fails the orphan as `abandoned` (ADR-068).
 - Process signals: on SIGTERM the executor finishes the current database statement, moves the run to `failed` with `error_code = 'internal'` and detail `terminated`, releases the lock, and exits 1. The CronJob `activeDeadlineSeconds` is 3600.
 - Determinism: the same bars and config hash produce byte-identical `factor_scores`, `ticker_scores`, and selection (NFR-002); no clock or randomness reaches the engine; the run's "as of" is the trade date.
 

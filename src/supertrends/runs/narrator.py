@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright 2026 Serverless Ventures LLC
-"""The `narrating` step's plug-in point (FR-901, ADR-066).
+"""The `narrating` step's plug-in point (FR-901, ADR-068).
 
 The orchestrator hands each published pick to a `Narrator` and stores what it returns: the
 evidence document (`recommendations.evidence`) and an optional narrative (`narratives`).
@@ -161,7 +161,7 @@ class MinimalNarrator:
 
 
 class TemplateNarrator:
-    """The S3-T08 narrator (FR-901, ADR-067, ADR-068): the full evidence document and the
+    """The S3-T08 narrator (FR-901, ADR-067, ADR-069): the full evidence document and the
     deterministic template narrative.
 
     The evidence is built from engine output only, to the committed schema (the test suite

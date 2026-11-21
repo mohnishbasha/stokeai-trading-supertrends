@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright 2026 Serverless Ventures LLC
-"""The daily run orchestrator (FR-901 to FR-906, ARCHITECTURE sections 4.1 and 8, ADR-066).
+"""The daily run orchestrator (FR-901 to FR-906, ARCHITECTURE sections 4.1 and 8, ADR-068).
 
 `execute_run` takes the run advisory lock, reaps abandoned runs, inserts a `queued` run, and
 drives it through `ingesting -> computing -> scoring -> selecting -> narrating -> published`.

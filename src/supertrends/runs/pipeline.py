@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright 2026 Serverless Ventures LLC
-"""Pure steps of the daily run: exclusions, scoring, row building, summary (FR-906, ADR-066).
+"""Pure steps of the daily run: exclusions, scoring, row building, summary (FR-906, ADR-068).
 
 No I/O, clock, or randomness: the orchestrator loads inputs and writes the rows built here, so
 two runs over the same bars and config produce identical rows (NFR-002).
