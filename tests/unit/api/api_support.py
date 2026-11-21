@@ -207,13 +207,11 @@ class FakeStore:
     def picks(self, run_id: str) -> list[RecommendationView]:
         return self.picks_by_run.get(run_id, [])
 
-    def pick_extras(
-        self, run_id: str, picked: Sequence[str], others: Sequence[str]
-    ) -> PickExtras:
+    def pick_extras(self, run_id: str, picked: Sequence[str], others: Sequence[str]) -> PickExtras:
         return PickExtras(
-            expected_move={s: 4.1 for s in picked},
-            ribbon={s: "UUUUDDDUUU" for s in picked},
-            scores={s: (77.9, 70.0) for s in others},
+            expected_move=dict.fromkeys(picked, 4.1),
+            ribbon=dict.fromkeys(picked, "UUUUDDDUUU"),
+            scores=dict.fromkeys(others, (77.9, 70.0)),
         )
 
     def rankings(

@@ -175,6 +175,22 @@ def config_export_schema(
         output.write_text(text, encoding="utf-8")
 
 
+@config_app.command("export-openapi")
+def config_export_openapi(
+    output: Annotated[
+        Path | None, typer.Option(help="Write to this file instead of stdout.")
+    ] = None,
+) -> None:
+    """Export the API's OpenAPI document (what `make openapi` commits to docs/openapi.json)."""
+    from supertrends.api.openapi import render_openapi  # noqa: PLC0415 (keeps CLI start-up fast)
+
+    text = render_openapi()
+    if output is None:
+        typer.echo(text, nl=False)
+    else:
+        output.write_text(text, encoding="utf-8")
+
+
 @db_app.command("migrate")
 def db_migrate(
     revision: Annotated[str, typer.Option(help="Target Alembic revision.")] = "head",

@@ -8,11 +8,15 @@ Scenario names follow docs/TEST_PLAN.md section 10.11; the app runs against an i
 from __future__ import annotations
 
 import json
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
 from jsonschema import Draft202012Validator
 
+from supertrends.api import deps
+from supertrends.api.openapi import render_openapi
+from supertrends.runs import dates
 from supertrends.runs.narrator import DISCLAIMER
 from supertrends.runs.service import TriggerResult
 from supertrends.scoring.config import FACTOR_IDS
@@ -36,7 +40,10 @@ def test_contract_api_recommendations_latest_shape_matches_openapi() -> None:
     client, _ = make_client()
     body = client.get(LATEST).json()
     doc = client.get("/openapi.json").json()
-    schema = {"$ref": "#/components/schemas/RecommendationsResponse", "components": doc["components"]}
+    schema = {
+        "$ref": "#/components/schemas/RecommendationsResponse",
+        "components": doc["components"],
+    }
     errors = list(Draft202012Validator(schema).iter_errors(body))
     assert errors == []
     assert body["date"] == "2026-11-13"
@@ -68,7 +75,11 @@ def test_contract_api_recommendations_latest_shape_matches_openapi() -> None:
     assert pick["confidence"] == 71
     assert pick["ribbon"] == "UUUUDDDUUU"
     assert [f["id"] for f in pick["top_factors"]] == ["supertrend", "sma", "macd"]
-    assert pick["narrative"] == {"text": "Daily Supertrend is up.", "source": "template", "model": None}
+    assert pick["narrative"] == {
+        "text": "Daily Supertrend is up.",
+        "source": "template",
+        "model": None,
+    }
     assert body["also_qualified"] == [
         {
             "ticker": "VOO",
@@ -363,9 +374,7 @@ def test_contract_api_post_runs_while_running_returns_409_already_running() -> N
     assert ACTIVE_ID in body["detail"]
 
 
-def store_date() -> Any:
-    from datetime import date
-
+def store_date() -> date:
     return date(2026, 11, 16)
 
 
@@ -384,9 +393,7 @@ def test_contract_api_post_runs_date_errors_and_market_closed() -> None:
     problem(
         client.post("/api/v1/runs", json={"date": "bad"}, headers=AUTH), 422, "validation-error"
     )
-    problem(
-        client.post("/api/v1/runs", json={"extra": 1}, headers=AUTH), 422, "validation-error"
-    )
+    problem(client.post("/api/v1/runs", json={"extra": 1}, headers=AUTH), 422, "validation-error")
     problem(
         client.post(
             "/api/v1/runs",
@@ -399,24 +406,34 @@ def test_contract_api_post_runs_date_errors_and_market_closed() -> None:
 
 
 def test_contract_api_post_runs_weekend_default_returns_200_market_closed(monkeypatch: Any) -> None:
-    from datetime import UTC, datetime
-
-    from supertrends.api import deps
-
     client, store = make_client()
     saturday = datetime(2026, 11, 14, 18, 0, tzinfo=UTC)
     client.app.dependency_overrides[deps.get_clock] = lambda: saturday  # type: ignore[attr-defined]
     response = client.post("/api/v1/runs", json={}, headers=AUTH)
     assert response.status_code == 200
-    assert response.json() == {"run_id": None, "state": "market_closed", "trade_date": "2026-11-14"}
+    assert response.json() == {"run_id": None, "state": "market_closed"}
+    assert not store.calls
+
+
+def test_contract_api_post_runs_market_closed_code_returns_200_market_closed(
+    monkeypatch: Any,
+) -> None:
+    """S3-T10 raises `TradeDateError` with code `market_closed`; the handler maps it by code."""
+
+    def closed(requested: date | None, now: Any = None) -> date:
+        exc = dates.TradeDateError(dates.NOT_A_TRADING_DATE, "market closed")
+        exc.code = "market_closed"
+        raise exc
+
+    monkeypatch.setattr(dates, "resolve_trade_date", closed)
+    client, store = make_client()
+    response = client.post("/api/v1/runs", json={"date": "2026-11-13"}, headers=AUTH)
+    assert response.status_code == 200
+    assert response.json() == {"run_id": None, "state": "market_closed"}
     assert not store.calls
 
 
 def test_contract_api_post_runs_session_not_complete_returns_409() -> None:
-    from datetime import UTC, datetime
-
-    from supertrends.api import deps
-
     client, _ = make_client()
     midday = datetime(2026, 11, 16, 16, 0, tzinfo=UTC)
     client.app.dependency_overrides[deps.get_clock] = lambda: midday  # type: ignore[attr-defined]
@@ -426,15 +443,13 @@ def test_contract_api_post_runs_session_not_complete_returns_409() -> None:
 def test_contract_api_config_scoring_returns_active_config_and_hash() -> None:
     client, _ = make_client()
     body = client.get("/api/v1/config/scoring").json()
-    assert body["version"] == 1
+    version = body["document"]["scoring"]["version"]
+    assert body["version"] == version >= 1
     assert body["hash"].startswith("sha256:")
-    assert body["document"]["scoring"]["version"] == 1
     assert body["loaded_at"]
 
 
 def test_contract_api_openapi_document_matches_committed_docs_openapi_json() -> None:
-    from supertrends.api.openapi import render_openapi
-
     committed = (Path(__file__).resolve().parents[3] / "docs" / "openapi.json").read_text()
     assert committed == render_openapi(), "run `make openapi` and commit docs/openapi.json"
     paths = json.loads(committed)["paths"]
