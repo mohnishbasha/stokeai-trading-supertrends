@@ -731,176 +731,235 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-001 | `unit_factor_result_score_101_raises_validation_error` | A factor returning 101 raises | FR-3xx, S3-T01 | Deferred |
-| TS-SCR-002 | `unit_factor_result_score_minus_101_raises_validation_error` | A factor returning -101 raises | FR-3xx, S3-T01 | Deferred |
-| TS-SCR-003 | `unit_factor_registry_every_config_factor_id_registered_and_reverse` | Config ids and registered factors match both ways | FR-3xx, S3-T01 | Deferred |
-| TS-SCR-004 | `unit_factor_result_contains_evidence_items_name_value_unit_reason_and_quality` | FactorResult shape | FR-3xx | Deferred |
+| TS-SCR-001 | `unit_factor_result_score_101_raises_validation_error` | A factor returning 101 raises | FR-3xx, S3-T01 | Automated |
+| TS-SCR-002 | `unit_factor_result_score_minus_101_raises_validation_error` | A factor returning -101 raises | FR-3xx, S3-T01 | Automated |
+| TS-SCR-003 | `unit_factor_registry_every_config_factor_id_registered_and_reverse` | Config ids and registered factors match both ways | FR-3xx, S3-T01 | Automated |
+| TS-SCR-004 | `unit_factor_result_contains_evidence_items_name_value_unit_reason_and_quality` | FactorResult shape | FR-3xx | Automated |
 | TS-SCR-005 | `prop_factors_all_scores_within_minus_100_and_100_for_random_snapshots` | Range property for all 12 factors | FR-3xx | Deferred |
 | TS-SCR-006 | `unit_factor_reasons_one_deterministic_template_per_rule_that_fired` | Reasons come from templates, one per fired rule | FR-5xx | Deferred |
 | TS-SCR-007 | `prop_factors_all_truncation_does_not_change_score_at_t` | Factor-level no-look-ahead (section 6.2) | NFR-007 | Deferred |
+| TS-SCR-301 | `unit_config_equals_appendix_e_ignoring_comments_and_the_version_bump` | `config/scoring.yaml` equals BUILD_PROMPT Appendix E line for line (comments ignored, `scoring.version` 2) | spec 1.1.0, S3-T01 | Automated |
+| TS-SCR-302 | `unit_config_scoring_version_is_2_for_spec_1_1_0` | The Ripster weights and block are a scoring change, so `scoring.version` is 2 | Spec Change Protocol, S3-T01 | Automated |
+| TS-SCR-303 | `unit_config_ripster_block_values_match_appendix_e` | The `ripster` block parses into typed values (pairs, points summing to 100, lookback 3, penalty 10, gate) | FR-333, S3-T01 | Automated |
+| TS-SCR-304 | `unit_config_ripster_block_is_strict` | Unknown, missing, or out-of-range `ripster` keys are rejected naming the key | FR-3xx, S3-T01 | Automated |
+| TS-SCR-305 | `unit_config_twelve_factor_ids_in_weights_order_and_regime_multipliers_cover_ripster` | Twelve IDs in `weights` order; regime multipliers carry ripster | FR-316, S3-T01 | Automated |
+| TS-SCR-306 | `unit_factor_quality_vocabulary_is_ok_degraded_missing_daily_estimate` | Quality vocabulary matches `factor_scores.quality`; registry iterates in config weight order | ADR-059, S3-T01 | Automated |
+| TS-SCR-307 | `unit_factor_stub_raises_not_implemented_naming_its_owner_task` | Registry get, duplicate and empty IDs, Protocol, and the owner map; once S3-T02, T03, T04 and T14 landed no stub raising `NotImplementedError` is left (fundamentals stays a `missing` stub until S5-T04) | ADR-059, S3-T01 | Automated |
+| TS-SCR-308 | `unit_factor_fundamentals_stub_returns_missing_with_score_zero` | Sprint 3 fundamentals is always `missing`, score 0, weight dropped | FR-315, S3-T01 | Automated |
+| TS-SCR-309 | `unit_factor_result_missing_helper_scores_zero_with_missing_quality` | `FactorResult.missing`; a `missing` result with a nonzero score is rejected | FR-315, S3-T01 | Automated |
+| TS-SCR-310 | `unit_snapshot_contains_every_input_path_of_the_factor` | Every declared input path of each factor exists in the snapshot and is non-null unless legitimately absent | S3-T01 audit | Automated |
+| TS-SCR-311 | `unit_snapshot_new_daily_fields_match_independent_computations` | `prev_close`, `high`, `low`, `close_lag_3`, `ret_5`, `avg_dollar_volume_20d` hand-derived; null in warm-up | S3-T01 audit | Automated |
+| TS-SCR-312 | `unit_snapshot_sma_cross_is_sma50_against_sma200_over_the_config_lookback` | Golden and death cross is SMA50 vs SMA200 (Factor 2) | FR-3xx, S3-T01 | Automated |
+| TS-SCR-313 | `unit_snapshot_ripster_block_matches_independent_ema_clouds` | Ripster block (clouds, bias, stack, flip count, pullback, weekly direction) vs independent loops; warm-up null; configured lookback; schema 2 | FR-333, S3-T01 | Automated |
+| TS-SCR-314 | `unit_factor_result_nan_inf_and_just_out_of_range_scores_raise` | NaN and infinities never become a score; results are frozen and strict; weight multiplier is positive and finite | ADR-059, S3-T01 | Automated |
+| TS-SCR-315 | `unit_reason_number_formatting_is_consistent` | One number format in reasons (ints as is, floats 2 decimals); NaN rejected | FR-5xx, S3-T01 | Automated |
+| TS-SCR-316 | `unit_factor_context_defaults_and_immutability` | `FactorContext` defaults and immutability; each factor module docstring lists its input paths | ADR-059, S3-T01 | Automated |
+| TS-SCR-317 | `unit_config_architecture_13_1_mirrors_the_config_file` | The yaml in ARCHITECTURE 13.1 equals `config/scoring.yaml`, comments ignored | S3-T01 | Automated |
+| TS-SCR-318 | `unit_factors_registry_is_complete_in_a_fresh_interpreter_without_other_imports` | One module per factor; the explicit list builds the full registry with no import side effects | ADR-059, S3-T01 | Automated |
+| TS-SCR-319 | `unit_snapshot_contains_regime_confidence_and_selection_inputs` | ADX, the confidence deductions, and the selection gate inputs are in the snapshot | FR-3xx, S3-T01 | Automated |
 
 #### 10.4.1 Factor 1: Supertrend
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-010 | `unit_supertrend_score_daily_up_base_plus_60` | `base = +60` when `st_dir_d == +1` | FR-3xx | Deferred |
-| TS-SCR-011 | `unit_supertrend_score_daily_down_base_minus_60` | `base = -60` when down | FR-3xx | Deferred |
-| TS-SCR-012 | `unit_supertrend_score_weekly_agrees_up_adds_25` | Weekly agreement, up | FR-3xx | Deferred |
-| TS-SCR-013 | `unit_supertrend_score_weekly_agrees_down_adds_minus_25` | Weekly agreement, down (`+25 * st_dir_d`) | FR-3xx | Deferred |
-| TS-SCR-014 | `unit_supertrend_score_weekly_conflict_up_adds_minus_15` | Weekly conflict, daily up | FR-3xx | Deferred |
-| TS-SCR-015 | `unit_supertrend_score_weekly_conflict_down_adds_plus_15` | Weekly conflict, daily down (`-15 * -1`) | FR-3xx | Deferred |
-| TS-SCR-016 | `unit_supertrend_score_flip_5_bars_ago_adds_freshness_15` | Boundary `bars_since_flip == 5` | FR-3xx, S3-T02 | Deferred |
-| TS-SCR-017 | `unit_supertrend_score_flip_6_bars_ago_adds_freshness_0` | Boundary `bars_since_flip == 6` | FR-3xx, S3-T02 | Deferred |
-| TS-SCR-018 | `unit_supertrend_score_fresh_flip_down_adds_minus_15` | Freshness sign follows direction | FR-3xx | Deferred |
-| TS-SCR-019 | `unit_supertrend_score_distance_4_0_atr_no_stretch_penalty` | Boundary: `|distance| == 4` is not over 4 | FR-3xx | Deferred |
-| TS-SCR-020 | `unit_supertrend_score_distance_4_01_atr_up_subtracts_10` | Stretch penalty, up | FR-3xx | Deferred |
-| TS-SCR-021 | `unit_supertrend_score_distance_4_01_atr_down_adds_10` | Stretch penalty, down | FR-3xx | Deferred |
-| TS-SCR-022 | `unit_supertrend_score_max_case_up_fresh_weekly_agree_equals_100` | 60 + 25 + 15 = 100, clipped | FR-3xx | Deferred |
-| TS-SCR-023 | `unit_supertrend_score_max_case_down_equals_minus_100` | Mirror extreme | FR-3xx | Deferred |
-| TS-SCR-024 | `unit_supertrend_score_evidence_includes_line_direction_bars_since_flip_distance` | Evidence content | FR-3xx, FR-5xx | Deferred |
+| TS-SCR-010 | `unit_supertrend_score_daily_up_base_plus_60` | `base = +60` when `st_dir_d == +1` | FR-3xx | Automated |
+| TS-SCR-011 | `unit_supertrend_score_daily_down_base_minus_60` | `base = -60` when down | FR-3xx | Automated |
+| TS-SCR-012 | `unit_supertrend_score_weekly_agrees_up_adds_25` | Weekly agreement, up | FR-3xx | Automated |
+| TS-SCR-013 | `unit_supertrend_score_weekly_agrees_down_adds_minus_25` | Weekly agreement, down (`+25 * st_dir_d`) | FR-3xx | Automated |
+| TS-SCR-014 | `unit_supertrend_score_weekly_conflict_up_adds_minus_15` | Weekly conflict, daily up | FR-3xx | Automated |
+| TS-SCR-015 | `unit_supertrend_score_weekly_conflict_down_adds_plus_15` | Weekly conflict, daily down (`-15 * -1`) | FR-3xx | Automated |
+| TS-SCR-016 | `unit_supertrend_score_flip_5_bars_ago_adds_freshness_15` | Boundary `bars_since_flip == 5` | FR-3xx, S3-T02 | Automated |
+| TS-SCR-017 | `unit_supertrend_score_flip_6_bars_ago_adds_freshness_0` | Boundary `bars_since_flip == 6` | FR-3xx, S3-T02 | Automated |
+| TS-SCR-018 | `unit_supertrend_score_fresh_flip_down_adds_minus_15` | Freshness sign follows direction | FR-3xx | Automated |
+| TS-SCR-019 | `unit_supertrend_score_distance_4_0_atr_no_stretch_penalty` | Boundary: `|distance| == 4` is not over 4 | FR-3xx | Automated |
+| TS-SCR-020 | `unit_supertrend_score_distance_4_01_atr_up_subtracts_10` | Stretch penalty, up | FR-3xx | Automated |
+| TS-SCR-021 | `unit_supertrend_score_distance_4_01_atr_down_adds_10` | Stretch penalty, down | FR-3xx | Automated |
+| TS-SCR-022 | `unit_supertrend_score_max_case_up_fresh_weekly_agree_equals_100` | 60 + 25 + 15 = 100, clipped | FR-3xx | Automated |
+| TS-SCR-023 | `unit_supertrend_score_max_case_down_equals_minus_100` | Mirror extreme | FR-3xx | Automated |
+| TS-SCR-024 | `unit_supertrend_score_evidence_includes_line_direction_bars_since_flip_distance` | Evidence content | FR-3xx, FR-5xx | Automated |
 
 #### 10.4.2 Factor 2: SMA analysis
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-030 | `unit_sma_score_close_above_sma200_adds_30` | +30 | FR-3xx | Deferred |
-| TS-SCR-031 | `unit_sma_score_close_below_sma200_subtracts_30` | -30 | FR-3xx | Deferred |
-| TS-SCR-032 | `unit_sma_score_sma50_above_sma200_adds_25` | +25 | FR-3xx | Deferred |
-| TS-SCR-033 | `unit_sma_score_sma50_below_sma200_subtracts_25` | -25 | FR-3xx | Deferred |
-| TS-SCR-034 | `unit_sma_score_close_above_sma50_adds_20` | +20 | FR-3xx | Deferred |
-| TS-SCR-035 | `unit_sma_score_close_below_sma50_subtracts_20` | -20 | FR-3xx | Deferred |
-| TS-SCR-036 | `unit_sma_score_sma20_slope_5_bars_positive_adds_15` | +15 | FR-3xx | Deferred |
-| TS-SCR-037 | `unit_sma_score_sma20_slope_5_bars_negative_subtracts_15` | -15 | FR-3xx | Deferred |
-| TS-SCR-038 | `unit_sma_score_golden_cross_10_bars_ago_adds_10` | Boundary: cross exactly 10 bars ago counts | FR-3xx | Deferred |
-| TS-SCR-039 | `unit_sma_score_golden_cross_11_bars_ago_adds_0` | Boundary: 11 bars does not count | FR-3xx | Deferred |
-| TS-SCR-040 | `unit_sma_score_death_cross_within_10_bars_subtracts_10` | -10 | FR-3xx | Deferred |
-| TS-SCR-041 | `unit_sma_score_all_bullish_sum_100_clipped` | 30 + 25 + 20 + 15 + 10 = 100 | FR-3xx | Deferred |
-| TS-SCR-042 | `unit_sma_score_all_bearish_sum_minus_100_clipped` | Mirror | FR-3xx | Deferred |
-| TS-SCR-043 | `unit_sma_score_close_equal_to_sma_adds_neither_sign` | Tie handling is defined and tested (equal is neither above nor below) | FR-3xx | Deferred |
+| TS-SCR-030 | `unit_sma_score_close_above_sma200_adds_30` | +30 | FR-3xx | Automated |
+| TS-SCR-031 | `unit_sma_score_close_below_sma200_subtracts_30` | -30 | FR-3xx | Automated |
+| TS-SCR-032 | `unit_sma_score_sma50_above_sma200_adds_25` | +25 | FR-3xx | Automated |
+| TS-SCR-033 | `unit_sma_score_sma50_below_sma200_subtracts_25` | -25 | FR-3xx | Automated |
+| TS-SCR-034 | `unit_sma_score_close_above_sma50_adds_20` | +20 | FR-3xx | Automated |
+| TS-SCR-035 | `unit_sma_score_close_below_sma50_subtracts_20` | -20 | FR-3xx | Automated |
+| TS-SCR-036 | `unit_sma_score_sma20_slope_5_bars_positive_adds_15` | +15 | FR-3xx | Automated |
+| TS-SCR-037 | `unit_sma_score_sma20_slope_5_bars_negative_subtracts_15` | -15 | FR-3xx | Automated |
+| TS-SCR-038 | `unit_sma_score_golden_cross_10_bars_ago_adds_10` | Boundary: a cross on the 10th bar of the window (as-of bar is bar 1) counts (A-26) | FR-3xx | Automated |
+| TS-SCR-039 | `unit_sma_score_golden_cross_11_bars_ago_adds_0` | Boundary: the 11th bar does not count (A-26) | FR-3xx | Automated |
+| TS-SCR-040 | `unit_sma_score_death_cross_within_10_bars_subtracts_10` | -10 | FR-3xx | Automated |
+| TS-SCR-041 | `unit_sma_score_all_bullish_sum_100_clipped` | 30 + 25 + 20 + 15 + 10 = 100 | FR-3xx | Automated |
+| TS-SCR-042 | `unit_sma_score_all_bearish_sum_minus_100_clipped` | Mirror | FR-3xx | Automated |
+| TS-SCR-043 | `unit_sma_score_close_equal_to_sma_adds_neither_sign` | Tie handling is defined and tested (equal is neither above nor below) | FR-3xx | Automated |
 
 #### 10.4.3 Factor 3: MACD
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-050 | `unit_macd_score_line_above_signal_adds_35` | +35 | FR-3xx | Deferred |
-| TS-SCR-051 | `unit_macd_score_line_below_signal_subtracts_35` | -35 | FR-3xx | Deferred |
-| TS-SCR-052 | `unit_macd_score_line_above_zero_adds_25` | +25 | FR-3xx | Deferred |
-| TS-SCR-053 | `unit_macd_score_line_below_zero_subtracts_25` | -25 | FR-3xx | Deferred |
-| TS-SCR-054 | `unit_macd_score_hist_rising_3_bars_adds_25` | +25 | FR-3xx | Deferred |
-| TS-SCR-055 | `unit_macd_score_hist_rising_2_bars_adds_0` | Boundary: 2 consecutive is not 3 | FR-3xx | Deferred |
-| TS-SCR-056 | `unit_macd_score_hist_falling_3_bars_subtracts_25` | -25 | FR-3xx | Deferred |
-| TS-SCR-057 | `unit_macd_score_bullish_cross_3_bars_ago_adds_15` | Boundary: within last 3 bars | FR-3xx | Deferred |
-| TS-SCR-058 | `unit_macd_score_bullish_cross_4_bars_ago_adds_0` | Boundary: 4 bars | FR-3xx | Deferred |
-| TS-SCR-059 | `unit_macd_score_bearish_cross_within_3_bars_subtracts_15` | -15 | FR-3xx | Deferred |
-| TS-SCR-060 | `unit_macd_score_weekly_disagrees_with_daily_multiplies_by_0_75` | Weekly line versus signal disagrees | FR-3xx | Deferred |
-| TS-SCR-061 | `unit_macd_score_weekly_agrees_with_daily_multiplier_1_0` | No change when weekly agrees | FR-3xx | Deferred |
-| TS-SCR-062 | `unit_macd_score_weekly_macd_reported_as_evidence` | Weekly MACD values in evidence | FR-3xx | Deferred |
+| TS-SCR-050 | `unit_macd_score_line_above_signal_adds_35` | +35 | FR-3xx | Automated |
+| TS-SCR-051 | `unit_macd_score_line_below_signal_subtracts_35` | -35 | FR-3xx | Automated |
+| TS-SCR-052 | `unit_macd_score_line_above_zero_adds_25` | +25 | FR-3xx | Automated |
+| TS-SCR-053 | `unit_macd_score_line_below_zero_subtracts_25` | -25 | FR-3xx | Automated |
+| TS-SCR-054 | `unit_macd_score_hist_rising_3_bars_adds_25` | +25 | FR-3xx | Automated |
+| TS-SCR-055 | `unit_macd_score_hist_rising_2_bars_adds_0` | Boundary: 2 consecutive is not 3 | FR-3xx | Automated |
+| TS-SCR-056 | `unit_macd_score_hist_falling_3_bars_subtracts_25` | -25 | FR-3xx | Automated |
+| TS-SCR-057 | `unit_macd_score_bullish_cross_3_bars_ago_adds_15` | Boundary: a cross on the 3rd bar of the window counts (A-26) | FR-3xx | Automated |
+| TS-SCR-058 | `unit_macd_score_bullish_cross_4_bars_ago_adds_0` | Boundary: the 4th bar does not count (A-26) | FR-3xx | Automated |
+| TS-SCR-059 | `unit_macd_score_bearish_cross_within_3_bars_subtracts_15` | -15 | FR-3xx | Automated |
+| TS-SCR-060 | `unit_macd_score_weekly_disagrees_with_daily_multiplies_by_0_75` | Weekly line versus signal disagrees | FR-3xx | Automated |
+| TS-SCR-061 | `unit_macd_score_weekly_agrees_with_daily_multiplier_1_0` | No change when weekly agrees | FR-3xx | Automated |
+| TS-SCR-062 | `unit_macd_score_weekly_macd_reported_as_evidence` | Weekly MACD values in evidence | FR-3xx | Automated |
 
 #### 10.4.4 Factor 4: Divergences
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-070 | `unit_divergence_score_regular_bullish_rsi_adds_40` | RSI +40 | FR-3xx | Deferred |
-| TS-SCR-071 | `unit_divergence_score_regular_bearish_rsi_subtracts_40` | RSI -40 | FR-3xx | Deferred |
-| TS-SCR-072 | `unit_divergence_score_regular_bullish_macd_hist_adds_35` | MACD hist +35 | FR-3xx | Deferred |
-| TS-SCR-073 | `unit_divergence_score_regular_bullish_obv_adds_25` | OBV +25 | FR-3xx | Deferred |
-| TS-SCR-074 | `unit_divergence_score_hidden_bullish_rsi_counts_half_value_20` | Hidden counts at half | FR-3xx | Deferred |
-| TS-SCR-075 | `unit_divergence_score_hidden_bearish_obv_counts_half_value_minus_12_5` | Hidden bearish OBV | FR-3xx | Deferred |
-| TS-SCR-076 | `unit_divergence_score_same_type_on_weekly_multiplies_total_by_1_25` | Weekly confirmation multiplier | FR-3xx | Deferred |
-| TS-SCR-077 | `unit_divergence_score_sum_over_100_clipped_to_100` | Clip | FR-3xx | Deferred |
-| TS-SCR-078 | `unit_divergence_score_none_present_returns_zero` | No divergence | FR-3xx | Deferred |
-| TS-SCR-079 | `unit_divergence_score_opposite_signs_net_out` | Bullish RSI and bearish OBV combine | FR-3xx | Deferred |
-| TS-SCR-080 | `unit_divergence_score_second_pivot_16_bars_ago_not_counted` | Recency boundary 15 versus 16 | FR-3xx | Deferred |
+| TS-SCR-070 | `unit_divergence_score_regular_bullish_rsi_adds_40` | RSI +40 | FR-3xx | Automated |
+| TS-SCR-071 | `unit_divergence_score_regular_bearish_rsi_subtracts_40` | RSI -40 | FR-3xx | Automated |
+| TS-SCR-072 | `unit_divergence_score_regular_bullish_macd_hist_adds_35` | MACD hist +35 | FR-3xx | Automated |
+| TS-SCR-073 | `unit_divergence_score_regular_bullish_obv_adds_25` | OBV +25 | FR-3xx | Automated |
+| TS-SCR-074 | `unit_divergence_score_hidden_bullish_rsi_counts_half_value_20` | Hidden counts at half | FR-3xx | Automated |
+| TS-SCR-075 | `unit_divergence_score_hidden_bearish_obv_counts_half_value_minus_12_5` | Hidden bearish OBV | FR-3xx | Automated |
+| TS-SCR-076 | `unit_divergence_score_same_type_on_weekly_multiplies_total_by_1_25` | Weekly confirmation multiplier | FR-3xx | Automated |
+| TS-SCR-077 | `unit_divergence_score_sum_over_100_clipped_to_100` | Clip | FR-3xx | Automated |
+| TS-SCR-078 | `unit_divergence_score_none_present_returns_zero` | No divergence | FR-3xx | Automated |
+| TS-SCR-079 | `unit_divergence_score_opposite_signs_net_out` | Bullish RSI and bearish OBV combine | FR-3xx | Automated |
+| TS-SCR-080 | `unit_divergence_score_second_pivot_16_bars_ago_not_counted` | Recency boundary: `t - p2` of 15 counts, 16 does not (A-26) | FR-3xx | Automated |
+| TS-SCR-320 | `unit_sma_cross_boundary_10_bars_on_real_snapshots` | Real snapshots against an independent SMA50/SMA200 cross finder: counts on the 10th bar of the window, not the 11th | FR-3xx, S3-T02 | Automated |
+| TS-SCR-321 | `unit_macd_cross_boundary_3_bars_on_real_snapshots` | Real snapshots against an independent MACD loop: counts on the 3rd bar, not the 4th | FR-3xx, S3-T02 | Automated |
+| TS-SCR-322 | `unit_macd_histogram_run_boundary_2_and_3_bars_on_real_snapshots` | Histogram up or down 2 bars gives no run; 3 bars gives +1 or -1 (independent loop) | FR-3xx, S3-T02 | Automated |
+| TS-SCR-323 | `unit_factors_1_to_4_on_real_snapshots_are_in_range_with_evidence` | Factors 1 to 4 on real snapshots: `ok`, in range, evidence with reasons, deterministic | FR-3xx, FR-5xx, S3-T02 | Automated |
+| TS-SCR-324 | `unit_factors_1_to_4_on_a_short_history_degrade_or_go_missing_not_raise` | 40 bars: SMA missing (score 0), MACD degraded without weekly; no exception | FR-3xx, A-27, S3-T02 | Automated |
+| TS-SCR-325 | `unit_factor_missing_and_degraded_inputs_follow_the_policy` | Null warm-up inputs give `missing`; null weekly, slope, ATR or distance give `degraded` with that part 0 (supertrend, sma, macd rows) | A-27, S3-T02 | Automated |
+| TS-SCR-326 | `unit_factor_thresholds_and_points_come_from_the_config` | Freshness, stretch, cross windows, weekly multipliers, divergence points, hidden and weekly multipliers and recency are read from the config | FR-3xx, S3-T02 | Automated |
 
 #### 10.4.5 Factor 5: Mean reversion
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-090 | `unit_mean_reversion_score_z_plus_2_5_z_part_minus_60` | Stretched up is bearish | FR-3xx | Deferred |
-| TS-SCR-091 | `unit_mean_reversion_score_z_minus_2_5_z_part_plus_60` | Stretched down is bullish | FR-3xx | Deferred |
-| TS-SCR-092 | `unit_mean_reversion_score_z_beyond_2_5_clipped_at_60` | `clip(z/2.5, -1, 1)` | FR-3xx | Deferred |
-| TS-SCR-093 | `unit_mean_reversion_score_z_zero_z_part_zero` | Neutral | FR-3xx | Deferred |
-| TS-SCR-094 | `unit_mean_reversion_score_rsi_30_rsi_part_plus_40` | Boundary at 30 | FR-3xx | Deferred |
-| TS-SCR-095 | `unit_mean_reversion_score_rsi_70_rsi_part_minus_40` | Boundary at 70 | FR-3xx | Deferred |
-| TS-SCR-096 | `unit_mean_reversion_score_rsi_50_rsi_part_zero_linear_midpoint` | Linear between | FR-3xx | Deferred |
-| TS-SCR-097 | `unit_mean_reversion_score_rsi_below_30_stays_plus_40` | No overshoot | FR-3xx | Deferred |
-| TS-SCR-098 | `unit_mean_reversion_score_pct_b_is_evidence_only_not_in_score` | `pct_b` does not change the score | FR-3xx | Deferred |
-| TS-SCR-099 | `unit_mean_reversion_score_stdev_zero_flat_series_returns_zero_degraded` | Zero stdev handled without error | FR-3xx | Deferred |
+| TS-SCR-090 | `unit_mean_reversion_score_z_plus_2_5_z_part_minus_60` | Stretched up is bearish | FR-3xx | Automated |
+| TS-SCR-091 | `unit_mean_reversion_score_z_minus_2_5_z_part_plus_60` | Stretched down is bullish | FR-3xx | Automated |
+| TS-SCR-092 | `unit_mean_reversion_score_z_beyond_2_5_clipped_at_60` | `clip(z/2.5, -1, 1)` | FR-3xx | Automated |
+| TS-SCR-093 | `unit_mean_reversion_score_z_zero_z_part_zero` | Neutral | FR-3xx | Automated |
+| TS-SCR-094 | `unit_mean_reversion_score_rsi_30_rsi_part_plus_40` | Boundary at 30 | FR-3xx | Automated |
+| TS-SCR-095 | `unit_mean_reversion_score_rsi_70_rsi_part_minus_40` | Boundary at 70 | FR-3xx | Automated |
+| TS-SCR-096 | `unit_mean_reversion_score_rsi_50_rsi_part_zero_linear_midpoint` | Linear between | FR-3xx | Automated |
+| TS-SCR-097 | `unit_mean_reversion_score_rsi_below_30_stays_plus_40` | No overshoot | FR-3xx | Automated |
+| TS-SCR-098 | `unit_mean_reversion_score_pct_b_is_evidence_only_not_in_score` | `pct_b` does not change the score | FR-3xx | Automated |
+| TS-SCR-099 | `unit_mean_reversion_score_stdev_zero_flat_series_returns_zero_degraded` | Zero stdev handled without error | FR-3xx | Automated |
+| TS-SCR-360 | `unit_mean_reversion_score_parts_sum` | z_part + rsi_part, both signs and opposing parts; FR-307 example -100 | FR-307, S3-T03 | Automated |
+| TS-SCR-361 | `unit_mean_reversion_evidence_and_reasons_use_templates` | Evidence names, units and rendered reasons | FR-5xx, S3-T03 | Automated |
+| TS-SCR-362 | `unit_mean_reversion_null_inputs_degrade_or_go_missing` | One null input degrades, both null is `missing` | FR-307, S3-T03 | Automated |
+| TS-SCR-363 | `unit_mean_reversion_on_real_snapshots_is_in_range_and_declares_inputs` | Computed snapshots score in range and equal the formula | FR-307, S3-T03 | Automated |
 
 #### 10.4.6 Factor 6: Fibonacci
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-100 | `unit_fib_score_up_leg_near_38_2_and_holding_adds_60` | +60 | FR-3xx | Deferred |
-| TS-SCR-101 | `unit_fib_score_up_leg_near_50_and_holding_adds_70` | +70 | FR-3xx | Deferred |
-| TS-SCR-102 | `unit_fib_score_up_leg_near_61_8_and_holding_adds_80` | +80 | FR-3xx | Deferred |
-| TS-SCR-103 | `unit_fib_score_up_leg_close_below_78_6_subtracts_50` | Swing failed | FR-3xx | Deferred |
-| TS-SCR-104 | `unit_fib_score_up_leg_close_above_b_adds_20` | Leg resumed | FR-3xx | Deferred |
-| TS-SCR-105 | `unit_fib_score_up_leg_otherwise_zero` | No rule matches | FR-3xx | Deferred |
-| TS-SCR-106 | `unit_fib_score_near_boundary_exactly_half_atr_counts_as_near` | `abs(close - level) <= 0.5*atr14` | FR-3xx | Deferred |
-| TS-SCR-107 | `unit_fib_score_holding_requires_close_above_prior_close_and_low_ge_level_minus_half_atr` | Both `holding` conditions | FR-3xx | Deferred |
-| TS-SCR-108 | `unit_fib_score_down_leg_near_38_2_and_holding_subtracts_60` | Mirror of +60 | FR-3xx | Deferred |
-| TS-SCR-109 | `unit_fib_score_down_leg_near_50_and_holding_subtracts_70` | Mirror | FR-3xx | Deferred |
-| TS-SCR-110 | `unit_fib_score_down_leg_near_61_8_and_holding_subtracts_80` | Mirror | FR-3xx | Deferred |
-| TS-SCR-111 | `unit_fib_score_down_leg_close_above_78_6_adds_50` | Mirror of failure rule | FR-3xx | Deferred |
-| TS-SCR-112 | `unit_fib_score_down_leg_close_below_b_subtracts_20` | Mirror | FR-3xx | Deferred |
-| TS-SCR-113 | `unit_fib_score_no_leg_score_zero_quality_degraded` | No qualifying leg | FR-3xx | Deferred |
-| TS-SCR-114 | `unit_fib_score_evidence_includes_next_level_127_2_extension` | Next target evidence | FR-3xx, FR-5xx | Deferred |
+| TS-SCR-100 | `unit_fib_score_up_leg_near_38_2_and_holding_adds_60` | +60 | FR-3xx | Automated |
+| TS-SCR-101 | `unit_fib_score_up_leg_near_50_and_holding_adds_70` | +70 | FR-3xx | Automated |
+| TS-SCR-102 | `unit_fib_score_up_leg_near_61_8_and_holding_adds_80` | +80 | FR-3xx | Automated |
+| TS-SCR-103 | `unit_fib_score_up_leg_close_below_78_6_subtracts_50` | Swing failed | FR-3xx | Automated |
+| TS-SCR-104 | `unit_fib_score_up_leg_close_above_b_adds_20` | Leg resumed | FR-3xx | Automated |
+| TS-SCR-105 | `unit_fib_score_up_leg_otherwise_zero` | No rule matches | FR-3xx | Automated |
+| TS-SCR-106 | `unit_fib_score_near_boundary_exactly_half_atr_counts_as_near` | `abs(close - level) <= 0.5*atr14` | FR-3xx | Automated |
+| TS-SCR-107 | `unit_fib_score_holding_requires_close_above_prior_close_and_low_ge_level_minus_half_atr` | Both `holding` conditions | FR-3xx | Automated |
+| TS-SCR-108 | `unit_fib_score_down_leg_near_38_2_and_holding_subtracts_60` | Mirror of +60 | FR-3xx | Automated |
+| TS-SCR-109 | `unit_fib_score_down_leg_near_50_and_holding_subtracts_70` | Mirror | FR-3xx | Automated |
+| TS-SCR-110 | `unit_fib_score_down_leg_near_61_8_and_holding_subtracts_80` | Mirror | FR-3xx | Automated |
+| TS-SCR-111 | `unit_fib_score_down_leg_close_above_78_6_adds_50` | Mirror of failure rule | FR-3xx | Automated |
+| TS-SCR-112 | `unit_fib_score_down_leg_close_below_b_subtracts_20` | Mirror | FR-3xx | Automated |
+| TS-SCR-113 | `unit_fib_score_no_leg_score_zero_quality_degraded` | No qualifying leg | FR-3xx | Automated |
+| TS-SCR-114 | `unit_fib_score_evidence_includes_next_level_127_2_extension` | Next target evidence | FR-3xx, FR-5xx | Automated |
+| TS-SCR-364 | `unit_fib_first_listed_rule_wins_when_two_levels_are_near` | Listed order decides when two levels are near (PRD A-28); both signs | FR-308, A-28, S3-T03 | Automated |
+| TS-SCR-365 | `unit_fib_missing_price_inputs_make_the_factor_missing` | Null close, prior close, low, high or ATR is `missing` | FR-308, S3-T03 | Automated |
+| TS-SCR-366 | `unit_fib_fail_rule_is_ignored_while_a_hold_rule_matches` | Hold rules precede the failure and resume rules; both signs | FR-308, A-28, S3-T03 | Automated |
+| TS-SCR-367 | `unit_fib_on_real_snapshots_scores_in_range` | Computed snapshots: in range; no leg means `degraded` | FR-309, S3-T03 | Automated |
+| TS-SCR-368 | `unit_fib_absent_extensions_leave_out_the_target_evidence` | No extensions in the snapshot: score unchanged, target items omitted | FR-308, S3-T03 | Automated |
 
 #### 10.4.7 Factor 7: Support and resistance
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-120 | `unit_levels_score_rr_formula_room_above_vs_below_base_clip_60` | `rr = d_r / max(d_s, 0.25)`, `base = clip((rr-1)*40, -60, 60)` | FR-3xx | Deferred |
-| TS-SCR-121 | `unit_levels_score_d_s_zero_uses_floor_0_25` | Division floor | FR-3xx | Deferred |
-| TS-SCR-122 | `unit_levels_score_rr_1_0_base_zero` | Neutral | FR-3xx | Deferred |
-| TS-SCR-123 | `unit_levels_score_breakout_rel_volume_1_5_adds_40` | Boundary: relative volume exactly 1.5 | FR-3xx | Deferred |
-| TS-SCR-124 | `unit_levels_score_breakout_rel_volume_1_49_adds_0` | Boundary just below | FR-3xx | Deferred |
-| TS-SCR-125 | `unit_levels_score_breakout_level_not_intact_yesterday_adds_0` | Intact-yesterday condition | FR-3xx | Deferred |
-| TS-SCR-126 | `unit_levels_score_breakdown_rel_volume_1_5_subtracts_40` | -40 | FR-3xx | Deferred |
-| TS-SCR-127 | `unit_levels_score_total_clipped_to_100` | Base 60 plus breakout 40 | FR-3xx | Deferred |
-| TS-SCR-128 | `unit_levels_score_no_resistance_above_uses_52_week_high_level` | 52-week levels join the set | FR-3xx | Deferred |
+| TS-SCR-120 | `unit_levels_score_rr_formula_room_above_vs_below_base_clip_60` | `rr = d_r / max(d_s, 0.25)`, `base = clip((rr-1)*40, -60, 60)` | FR-3xx | Automated |
+| TS-SCR-121 | `unit_levels_score_d_s_zero_uses_floor_0_25` | Division floor | FR-3xx | Automated |
+| TS-SCR-122 | `unit_levels_score_rr_1_0_base_zero` | Neutral | FR-3xx | Automated |
+| TS-SCR-123 | `unit_levels_score_breakout_rel_volume_1_5_adds_40` | Boundary: relative volume exactly 1.5 | FR-3xx | Automated |
+| TS-SCR-124 | `unit_levels_score_breakout_rel_volume_1_49_adds_0` | Boundary just below | FR-3xx | Automated |
+| TS-SCR-125 | `unit_levels_score_breakout_level_not_intact_yesterday_adds_0` | Intact-yesterday condition | FR-3xx | Automated |
+| TS-SCR-126 | `unit_levels_score_breakdown_rel_volume_1_5_subtracts_40` | -40 | FR-3xx | Automated |
+| TS-SCR-127 | `unit_levels_score_total_clipped_to_100` | Base 60 plus breakout 40 | FR-3xx | Automated |
+| TS-SCR-128 | `unit_levels_score_no_resistance_above_uses_52_week_high_level` | 52-week levels join the set | FR-3xx | Automated |
+| TS-SCR-370 | `unit_levels_close_beyond_the_52_week_extreme_floors_distance_at_zero` | No resistance and close at or past the 52-week high gives `d_r` 0; mirror for support | FR-310, A-29, S3-T03 | Automated |
+| TS-SCR-371 | `unit_levels_no_support_below_uses_52_week_low_level` | The 52-week low gives `d_s` when no support exists | FR-310, A-29, S3-T03 | Automated |
+| TS-SCR-372 | `unit_levels_missing_inputs_make_the_factor_missing` | No levels block, close, ATR (or zero) or 52-week range is `missing` | FR-310, S3-T03 | Automated |
+| TS-SCR-373 | `unit_levels_evidence_and_reasons_use_templates` | Evidence names, units and rendered reasons | FR-5xx, S3-T03 | Automated |
+| TS-SCR-374 | `unit_levels_on_real_snapshots_matches_independent_rr` | Computed snapshots equal the rr formula | FR-310, S3-T03 | Automated |
 
 #### 10.4.8 Factor 8: Volatility
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-130 | `unit_volatility_score_squeeze_up_trend_adds_30` | `+30 * st_dir_d` | FR-3xx | Deferred |
-| TS-SCR-131 | `unit_volatility_score_squeeze_down_trend_subtracts_30` | Direction sign | FR-3xx | Deferred |
-| TS-SCR-132 | `unit_volatility_score_squeeze_boundary_rank_15_is_not_squeeze` | `bbw_rank < 15` strict | FR-3xx | Deferred |
-| TS-SCR-133 | `unit_volatility_score_expansion_with_move_in_trend_direction_adds_20` | `+20 * st_dir_d` | FR-3xx | Deferred |
-| TS-SCR-134 | `unit_volatility_score_expansion_move_against_trend_adds_0` | Move over 3 bars opposes direction | FR-3xx | Deferred |
-| TS-SCR-135 | `unit_volatility_score_atr_pct_rank_above_90_halves_score` | Multiplier 0.5 | FR-3xx | Deferred |
-| TS-SCR-136 | `unit_volatility_score_atr_pct_rank_exactly_90_no_halving` | Boundary | FR-3xx | Deferred |
-| TS-SCR-137 | `unit_volatility_score_neither_squeeze_nor_expansion_returns_zero` | No rule | FR-3xx | Deferred |
-| TS-SCR-138 | `unit_volatility_evidence_expected_1d_move_equals_atr14` | Risk evidence on every card | FR-3xx, FR-7xx | Deferred |
+| TS-SCR-130 | `unit_volatility_score_squeeze_up_trend_adds_30` | `+30 * st_dir_d` | FR-3xx | Automated |
+| TS-SCR-131 | `unit_volatility_score_squeeze_down_trend_subtracts_30` | Direction sign | FR-3xx | Automated |
+| TS-SCR-132 | `unit_volatility_score_squeeze_boundary_rank_15_is_not_squeeze` | `bbw_rank < 15` strict | FR-3xx | Automated |
+| TS-SCR-133 | `unit_volatility_score_expansion_with_move_in_trend_direction_adds_20` | `+20 * st_dir_d` | FR-3xx | Automated |
+| TS-SCR-134 | `unit_volatility_score_expansion_move_against_trend_adds_0` | Move over 3 bars opposes direction | FR-3xx | Automated |
+| TS-SCR-135 | `unit_volatility_score_atr_pct_rank_above_90_halves_score` | Multiplier 0.5 | FR-3xx | Automated |
+| TS-SCR-136 | `unit_volatility_score_atr_pct_rank_exactly_90_no_halving` | Boundary | FR-3xx | Automated |
+| TS-SCR-137 | `unit_volatility_score_neither_squeeze_nor_expansion_returns_zero` | No rule | FR-3xx | Automated |
+| TS-SCR-138 | `unit_volatility_evidence_expected_1d_move_equals_atr14` | Risk evidence on every card | FR-3xx, FR-7xx | Automated |
+| TS-SCR-380 | `unit_volatility_expansion_rank_85_is_not_expansion` | `bbw_rank > 85` is strict even with the flag set | FR-311, S3-T03 | Automated |
+| TS-SCR-381 | `unit_volatility_expansion_needs_the_rising_flag` | A high rank without the rising flag scores 0 | FR-311, S3-T03 | Automated |
+| TS-SCR-382 | `unit_volatility_null_atr_rank_or_atr_degrades` | Null ATR rank or ATR degrades; the score stays | FR-311, S3-T03 | Automated |
+| TS-SCR-383 | `unit_volatility_missing_direction_or_rank_is_missing` | No direction or band width rank is `missing` | FR-311, S3-T03 | Automated |
+| TS-SCR-384 | `unit_volatility_evidence_and_reasons_use_templates` | Rendered reasons for every evidence item | FR-5xx, S3-T03 | Automated |
+| TS-SCR-385 | `unit_volatility_on_real_snapshots_agrees_with_snapshot_flags` | Computed snapshots: in range, squeeze equals the flag, score equals the rules | FR-311, S3-T03 | Automated |
+| TS-SCR-386 | `unit_volatility_null_risk_inputs_are_left_out_of_the_evidence` | Null ATR %, HV20 and band width drop their items; score unchanged | FR-311, S3-T03 | Automated |
+| TS-SCR-390 | `unit_factors_5_to_8_are_pure_and_deterministic` | Same snapshot same result, snapshot not mutated, JSON-safe, reasons and units set | ADR-061, S3-T03 | Automated |
+| TS-SCR-391 | `unit_factors_5_to_8_read_only_declared_inputs` | A snapshot reduced to the declared input paths gives the same result | ADR-061, S3-T03 | Automated |
 
 #### 10.4.9 Factor 9: Volume oscillator
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-140 | `unit_volume_osc_score_positive_vo_rising_price_vo_part_positive` | Rising volume confirms an up move | FR-3xx | Deferred |
-| TS-SCR-141 | `unit_volume_osc_score_positive_vo_falling_price_vo_part_negative` | Selling on rising volume | FR-3xx, S3-T04 | Deferred |
-| TS-SCR-142 | `unit_volume_osc_score_negative_vo_rising_price_vo_part_negative` | Rally on fading volume | FR-3xx | Deferred |
-| TS-SCR-143 | `unit_volume_osc_score_negative_vo_falling_price_vo_part_positive` | Decline on fading volume | FR-3xx | Deferred |
-| TS-SCR-144 | `unit_volume_osc_score_vo_part_clipped_at_60` | `clip(vo*2, -60, 60)` | FR-3xx | Deferred |
-| TS-SCR-145 | `unit_volume_osc_score_ret5_zero_vo_part_zero` | `sign(0) == 0` | FR-3xx | Deferred |
-| TS-SCR-146 | `unit_volume_osc_score_obv_slope_positive_adds_40` | `obv_part` | FR-3xx | Deferred |
-| TS-SCR-147 | `unit_volume_osc_score_obv_slope_negative_subtracts_40` | `obv_part` | FR-3xx | Deferred |
-| TS-SCR-148 | `unit_volume_osc_score_total_clipped_to_100` | Clip | FR-3xx | Deferred |
+| TS-SCR-140 | `unit_volume_osc_score_positive_vo_rising_price_vo_part_positive` | Rising volume confirms an up move | FR-3xx | Automated |
+| TS-SCR-141 | `unit_volume_osc_score_positive_vo_falling_price_vo_part_negative` | Selling on rising volume | FR-3xx, S3-T04 | Automated |
+| TS-SCR-142 | `unit_volume_osc_score_negative_vo_rising_price_vo_part_negative` | Rally on fading volume | FR-3xx | Automated |
+| TS-SCR-143 | `unit_volume_osc_score_negative_vo_falling_price_vo_part_positive` | Decline on fading volume | FR-3xx | Automated |
+| TS-SCR-144 | `unit_volume_osc_score_vo_part_clipped_at_60` | `clip(vo*2, -60, 60)` | FR-3xx | Automated |
+| TS-SCR-145 | `unit_volume_osc_score_ret5_zero_vo_part_zero` | `sign(0) == 0` | FR-3xx | Automated |
+| TS-SCR-146 | `unit_volume_osc_score_obv_slope_positive_adds_40` | `obv_part` | FR-3xx | Automated |
+| TS-SCR-147 | `unit_volume_osc_score_obv_slope_negative_subtracts_40` | `obv_part` | FR-3xx | Automated |
+| TS-SCR-148 | `unit_volume_osc_score_total_clipped_to_100` | Clip | FR-3xx | Automated |
+| TS-SCR-400 | `unit_volume_osc_null_input_is_missing_score_zero` | Any of `vo`, `ret5`, `obv_slope` in warm-up gives a missing factor | FR-312, S3-T04 | Automated |
+| TS-SCR-401 | `unit_volume_osc_evidence_lists_inputs_and_parts_with_reasons` | Evidence has vo, ret5, OBV sign, vo_part, obv_part | FR-312, S3-T04 | Automated |
+| TS-SCR-402 | `unit_volume_osc_reason_names_confirm_or_fade` | The vo_part reason says confirms or fades | FR-312, S3-T04 | Automated |
+| TS-SCR-403 | `unit_volume_osc_input_paths_resolve` | Declared input paths resolve | FR-312, S3-T04 | Automated |
+| TS-SCR-404 | `unit_volume_osc_pure_and_deterministic` | Same snapshot, equal results, no mutation | FR-301, S3-T04 | Automated |
 
 #### 10.4.10 Factor 10: Buy / sell volume
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-150 | `unit_flow_score_delta_pct_10_clip_50_plus_cmf_clip_50` | Both parts and both clips | FR-3xx | Deferred |
-| TS-SCR-151 | `unit_flow_score_delta_pct_10_0_2_clipped_at_50` | `0.2*300 = 60` clips to 50 | FR-3xx | Deferred |
-| TS-SCR-152 | `unit_flow_score_cmf20_negative_part_clipped_at_minus_50` | Clip low | FR-3xx | Deferred |
-| TS-SCR-153 | `unit_flow_score_quality_intraday_weight_multiplier_1_0` | No weight change | FR-3xx | Deferred |
-| TS-SCR-154 | `unit_flow_score_quality_daily_estimate_weight_multiplier_0_6` | Weight times 0.6 | FR-3xx, S3-T04 | Deferred |
-| TS-SCR-155 | `unit_flow_score_quality_stored_and_shown_in_evidence` | Quality visible in evidence | FR-3xx, FR-7xx | Deferred |
-| TS-SCR-156 | `unit_flow_score_accumulation_distribution_days_reported_as_evidence` | 20-session counts | FR-3xx | Deferred |
-| TS-SCR-157 | `unit_flow_score_trades_quality_path_accepts_provider_flag` | Optional upgrade is accepted by the interface | FR-3xx, A§7 | Deferred |
+| TS-SCR-150 | `unit_flow_score_delta_pct_10_clip_50_plus_cmf_clip_50` | Both parts and both clips | FR-3xx | Automated |
+| TS-SCR-151 | `unit_flow_score_delta_pct_10_0_2_clipped_at_50` | `0.2*300 = 60` clips to 50 | FR-3xx | Automated |
+| TS-SCR-152 | `unit_flow_score_cmf20_negative_part_clipped_at_minus_50` | Clip low | FR-3xx | Automated |
+| TS-SCR-153 | `unit_flow_score_quality_intraday_weight_multiplier_1_0` | No weight change | FR-3xx | Automated |
+| TS-SCR-154 | `unit_flow_score_quality_daily_estimate_weight_multiplier_0_6` | Weight times 0.6 | FR-3xx, S3-T04 | Automated |
+| TS-SCR-155 | `unit_flow_score_quality_stored_and_shown_in_evidence` | Quality visible in evidence | FR-3xx, FR-7xx | Automated |
+| TS-SCR-156 | `unit_flow_score_accumulation_distribution_days_reported_as_evidence` | 20-session counts | FR-3xx | Automated |
+| TS-SCR-157 | `unit_flow_score_trades_quality_path_accepts_provider_flag` | Optional upgrade is accepted by the interface | FR-3xx, A§7 | Automated |
+| TS-SCR-405 | `unit_flow_null_input_is_missing_score_zero` | `delta_pct_10` or `cmf20` in warm-up gives a missing factor | FR-313, S3-T04 | Automated |
+| TS-SCR-406 | `unit_flow_unknown_quality_is_rejected` | A quality outside intraday, daily_estimate, trades raises ValueError | FR-313, S3-T04 | Automated |
+| TS-SCR-407 | `unit_flow_null_day_counts_leave_out_evidence_items` | Null accumulation or distribution counts are left out; score unchanged | FR-313, S3-T04 | Automated |
+| TS-SCR-408 | `unit_flow_evidence_lists_delta_and_cmf_with_reasons` | Evidence has delta_pct_10 and cmf_20 with formatted reasons | FR-313, S3-T04 | Automated |
+| TS-SCR-409 | `unit_flow_input_paths_resolve_and_pure` | Declared paths resolve; compute is pure | FR-301, S3-T04 | Automated |
 
 #### 10.4.11 Factor 11: Fundamentals overlay
 
@@ -931,50 +990,64 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SCR-180 | `unit_ripster_score_close_above_c3_bias_adds_30` | `bias` = +30 | FR-333 | Deferred |
-| TS-SCR-181 | `unit_ripster_score_close_below_c3_bias_subtracts_30` | `bias` = -30 | FR-333 | Deferred |
-| TS-SCR-182 | `unit_ripster_score_close_inside_c3_pos_0_bias_is_0` | `pos(c3)` = 0 scores 0 for `bias` | FR-333, S3-T14 | Deferred |
-| TS-SCR-183 | `unit_ripster_score_c2_bullish_trend_adds_20` | `trend` = +20 | FR-333 | Deferred |
-| TS-SCR-184 | `unit_ripster_score_c2_bearish_trend_subtracts_20` | `trend` = -20 | FR-333 | Deferred |
-| TS-SCR-185 | `unit_ripster_score_c2_fully_above_c3_stacking_adds_20` | `stack` = +1 | FR-333 | Deferred |
-| TS-SCR-186 | `unit_ripster_score_c2_fully_below_c3_stacking_subtracts_20` | `stack` = -1 | FR-333 | Deferred |
-| TS-SCR-187 | `unit_ripster_score_c2_overlapping_c3_stacking_is_0` | Overlapping clouds give 0 | FR-333 | Deferred |
-| TS-SCR-188 | `unit_ripster_score_c3_bullish_mid_adds_10` | `mid` = +10 | FR-333 | Deferred |
-| TS-SCR-189 | `unit_ripster_score_c3_bearish_mid_subtracts_10` | `mid` = -10 | FR-333 | Deferred |
-| TS-SCR-190 | `unit_ripster_score_close_above_c5_long_adds_10` | `long` = +10 | FR-333 | Deferred |
-| TS-SCR-191 | `unit_ripster_score_close_below_c5_long_subtracts_10` | `long` = -10 | FR-333 | Deferred |
-| TS-SCR-192 | `unit_ripster_score_close_inside_c5_long_is_0` | `pos(c5)` = 0 | FR-333 | Deferred |
-| TS-SCR-193 | `unit_ripster_score_pullback_held_stack_plus_1_low_2_bars_ago_close_above_bot_c1_adds_10` | Held bullish pullback | FR-333, S3-T14 | Deferred |
-| TS-SCR-194 | `unit_ripster_score_pullback_failed_close_at_or_below_bot_c1_is_0` | Failed bullish pullback | FR-333, S3-T14 | Deferred |
-| TS-SCR-195 | `unit_ripster_score_pullback_stale_test_4_bars_ago_is_0` | Stale test (4 bars ago) does not count | FR-333, S3-T14 | Deferred |
-| TS-SCR-196 | `unit_ripster_score_pullback_test_3_bars_ago_counts` | Boundary: `pullback_lookback_bars` = 3 is inclusive | FR-333 | Deferred |
-| TS-SCR-197 | `unit_ripster_score_pullback_bearish_held_stack_minus_1_high_at_or_above_bot_c1_close_below_top_c1_subtracts_10` | Held bearish pullback | FR-333 | Deferred |
-| TS-SCR-198 | `unit_ripster_score_pullback_bearish_failed_close_at_or_above_top_c1_is_0` | Failed bearish pullback | FR-333 | Deferred |
-| TS-SCR-199 | `unit_ripster_score_pullback_stack_0_is_0_even_when_c1_tested` | Pullback requires `stack != 0` | FR-333 | Deferred |
-| TS-SCR-200 | `unit_ripster_score_all_components_bullish_maximum_30_20_20_10_10_10_is_100` | Upper bound | FR-333 | Deferred |
-| TS-SCR-201 | `unit_ripster_score_all_components_bearish_maximum_is_minus_100` | Lower bound | FR-333 | Deferred |
-| TS-SCR-202 | `unit_ripster_score_c4_72_89_cloud_is_evidence_only_not_scored` | Changing the 72/89 cloud leaves the score unchanged | FR-333 | Deferred |
-| TS-SCR-203 | `unit_ripster_score_pullback_lookback_read_from_config_ripster_key` | `ripster.pullback_lookback_bars` | FR-333, A§13 | Deferred |
-| TS-SCR-204 | `unit_ripster_score_evidence_lists_six_components_and_derived_rc_values` | Components and `rc_*` values in the evidence | FR-333, FR-5xx | Deferred |
+| TS-SCR-180 | `unit_ripster_score_close_above_c3_bias_adds_30` | `bias` = +30 | FR-333 | Automated |
+| TS-SCR-181 | `unit_ripster_score_close_below_c3_bias_subtracts_30` | `bias` = -30 | FR-333 | Automated |
+| TS-SCR-182 | `unit_ripster_score_close_inside_c3_pos_0_bias_is_0` | `pos(c3)` = 0 scores 0 for `bias` | FR-333, S3-T14 | Automated |
+| TS-SCR-183 | `unit_ripster_score_c2_bullish_trend_adds_20` | `trend` = +20 | FR-333 | Automated |
+| TS-SCR-184 | `unit_ripster_score_c2_bearish_trend_subtracts_20` | `trend` = -20 | FR-333 | Automated |
+| TS-SCR-185 | `unit_ripster_score_c2_fully_above_c3_stacking_adds_20` | `stack` = +1 | FR-333 | Automated |
+| TS-SCR-186 | `unit_ripster_score_c2_fully_below_c3_stacking_subtracts_20` | `stack` = -1 | FR-333 | Automated |
+| TS-SCR-187 | `unit_ripster_score_c2_overlapping_c3_stacking_is_0` | Overlapping clouds give 0 | FR-333 | Automated |
+| TS-SCR-188 | `unit_ripster_score_c3_bullish_mid_adds_10` | `mid` = +10 | FR-333 | Automated |
+| TS-SCR-189 | `unit_ripster_score_c3_bearish_mid_subtracts_10` | `mid` = -10 | FR-333 | Automated |
+| TS-SCR-190 | `unit_ripster_score_close_above_c5_long_adds_10` | `long` = +10 | FR-333 | Automated |
+| TS-SCR-191 | `unit_ripster_score_close_below_c5_long_subtracts_10` | `long` = -10 | FR-333 | Automated |
+| TS-SCR-192 | `unit_ripster_score_close_inside_c5_long_is_0` | `pos(c5)` = 0 | FR-333 | Automated |
+| TS-SCR-193 | `unit_ripster_score_pullback_held_low_2_bars_ago_close_above_bot_c1_adds_10` | Held bullish pullback | FR-333, S3-T14 | Automated |
+| TS-SCR-194 | `unit_ripster_score_pullback_failed_close_at_or_below_bot_c1_is_0` | Failed bullish pullback | FR-333, S3-T14 | Automated |
+| TS-SCR-195 | `unit_ripster_score_pullback_stale_test_4_bars_ago_is_0` | Stale test (4 bars ago) does not count | FR-333, S3-T14 | Automated |
+| TS-SCR-196 | `unit_ripster_score_pullback_test_3_bars_ago_counts` | Boundary, resolved with PRD A-25: the window is t-2..t, so a test 2 bars ago (the oldest bar of the 3-bar window) counts and a test 3 bars ago (t-3) does not | FR-333 | Automated |
+| TS-SCR-197 | `unit_ripster_score_pullback_bearish_held_stack_minus_1_high_at_or_above_bot_c1_close_below_top_c1_subtracts_10` | Held bearish pullback | FR-333 | Automated |
+| TS-SCR-198 | `unit_ripster_score_pullback_bearish_failed_close_at_or_above_top_c1_is_0` | Failed bearish pullback | FR-333 | Automated |
+| TS-SCR-199 | `unit_ripster_score_pullback_stack_0_is_0_even_when_c1_tested` | Pullback requires `stack != 0` | FR-333 | Automated |
+| TS-SCR-200 | `unit_ripster_score_all_components_bullish_maximum_30_20_20_10_10_10_is_100` | Upper bound | FR-333 | Automated |
+| TS-SCR-201 | `unit_ripster_score_all_components_bearish_maximum_is_minus_100` | Lower bound | FR-333 | Automated |
+| TS-SCR-202 | `unit_ripster_score_c4_72_89_cloud_is_evidence_only_not_scored` | Changing the 72/89 cloud leaves the score unchanged | FR-333 | Automated |
+| TS-SCR-203 | `unit_ripster_score_pullback_lookback_read_from_config_ripster_key` | `ripster.pullback_lookback_bars` | FR-333, A§13 | Automated |
+| TS-SCR-204 | `unit_ripster_score_evidence_lists_six_components_and_derived_rc_values` | Components and `rc_*` values in the evidence | FR-333, FR-5xx | Automated |
+| TS-SCR-420 | `unit_ripster_score_clip_to_plus_minus_100_when_points_exceed` | Sum above 100 or below -100 is clipped | FR-333, S3-T14 | Automated |
+| TS-SCR-421 | `unit_ripster_score_points_read_from_config_ripster_key` | `ripster.points` sets every component | FR-333, S3-T14 | Automated |
+| TS-SCR-422 | `unit_ripster_score_reasons_are_deterministic_and_name_the_rule` | Reason templates, one per rule line | FR-333, S3-T14 | Automated |
+| TS-SCR-423 | `unit_ripster_score_missing_core_input_is_missing_quality_score_zero` | Null bias, stack, c2 or c3 direction (under 50 bars) gives `missing`, score 0 | FR-333, A-31, S3-T14 | Automated |
+| TS-SCR-424 | `unit_ripster_score_c5_not_defined_yet_scores_long_zero_and_is_degraded` | Null 180/200 position (50 to 199 bars): `long` 0, quality `degraded` | FR-333, A-31, S3-T14 | Automated |
+| TS-SCR-425 | `unit_ripster_score_is_pure_and_does_not_mutate_the_snapshot` | Purity | FR-333, S3-T14 | Automated |
+| TS-SCR-426 | `unit_ripster_score_pullback_bearish_end_to_end_held_failed_and_stale` | Bearish held, failed and stale tests from hand-built bars | FR-333, S3-T14 | Automated |
+| TS-SCR-427 | `unit_ripster_score_on_computed_snapshot_reads_every_declared_input` | Factor on `compute_snapshot` output equals an independent evaluation of the rule lines | FR-333, S3-T14 | Automated |
+| TS-SCR-428 | `unit_ripster_score_registry_factor_is_the_module_factor` | Registry `ripster` is the implemented factor, not the stub | FR-333, S3-T14 | Automated |
+| TS-SCR-429 | `unit_ripster_score_null_cloud_edges_and_weekly_direction_stay_null_in_evidence` | Null edges and weekly direction stay null in the evidence | FR-333, FR-5xx, S3-T14 | Automated |
+| TS-SCR-430 | `unit_confidence_stack_penalty_rule_lines (opposing)` | `confidence_stack_penalty` is 10 when `rc_stack == -st_dir_d`, both signs (helper for TS-CMP-031) | FR-335, S3-T14 | Automated |
+| TS-SCR-431 | `unit_confidence_stack_penalty_rule_lines (same sign or zero)` | No deduction for same sign or `rc_stack` 0 (helper for TS-CMP-032) | FR-335, S3-T14 | Automated |
+| TS-SCR-432 | `unit_confidence_stack_penalty_reads_amount_from_config` | `ripster.confidence_stack_conflict_penalty` | FR-335, S3-T14 | Automated |
+| TS-SCR-433 | `unit_confidence_stack_penalty_null_input_gives_no_deduction` | Warm-up nulls never deduct | FR-335, S3-T14 | Automated |
 
 ### 10.5 Regime and weights (TS-REG)
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-REG-001 | `unit_regime_classify_adx_25_is_trending` | Boundary: ADX >= 25 | FR-3xx, S5-T05 | Deferred |
-| TS-REG-002 | `unit_regime_classify_adx_24_99_is_transitional` | Just below 25 | FR-3xx | Deferred |
-| TS-REG-003 | `unit_regime_classify_adx_20_is_transitional` | Boundary: ranging is `< 20` | FR-3xx | Deferred |
-| TS-REG-004 | `unit_regime_classify_adx_19_99_is_ranging` | Just below 20 | FR-3xx | Deferred |
-| TS-REG-005 | `unit_weights_base_sum_equals_100` | Twelve base weights sum to 100 | FR-3xx, A§13 | Deferred |
+| TS-REG-001 | `unit_regime_classify_adx_25_is_trending` | Boundary: ADX >= 25 | FR-3xx, S5-T05 | Automated |
+| TS-REG-002 | `unit_regime_classify_adx_24_99_is_transitional` | Just below 25 | FR-3xx | Automated |
+| TS-REG-003 | `unit_regime_classify_adx_20_is_transitional` | Boundary: ranging is `< 20` | FR-3xx | Automated |
+| TS-REG-004 | `unit_regime_classify_adx_19_99_is_ranging` | Just below 20 | FR-3xx | Automated |
+| TS-REG-005 | `unit_weights_base_sum_equals_100` | Twelve base weights sum to 100 | FR-3xx, A§13 | Automated |
 | TS-REG-006 | `unit_config_weights_not_summing_to_100_fails_validation_naming_key` | Schema rejects | FR-3xx, S0-T09 | Automated |
-| TS-REG-007 | `unit_weights_multiplier_table_every_cell_trending_matches_spec` | One parametrized row per cell, trending column (12 cells) | FR-3xx, S5-T05 | Deferred |
-| TS-REG-008 | `unit_weights_multiplier_table_every_cell_ranging_matches_spec` | Ranging column (12 cells) | FR-3xx, S5-T05 | Deferred |
-| TS-REG-009 | `unit_weights_multiplier_table_every_cell_transitional_all_1_0` | Transitional column (12 cells) | FR-3xx, S5-T05 | Deferred |
-| TS-REG-010 | `unit_weights_renormalize_after_regime_multipliers_sum_exactly_100` | Renormalization | FR-3xx | Deferred |
-| TS-REG-011 | `unit_weights_event_adjust_days_to_earnings_5_multiplies_fundamentals_1_5` | Boundary: 5 trading days | FR-3xx | Deferred |
-| TS-REG-012 | `unit_weights_event_adjust_days_to_earnings_6_no_change` | Boundary: 6 | FR-3xx | Deferred |
-| TS-REG-013 | `unit_weights_event_adjust_sets_event_risk_flag` | `event_risk` flag | FR-3xx, US-010 | Deferred |
-| TS-REG-014 | `unit_weights_event_adjust_applied_after_regime_before_renormalize` | Order of operations | FR-3xx | Deferred |
+| TS-REG-007 | `unit_weights_multiplier_table_every_cell_trending_matches_spec` | One parametrized row per cell, trending column (12 cells) | FR-3xx, S5-T05 | Automated |
+| TS-REG-008 | `unit_weights_multiplier_table_every_cell_ranging_matches_spec` | Ranging column (12 cells) | FR-3xx, S5-T05 | Automated |
+| TS-REG-009 | `unit_weights_multiplier_table_every_cell_transitional_all_1_0` | Transitional column (12 cells) | FR-3xx, S5-T05 | Automated |
+| TS-REG-010 | `unit_weights_renormalize_after_regime_multipliers_sum_exactly_100` | Renormalization | FR-3xx | Automated |
+| TS-REG-011 | `unit_weights_event_adjust_days_to_earnings_5_multiplies_fundamentals_1_5` | Boundary: 5 trading days | FR-3xx | Automated |
+| TS-REG-012 | `unit_weights_event_adjust_days_to_earnings_6_no_change` | Boundary: 6 | FR-3xx | Automated |
+| TS-REG-013 | `unit_weights_event_adjust_sets_event_risk_flag` | `event_risk` flag | FR-3xx, US-010 | Automated |
+| TS-REG-014 | `unit_weights_event_adjust_applied_after_regime_before_renormalize` | Order of operations | FR-3xx | Automated |
 | TS-REG-015 | `unit_thresholds_fundamentals_score_minus_40_raises_buy_threshold_5` | Boundary: `<= -40` | FR-3xx | Deferred |
 | TS-REG-016 | `unit_thresholds_fundamentals_score_minus_39_no_buy_shift` | Just above | FR-3xx | Deferred |
 | TS-REG-017 | `unit_thresholds_fundamentals_score_plus_40_lowers_sell_threshold_5` | Boundary: `>= +40` | FR-3xx | Deferred |
@@ -984,118 +1057,167 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-REG-021 | `unit_thresholds_adjustments_stack_risk_off_plus_weak_fundamentals_buy_75` | 65 + 5 + 5 | FR-3xx, S5-T05 | Deferred |
 | TS-REG-022 | `unit_thresholds_adjustments_stack_risk_on_plus_strong_fundamentals_sell_25` | 35 - 5 - 5 | FR-3xx | Deferred |
 | TS-REG-023 | `unit_regime_adjustments_list_records_every_fired_adjustment` | Stored list includes regime, earnings, threshold shifts | FR-3xx, FR-5xx | Deferred |
-| TS-REG-024 | `prop_weights_after_any_adjustment_combination_sum_to_100` | All combinations of regime, event, missing factors | FR-3xx, S5-T05 | Deferred |
-| TS-REG-025 | `unit_weights_missing_factor_redistributes_proportionally_across_others` | ETF fundamentals missing | FR-3xx | Deferred |
-| TS-REG-026 | `unit_weights_degraded_factor_weight_halved_then_renormalized` | Fundamentals older than 120 days | FR-3xx | Deferred |
-| TS-REG-027 | `unit_weights_daily_estimate_flow_multiplier_0_6_then_renormalized` | Flow weight times 0.6 | FR-3xx | Deferred |
-| TS-REG-028 | `unit_weights_all_but_one_factor_missing_remaining_weight_100` | Extreme redistribution | FR-3xx | Deferred |
-| TS-REG-029 | `unit_weights_sprint3_defaults_all_multipliers_1_fundamentals_missing_paths_exist` | Code paths exist with injected values | FR-3xx, S3-T05 | Deferred |
+| TS-REG-024 | `prop_weights_after_any_adjustment_combination_sum_to_100` | All combinations of regime, event, missing factors | FR-3xx, S5-T05 | Automated |
+| TS-REG-025 | `unit_weights_missing_factor_redistributes_proportionally_across_others` | ETF fundamentals missing | FR-3xx | Automated |
+| TS-REG-026 | `unit_weights_degraded_factor_weight_halved_then_renormalized` | Fundamentals older than 120 days | FR-3xx | Automated |
+| TS-REG-027 | `unit_weights_daily_estimate_flow_multiplier_0_6_then_renormalized` | Flow weight times 0.6 | FR-3xx | Automated |
+| TS-REG-028 | `unit_weights_all_but_one_factor_missing_remaining_weight_100` | Extreme redistribution | FR-3xx | Automated |
+| TS-REG-029 | `unit_weights_sprint3_defaults_all_multipliers_1_fundamentals_missing_paths_exist` | Code paths exist with injected values | FR-3xx, S3-T05 | Automated |
 | TS-REG-030 | `it_regime_benchmarks_spy_qqq_used_even_when_not_on_watchlist` | Market regime source | FR-3xx, FR-0xx | Deferred |
-| TS-REG-031 | `unit_weights_base_ripster_is_10_and_supertrend_is_20` | New base weights: supertrend 20, sma 7, macd 8, divergence 9, mean_reversion 7, fibonacci 5, levels 7, volatility 4, volume_osc 6, flow 9, fundamentals 8, ripster 10 | FR-3xx, A§13, S3-T14 | Deferred |
-| TS-REG-032 | `unit_weights_multiplier_ripster_trending_1_20_ranging_0_70_transitional_1_00` | Ripster row of the regime table | FR-3xx, S5-T05 | Deferred |
+| TS-REG-031 | `unit_weights_base_ripster_is_10_and_supertrend_is_20` | New base weights: supertrend 20, sma 7, macd 8, divergence 9, mean_reversion 7, fibonacci 5, levels 7, volatility 4, volume_osc 6, flow 9, fundamentals 8, ripster 10 | FR-3xx, A§13, S3-T14 | Automated |
+| TS-REG-032 | `unit_weights_multiplier_ripster_trending_1_20_ranging_0_70_transitional_1_00` | Ripster row of the regime table | FR-3xx, S5-T05 | Automated |
 | TS-REG-033 | `unit_config_ripster_block_missing_key_fails_validation_naming_key` | `ripster` block keys validated by the schema (twelve weights) | FR-3xx, S0-T09 | Deferred |
+| TS-REG-101 | `unit_weights_adjustments_name_regime_when_it_tilts` | Adjustments list names the regime when multipliers differ from 1.0; empty for transitional or no regime | FR-318, FR-323, S3-T05 | Automated |
+| TS-REG-102 | `unit_regime_classify_null_or_nan_adx_is_transitional` | ADX in warm-up gives no tilt | FR-317, S3-T05 | Automated |
+| TS-REG-103 | `unit_regime_classify_thresholds_read_from_config` | `regime.trending_min` and `regime.ranging_max` drive the boundaries | FR-317, S3-T05 | Automated |
+| TS-REG-104 | `unit_weights_results_must_cover_exactly_the_factor_ids` | Absent, unknown or mislabelled result is a ValueError | FR-324, S3-T05 | Automated |
+| TS-REG-105 | `unit_weights_all_factors_missing_raises_no_scorable_factors` | No composite without a scorable factor | FR-324, S3-T05 | Automated |
+| TS-REG-106 | `unit_weights_result_is_frozen_with_read_only_mappings` | Frozen record, read-only mappings | FR-318, S3-T05 | Automated |
+| TS-REG-107 | `unit_regime_multipliers_unknown_regime_raises` | Unknown regime name is a ValueError naming it | FR-318, S3-T05 | Automated |
+| TS-REG-108 | `unit_weights_event_adjust_negative_days_to_earnings_no_change` | A past earnings date is not an event | FR-319, S3-T05 | Automated |
+| TS-REG-109 | `unit_weights_event_risk_flag_from_context_without_weight_change` | Injected `event_risk` is carried through | FR-319, S3-T05 | Automated |
 
 ### 10.6 Composite, display, bands, confidence (TS-CMP)
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-CMP-001 | `unit_composite_compute_weighted_mean_over_non_missing_factors` | `sum(w*s)/sum(w)` | FR-3xx | Deferred |
-| TS-CMP-002 | `unit_composite_compute_contributions_sum_to_composite_within_1e9` | `contribution = weight*score/100` | FR-3xx, S3-T05 | Deferred |
-| TS-CMP-003 | `unit_composite_compute_removing_factor_redistributes_weight_proportionally` | Missing factor | FR-3xx, S3-T05 | Deferred |
-| TS-CMP-004 | `unit_display_compute_composite_zero_is_50_0` | `round((c+100)/2, 1)` | FR-3xx, S3-T05 | Deferred |
-| TS-CMP-005 | `unit_display_compute_composite_plus_100_is_100` | Upper bound | FR-3xx | Deferred |
-| TS-CMP-006 | `unit_display_compute_composite_minus_100_is_0` | Lower bound | FR-3xx | Deferred |
-| TS-CMP-007 | `unit_display_compute_rounds_to_one_decimal_half_even_defined` | Rounding rule is defined and tested | FR-3xx | Deferred |
-| TS-CMP-008 | `unit_band_assign_80_0_strong_buy` | Boundary | FR-3xx | Deferred |
-| TS-CMP-009 | `unit_band_assign_79_9_buy` | Boundary | FR-3xx | Deferred |
-| TS-CMP-010 | `unit_band_assign_65_0_buy` | Boundary | FR-3xx | Deferred |
-| TS-CMP-011 | `unit_band_assign_64_9_neutral_leaning_up` | Boundary | FR-3xx | Deferred |
-| TS-CMP-012 | `unit_band_assign_50_0_neutral_leaning_up` | Boundary | FR-3xx | Deferred |
-| TS-CMP-013 | `unit_band_assign_49_9_neutral_leaning_down` | Boundary | FR-3xx | Deferred |
-| TS-CMP-014 | `unit_band_assign_35_1_neutral_leaning_down` | Boundary | FR-3xx | Deferred |
-| TS-CMP-015 | `unit_band_assign_35_0_sell` | Boundary | FR-3xx | Deferred |
-| TS-CMP-016 | `unit_band_assign_20_1_sell` | Boundary | FR-3xx | Deferred |
-| TS-CMP-017 | `unit_band_assign_20_0_strong_sell` | Boundary | FR-3xx | Deferred |
-| TS-CMP-018 | `unit_band_assign_0_0_strong_sell` | Boundary | FR-3xx | Deferred |
-| TS-CMP-019 | `prop_band_assign_every_display_value_maps_to_exactly_one_band` | No gaps or overlaps over 0.0 to 100.0 step 0.1 | FR-3xx | Deferred |
-| TS-CMP-020 | `unit_confidence_agreement_share_of_weight_with_same_sign_as_composite` | Agreement in 0..1 | FR-3xx | Deferred |
-| TS-CMP-021 | `unit_confidence_all_factors_agree_is_100_before_penalties` | Upper bound | FR-3xx | Deferred |
-| TS-CMP-022 | `unit_confidence_atr_pct_rank_above_90_subtracts_15` | Penalty | FR-3xx | Deferred |
-| TS-CMP-023 | `unit_confidence_any_factor_degraded_subtracts_10` | Penalty | FR-3xx | Deferred |
-| TS-CMP-024 | `unit_confidence_weekly_direction_differs_from_daily_subtracts_10` | Penalty | FR-3xx | Deferred |
-| TS-CMP-025 | `unit_confidence_event_risk_subtracts_10` | Penalty | FR-3xx | Deferred |
-| TS-CMP-026 | `unit_confidence_all_penalties_stack_subtracts_55` | Sum of penalties (15 + 10 + 10 + 10 + 10) | FR-3xx | Deferred |
-| TS-CMP-027 | `unit_confidence_clipped_to_0_when_penalties_exceed_agreement` | Lower clip | FR-3xx | Deferred |
-| TS-CMP-028 | `unit_confidence_zero_composite_sign_handling_defined` | A composite of exactly 0 has a defined agreement rule | FR-3xx | Deferred |
-| TS-CMP-029 | `unit_confidence_missing_factors_excluded_from_agreement_denominator` | Weight base is over non-missing factors | FR-3xx | Deferred |
-| TS-CMP-030 | `prop_composite_all_stages_outputs_in_range_for_random_factor_scores` | Composite -100..100, display 0..100, confidence 0..100 | FR-3xx | Deferred |
-| TS-CMP-031 | `unit_confidence_ripster_stack_opposes_daily_supertrend_subtracts_10` | `rc_stack == -st_dir_d`: confidence reduced by 10 and the deduction is shown | FR-335, S3-T14 | Deferred |
-| TS-CMP-032 | `unit_confidence_ripster_stack_same_sign_or_zero_no_deduction` | `st_dir_d` = +1 with `rc_stack` = +1 or 0 gives no Ripster deduction | FR-335 | Deferred |
-| TS-CMP-033 | `unit_confidence_ripster_worked_example_agreement_0_80_gives_70` | Agreement 0.80, `st_dir_d` = -1, `rc_stack` = +1 gives 80 - 10 = 70 | FR-335 | Deferred |
+| TS-CMP-001 | `unit_composite_compute_weighted_mean_over_non_missing_factors` | `sum(w*s)/sum(w)` | FR-3xx | Automated |
+| TS-CMP-002 | `unit_composite_compute_contributions_sum_to_composite_within_1e9` | `contribution = weight*score/100` | FR-3xx, S3-T05 | Automated |
+| TS-CMP-003 | `unit_composite_compute_removing_factor_redistributes_weight_proportionally` | Missing factor | FR-3xx, S3-T05 | Automated |
+| TS-CMP-004 | `unit_display_compute_composite_zero_is_50_0` | `round((c+100)/2, 1)` | FR-3xx, S3-T05 | Automated |
+| TS-CMP-005 | `unit_display_compute_composite_plus_100_is_100` | Upper bound | FR-3xx | Automated |
+| TS-CMP-006 | `unit_display_compute_composite_minus_100_is_0` | Lower bound | FR-3xx | Automated |
+| TS-CMP-007 | `unit_display_compute_rounds_to_one_decimal_half_even_defined` | Rounding rule is defined and tested | FR-3xx | Automated |
+| TS-CMP-008 | `unit_band_assign_80_0_strong_buy` | Boundary | FR-3xx | Automated |
+| TS-CMP-009 | `unit_band_assign_79_9_buy` | Boundary | FR-3xx | Automated |
+| TS-CMP-010 | `unit_band_assign_65_0_buy` | Boundary | FR-3xx | Automated |
+| TS-CMP-011 | `unit_band_assign_64_9_neutral_leaning_up` | Boundary | FR-3xx | Automated |
+| TS-CMP-012 | `unit_band_assign_50_0_neutral_leaning_up` | Boundary | FR-3xx | Automated |
+| TS-CMP-013 | `unit_band_assign_49_9_neutral_leaning_down` | Boundary | FR-3xx | Automated |
+| TS-CMP-014 | `unit_band_assign_35_1_neutral_leaning_down` | Boundary | FR-3xx | Automated |
+| TS-CMP-015 | `unit_band_assign_35_0_sell` | Boundary | FR-3xx | Automated |
+| TS-CMP-016 | `unit_band_assign_20_1_sell` | Boundary | FR-3xx | Automated |
+| TS-CMP-017 | `unit_band_assign_20_0_strong_sell` | Boundary | FR-3xx | Automated |
+| TS-CMP-018 | `unit_band_assign_0_0_strong_sell` | Boundary | FR-3xx | Automated |
+| TS-CMP-019 | `prop_band_assign_every_display_value_maps_to_exactly_one_band` | No gaps or overlaps over 0.0 to 100.0 step 0.1 | FR-3xx | Automated |
+| TS-CMP-020 | `unit_confidence_agreement_share_of_weight_with_same_sign_as_composite` | Agreement in 0..1 | FR-3xx | Automated |
+| TS-CMP-021 | `unit_confidence_all_factors_agree_is_100_before_penalties` | Upper bound | FR-3xx | Automated |
+| TS-CMP-022 | `unit_confidence_atr_pct_rank_above_90_subtracts_15` | Penalty | FR-3xx | Automated |
+| TS-CMP-023 | `unit_confidence_any_factor_degraded_subtracts_10` | Penalty | FR-3xx | Automated |
+| TS-CMP-024 | `unit_confidence_weekly_direction_differs_from_daily_subtracts_10` | Penalty | FR-3xx | Automated |
+| TS-CMP-025 | `unit_confidence_event_risk_subtracts_10` | Penalty | FR-3xx | Automated |
+| TS-CMP-026 | `unit_confidence_all_penalties_stack_subtracts_55` | Sum of penalties (15 + 10 + 10 + 10 + 10) | FR-3xx | Automated |
+| TS-CMP-027 | `unit_confidence_clipped_to_0_when_penalties_exceed_agreement` | Lower clip | FR-3xx | Automated |
+| TS-CMP-028 | `unit_confidence_zero_composite_sign_handling_defined` | A composite of exactly 0 has a defined agreement rule | FR-3xx | Automated |
+| TS-CMP-029 | `unit_confidence_missing_factors_excluded_from_agreement_denominator` | Weight base is over non-missing factors | FR-3xx | Automated |
+| TS-CMP-030 | `prop_composite_all_stages_outputs_in_range_for_random_factor_scores` | Composite -100..100, display 0..100, confidence 0..100 | FR-3xx | Automated |
+| TS-CMP-031 | `unit_confidence_ripster_stack_opposes_daily_supertrend_subtracts_10` | `rc_stack == -st_dir_d`: confidence reduced by 10 and the deduction is shown | FR-335, S3-T14 | Automated |
+| TS-CMP-032 | `unit_confidence_ripster_stack_same_sign_or_zero_no_deduction` | `st_dir_d` = +1 with `rc_stack` = +1 or 0 gives no Ripster deduction | FR-335 | Automated |
+| TS-CMP-033 | `unit_confidence_ripster_worked_example_agreement_0_80_gives_70` | Agreement 0.80, `st_dir_d` = -1, `rc_stack` = +1 gives 80 - 10 = 70 | FR-335 | Automated |
+| TS-CMP-101 | `unit_scorecard_worked_example_end_to_end` | Composite 3000/92, display 66.3, Buy, confidence 6200/92 on a hand example | FR-324 to FR-327, S3-T05 | Automated |
+| TS-CMP-102 | `unit_scorecard_is_frozen_with_read_only_mappings` | Frozen record, read-only mappings | FR-328, S3-T05 | Automated |
+| TS-CMP-103 | `unit_scorecard_injected_regime_applies_multipliers_adx_regime_reported` | `regime` from ADX, `regime_applied` from the context | FR-317, FR-318, S3-T05 | Automated |
+| TS-CMP-104 | `unit_scorecard_earnings_sets_event_risk_adjustment_and_deduction` | Earnings in 3 days: flag, adjustment text, confidence minus 10 | FR-319, FR-327, S3-T05 | Automated |
+| TS-CMP-105 | `unit_scorecard_all_missing_raises` | NoScorableFactorsError | FR-324, S3-T05 | Automated |
+| TS-CMP-106 | `unit_scorecard_missing_adx_regime_is_transitional` | Null ADX labels the regime transitional | FR-317, S3-T05 | Automated |
+| TS-CMP-107 | `unit_scorecard_deterministic_and_inputs_not_mutated` | Equal cards for equal inputs; inputs untouched | FR-329, S3-T05 | Automated |
+| TS-CMP-108 | `unit_scorecard_deductions_listed_in_order_with_reasons` | Order: atr, degraded, weekly, ripster, event; each has a reason | FR-327, S3-T05 | Automated |
+| TS-CMP-110 | `unit_band_labels_match_spec` | Band strings are the spec labels | FR-326, S3-T05 | Automated |
+| TS-CMP-111 | `unit_band_edges_follow_config_thresholds` | Buy floor and Sell ceiling read from `thresholds` | FR-326, S3-T05 | Automated |
+| TS-CMP-112 | `unit_confidence_daily_estimate_is_not_degraded` | Only quality `degraded` costs 10 | FR-327, S3-T05 | Automated |
+| TS-CMP-113 | `unit_confidence_ripster_stack_zero_direction_or_null_no_deduction` | `-0 == 0` and null inputs do not fire | FR-335, S3-T05 | Automated |
+| TS-CMP-114 | `unit_confidence_ripster_penalty_read_from_config` | Deduction is `ripster.confidence_stack_conflict_penalty` | FR-335, S3-T05 | Automated |
+| TS-CMP-115 | `unit_confidence_fr327_worked_example_atr_and_weekly` | 80 - 15 - 10 = 55 | FR-327, S3-T05 | Automated |
+| TS-CMP-116 | `unit_confidence_missing_snapshot_path_names_it` | KeyError naming the absent path | FR-327, S3-T05 | Automated |
 
 ### 10.7 Selection (TS-SEL)
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-SEL-001 | `unit_selection_buy_candidate_all_conditions_met_qualifies` | display, direction, confidence, quality, liquidity | FR-4xx | Deferred |
-| TS-SEL-002 | `unit_selection_buy_candidate_display_64_9_not_qualified` | Boundary of 65 | FR-4xx | Deferred |
-| TS-SEL-003 | `unit_selection_buy_candidate_display_65_0_qualifies` | Boundary | FR-4xx | Deferred |
-| TS-SEL-004 | `unit_selection_buy_candidate_st_dir_down_not_qualified` | Direction condition | FR-4xx | Deferred |
-| TS-SEL-005 | `unit_selection_buy_candidate_confidence_49_not_qualified` | Boundary of 50 | FR-4xx | Deferred |
-| TS-SEL-006 | `unit_selection_buy_candidate_confidence_50_qualifies` | Boundary | FR-4xx | Deferred |
-| TS-SEL-007 | `unit_selection_buy_candidate_stale_data_not_qualified` | Data quality | FR-4xx, US-020 | Deferred |
-| TS-SEL-008 | `unit_selection_buy_candidate_dollar_volume_below_20m_not_qualified` | Liquidity floor | FR-4xx | Deferred |
-| TS-SEL-009 | `unit_selection_buy_candidate_dollar_volume_exactly_20m_qualifies` | Boundary | FR-4xx | Deferred |
-| TS-SEL-010 | `unit_selection_buy_candidate_threshold_adjustments_raise_bar_to_75` | Uses per-ticker adjusted threshold | FR-4xx, FR-3xx | Deferred |
-| TS-SEL-011 | `unit_selection_sell_candidate_all_conditions_met_qualifies` | Mirror rules | FR-4xx | Deferred |
-| TS-SEL-012 | `unit_selection_sell_candidate_display_35_0_qualifies` | Boundary | FR-4xx | Deferred |
-| TS-SEL-013 | `unit_selection_sell_candidate_display_35_1_not_qualified` | Boundary | FR-4xx | Deferred |
-| TS-SEL-014 | `unit_selection_sell_candidate_st_dir_up_not_qualified` | Direction | FR-4xx | Deferred |
-| TS-SEL-015 | `unit_selection_sell_candidate_threshold_adjustments_lower_bar_to_25` | Adjusted threshold | FR-4xx | Deferred |
-| TS-SEL-016 | `unit_selection_rank_buys_by_display_descending` | Buy ranking | FR-4xx | Deferred |
-| TS-SEL-017 | `unit_selection_rank_sells_by_display_ascending` | Sell ranking | FR-4xx | Deferred |
-| TS-SEL-018 | `unit_selection_tiebreak_equal_display_higher_confidence_wins` | Tie-breaker 1 | FR-4xx | Deferred |
-| TS-SEL-019 | `unit_selection_tiebreak_equal_confidence_more_recent_flip_wins` | Tie-breaker 2 | FR-4xx | Deferred |
-| TS-SEL-020 | `unit_selection_tiebreak_equal_flip_higher_relative_volume_wins` | Tie-breaker 3 | FR-4xx | Deferred |
-| TS-SEL-021 | `unit_selection_tiebreak_all_equal_alphabetical_ticker_wins` | Tie-breaker 4 | FR-4xx | Deferred |
-| TS-SEL-022 | `prop_selection_rank_independent_of_input_order` | Shuffled input gives the same result | FR-4xx, NFR-002 | Deferred |
-| TS-SEL-023 | `unit_selection_publish_top_3_buys_and_top_2_sells_by_default` | Max counts | FR-4xx | Deferred |
-| TS-SEL-024 | `unit_selection_max_counts_read_from_config_selection_keys` | `max_buys`, `max_sells` | FR-4xx, A§13 | Deferred |
-| TS-SEL-025 | `unit_selection_only_one_qualifying_buy_result_has_one_buy_not_three` | Never pad | FR-4xx, S3-T06 | Deferred |
-| TS-SEL-026 | `unit_selection_zero_qualifying_sells_result_has_empty_sell_side` | Empty side is valid | FR-4xx | Deferred |
-| TS-SEL-027 | `unit_selection_empty_side_records_nearest_miss_with_reason` | Nearest-miss record | FR-4xx, S3-T06 | Deferred |
-| TS-SEL-028 | `unit_selection_correlation_guard_skips_candidate_above_0_9_with_selected_pick` | Guard | FR-4xx | Deferred |
-| TS-SEL-029 | `unit_selection_correlation_guard_exactly_0_9_is_not_skipped` | Boundary: "above 0.9" | FR-4xx | Deferred |
-| TS-SEL-030 | `unit_selection_correlation_guard_spy_voo_ivv_only_top_one_selected` | Three near-duplicates qualify | FR-4xx, S3-T06 | Deferred |
-| TS-SEL-031 | `unit_selection_correlation_guard_skipped_listed_as_also_qualified_with_duplicate_of` | "Also qualified" entry names the duplicated pick | FR-4xx | Deferred |
-| TS-SEL-032 | `unit_selection_correlation_guard_applied_per_side_not_across_sides` | Buy and sell sides independent | FR-4xx | Deferred |
-| TS-SEL-033 | `unit_selection_correlation_guard_uses_60_day_return_window` | Window | FR-4xx, A§13 | Deferred |
-| TS-SEL-034 | `unit_selection_correlation_guard_walks_past_skipped_to_fill_side` | Continue until full or exhausted | FR-4xx | Deferred |
-| TS-SEL-035 | `unit_selection_excluded_stale_and_insufficient_history_listed_with_reasons` | Exclusions never silently dropped | FR-4xx, US-020 | Deferred |
-| TS-SEL-036 | `unit_selection_stickiness_none_ticker_may_repeat_consecutive_days` | No stickiness rule | FR-4xx | Deferred |
-| TS-SEL-037 | `unit_selection_day_n_on_list_counter_counts_consecutive_days` | "day N on the list" | FR-4xx, FR-7xx | Deferred |
-| TS-SEL-038 | `unit_selection_sell_is_bearish_label_no_short_instruction_in_output` | No shorting, sizing, instrument advice in payload text | FR-4xx, FR-5xx | Deferred |
-| TS-SEL-039 | `unit_selection_buy_candidate_rc_bias_minus_1_not_qualified_reason_close_below_34_50_cloud` | Close below the 34/50 cloud rejects a buy and records the reason | FR-334, S3-T14 | Deferred |
-| TS-SEL-040 | `unit_selection_buy_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the buy gate | FR-334, S3-T14 | Deferred |
-| TS-SEL-041 | `unit_selection_buy_candidate_rc_bias_plus_1_passes_ripster_gate` | Close above the cloud passes the buy gate | FR-334 | Deferred |
-| TS-SEL-042 | `unit_selection_sell_candidate_rc_bias_plus_1_not_qualified_reason_close_above_34_50_cloud` | Close above the 34/50 cloud rejects a sell and records the reason | FR-334, S3-T14 | Deferred |
-| TS-SEL-043 | `unit_selection_sell_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the sell gate | FR-334, S3-T14 | Deferred |
-| TS-SEL-044 | `unit_selection_sell_candidate_rc_bias_minus_1_passes_ripster_gate` | Close below the cloud passes the sell gate | FR-334 | Deferred |
-| TS-SEL-045 | `unit_selection_ripster_gate_rejection_listed_in_nearest_miss_reasons` | A gate rejection appears as the nearest-miss reason when a side is empty | FR-334, FR-4xx | Deferred |
+| TS-SEL-001 | `unit_selection_buy_candidate_all_conditions_met_qualifies` | display, direction, confidence, quality, liquidity | FR-4xx | Automated |
+| TS-SEL-002 | `unit_selection_buy_candidate_display_64_9_not_qualified` | Boundary of 65 | FR-4xx | Automated |
+| TS-SEL-003 | `unit_selection_buy_candidate_display_65_0_qualifies` | Boundary | FR-4xx | Automated |
+| TS-SEL-004 | `unit_selection_buy_candidate_st_dir_down_not_qualified` | Direction condition | FR-4xx | Automated |
+| TS-SEL-005 | `unit_selection_buy_candidate_confidence_49_not_qualified` | Boundary of 50 | FR-4xx | Automated |
+| TS-SEL-006 | `unit_selection_buy_candidate_confidence_50_qualifies` | Boundary | FR-4xx | Automated |
+| TS-SEL-007 | `unit_selection_buy_candidate_stale_data_not_qualified` | Data quality | FR-4xx, US-020 | Automated |
+| TS-SEL-008 | `unit_selection_buy_candidate_dollar_volume_below_20m_not_qualified` | Liquidity floor | FR-4xx | Automated |
+| TS-SEL-009 | `unit_selection_buy_candidate_dollar_volume_exactly_20m_qualifies` | Boundary | FR-4xx | Automated |
+| TS-SEL-010 | `unit_selection_buy_candidate_threshold_adjustments_raise_bar_to_75` | Uses per-ticker adjusted threshold | FR-4xx, FR-3xx | Automated |
+| TS-SEL-011 | `unit_selection_sell_candidate_all_conditions_met_qualifies` | Mirror rules | FR-4xx | Automated |
+| TS-SEL-012 | `unit_selection_sell_candidate_display_35_0_qualifies` | Boundary | FR-4xx | Automated |
+| TS-SEL-013 | `unit_selection_sell_candidate_display_35_1_not_qualified` | Boundary | FR-4xx | Automated |
+| TS-SEL-014 | `unit_selection_sell_candidate_st_dir_up_not_qualified` | Direction | FR-4xx | Automated |
+| TS-SEL-015 | `unit_selection_sell_candidate_threshold_adjustments_lower_bar_to_25` | Adjusted threshold | FR-4xx | Automated |
+| TS-SEL-016 | `unit_selection_rank_buys_by_display_descending` | Buy ranking | FR-4xx | Automated |
+| TS-SEL-017 | `unit_selection_rank_sells_by_display_ascending` | Sell ranking | FR-4xx | Automated |
+| TS-SEL-018 | `unit_selection_tiebreak_equal_display_higher_confidence_wins` | Tie-breaker 1 | FR-4xx | Automated |
+| TS-SEL-019 | `unit_selection_tiebreak_equal_confidence_more_recent_flip_wins` | Tie-breaker 2 | FR-4xx | Automated |
+| TS-SEL-020 | `unit_selection_tiebreak_equal_flip_higher_relative_volume_wins` | Tie-breaker 3 | FR-4xx | Automated |
+| TS-SEL-021 | `unit_selection_tiebreak_all_equal_alphabetical_ticker_wins` | Tie-breaker 4 | FR-4xx | Automated |
+| TS-SEL-022 | `prop_selection_rank_independent_of_input_order` | Shuffled input gives the same result | FR-4xx, NFR-002 | Automated |
+| TS-SEL-023 | `unit_selection_publish_top_3_buys_and_top_2_sells_by_default` | Max counts | FR-4xx | Automated |
+| TS-SEL-024 | `unit_selection_max_counts_read_from_config_selection_keys` | `max_buys`, `max_sells` | FR-4xx, A§13 | Automated |
+| TS-SEL-025 | `unit_selection_only_one_qualifying_buy_result_has_one_buy_not_three` | Never pad | FR-4xx, S3-T06 | Automated |
+| TS-SEL-026 | `unit_selection_zero_qualifying_sells_result_has_empty_sell_side` | Empty side is valid | FR-4xx | Automated |
+| TS-SEL-027 | `unit_selection_empty_side_records_nearest_miss_with_reason` | Nearest-miss record | FR-4xx, S3-T06 | Automated |
+| TS-SEL-028 | `unit_selection_correlation_guard_skips_candidate_above_0_9_with_selected_pick` | Guard | FR-4xx | Automated |
+| TS-SEL-029 | `unit_selection_correlation_guard_exactly_0_9_is_not_skipped` | Boundary: "above 0.9" | FR-4xx | Automated |
+| TS-SEL-030 | `unit_selection_correlation_guard_spy_voo_ivv_only_top_one_selected` | Three near-duplicates qualify | FR-4xx, S3-T06 | Automated |
+| TS-SEL-031 | `unit_selection_correlation_guard_skipped_listed_as_also_qualified_with_duplicate_of` | "Also qualified" entry names the duplicated pick | FR-4xx | Automated |
+| TS-SEL-032 | `unit_selection_correlation_guard_applied_per_side_not_across_sides` | Buy and sell sides independent | FR-4xx | Automated |
+| TS-SEL-033 | `unit_selection_correlation_guard_uses_60_day_return_window` | Window | FR-4xx, A§13 | Automated |
+| TS-SEL-034 | `unit_selection_correlation_guard_walks_past_skipped_to_fill_side` | Continue until full or exhausted | FR-4xx | Automated |
+| TS-SEL-035 | `unit_selection_excluded_stale_and_insufficient_history_listed_with_reasons` | Exclusions never silently dropped | FR-4xx, US-020 | Automated |
+| TS-SEL-036 | `unit_selection_stickiness_none_ticker_may_repeat_consecutive_days` | No stickiness rule | FR-4xx | Automated |
+| TS-SEL-037 | `unit_selection_day_n_on_list_counter_counts_consecutive_days` | "day N on the list" | FR-4xx, FR-7xx | Automated |
+| TS-SEL-038 | `unit_selection_sell_is_bearish_label_no_short_instruction_in_output` | No shorting, sizing, instrument advice in payload text | FR-4xx, FR-5xx | Automated |
+| TS-SEL-039 | `unit_selection_buy_candidate_rc_bias_minus_1_not_qualified_reason_close_below_34_50_cloud` | Close below the 34/50 cloud rejects a buy and records the reason | FR-334, S3-T14 | Automated |
+| TS-SEL-040 | `unit_selection_buy_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the buy gate | FR-334, S3-T14 | Automated |
+| TS-SEL-041 | `unit_selection_buy_candidate_rc_bias_plus_1_passes_ripster_gate` | Close above the cloud passes the buy gate | FR-334 | Automated |
+| TS-SEL-042 | `unit_selection_sell_candidate_rc_bias_plus_1_not_qualified_reason_close_above_34_50_cloud` | Close above the 34/50 cloud rejects a sell and records the reason | FR-334, S3-T14 | Automated |
+| TS-SEL-043 | `unit_selection_sell_candidate_rc_bias_0_close_inside_34_50_cloud_qualifies` | Close inside the cloud passes the sell gate | FR-334, S3-T14 | Automated |
+| TS-SEL-044 | `unit_selection_sell_candidate_rc_bias_minus_1_passes_ripster_gate` | Close below the cloud passes the sell gate | FR-334 | Automated |
+| TS-SEL-045 | `unit_selection_ripster_gate_rejection_listed_in_nearest_miss_reasons` | A gate rejection appears as the nearest-miss reason when a side is empty | FR-334, FR-4xx | Automated |
+| TS-SEL-101 | `unit_selection_input_from_snapshot_reads_selection_input_paths` | The selection input builder reads exactly `SELECTION_INPUT_PATHS`; a null or NaN value (warm-up) becomes None, never 0; an absent path is a KeyError naming it | FR-4xx, ADR-065, S3-T06 | Automated |
+| TS-SEL-102 | `unit_selection_candidate_reasons_in_rule_order` | Every failing rule is listed, in the order of the selection rules | FR-4xx, ADR-050 | Automated |
+| TS-SEL-103 | `unit_selection_candidate_null_inputs_fail_with_reasons` | Null direction, bias or dollar volume fail closed with a reason; an unrounded confidence prints with up to two decimals | FR-4xx, ADR-065 | Automated |
+| TS-SEL-104 | `unit_selection_rc_bias_gate_disabled_and_unknown_side` | `ripster.selection_bias_gate: false` passes everything; a bad side, empty ticker, or a negative or non-finite threshold shift raises | FR-334, S3-T06 | Automated |
+| TS-SEL-105 | `unit_selection_nearest_miss_score_clearing_threshold_is_distance_zero` | Nearest-miss distance is the score shortfall against the adjusted threshold, 0 when the score clears it and another rule failed; ties use the side's ranking | FR-4xx, ADR-065 | Automated |
+| TS-SEL-106 | `unit_selection_nearest_miss_absent_when_full_or_nothing_missed` | A full side has no nearest miss; stale and guard-skipped candidates are not misses | FR-4xx, ADR-065 | Automated |
+| TS-SEL-107 | `unit_selection_correlation_undefined_never_skips` | Too little shared history, a flat series, or no closes has no correlation and is never "above 0.9" | FR-4xx, A-33 | Automated |
+| TS-SEL-108 | `unit_selection_return_correlation_uses_shared_dates_only` | Simple returns and Pearson on hand values; only dates both series share are used | FR-4xx, A-33 | Automated |
+| TS-SEL-109 | `unit_selection_duplicate_names_most_correlated_pick` | A guard-skipped candidate correlated with two picks is listed under the more correlated one | FR-4xx, ADR-065 | Automated |
+| TS-SEL-110 | `unit_selection_candidates_after_side_full_not_walked` | The walk stops when the side is full, so a later duplicate is not listed as also qualified | FR-4xx, ADR-065 | Automated |
+| TS-SEL-111 | `unit_selection_select_rejects_duplicate_tickers_and_bad_side` | The same ticker twice, an unknown side, a non-positive or non-finite close, or a window below 2 is a ValueError | FR-4xx | Automated |
+| TS-SEL-112 | `unit_selection_select_is_pure_and_deterministic` | Same inputs give an equal result; inputs are not mutated | FR-4xx, NFR-002 | Automated |
+| TS-SEL-113 | `unit_selection_import_boundary_no_api_cli_mcp_data_runs` | Selection imports nothing from api, cli, mcp, data, runs or narrative | A§2 | Automated |
+| TS-SEL-114 | `unit_selection_null_tie_breakers_rank_last` | An unknown flip age or relative volume ranks after any known one | FR-4xx, ADR-065 | Automated |
+| TS-SEL-115 | `unit_selection_max_zero_publishes_nothing_and_no_nearest_miss` | `max_buys: 0` publishes no buys; the side is full, so no nearest miss | FR-4xx, A§13 | Automated |
+| TS-SEL-150 | `unit_selection_bias_gate_rule_lines (buy, close below cloud)` | `selection_bias_gate(snapshot, 'buy')` rejects with reason `close below the 34/50 cloud` (helper for TS-SEL-039) | FR-334, S3-T14 | Automated |
+| TS-SEL-151 | `unit_selection_bias_gate_rule_lines (buy, inside)` | Buy passes inside the cloud (helper for TS-SEL-040) | FR-334, S3-T14 | Automated |
+| TS-SEL-152 | `unit_selection_bias_gate_rule_lines (buy, above)` | Buy passes above the cloud (helper for TS-SEL-041) | FR-334, S3-T14 | Automated |
+| TS-SEL-153 | `unit_selection_bias_gate_rule_lines (sell, close above cloud)` | Sell rejected with reason `close above the 34/50 cloud` (helper for TS-SEL-042) | FR-334, S3-T14 | Automated |
+| TS-SEL-154 | `unit_selection_bias_gate_rule_lines (sell, inside)` | Sell passes inside the cloud (helper for TS-SEL-043) | FR-334, S3-T14 | Automated |
+| TS-SEL-155 | `unit_selection_bias_gate_rule_lines (sell, below)` | Sell passes below the cloud (helper for TS-SEL-044) | FR-334, S3-T14 | Automated |
+| TS-SEL-156 | `unit_selection_bias_gate_disabled_passes_everything` | `ripster.selection_bias_gate: false` disables the gate | FR-334, S3-T14 | Automated |
+| TS-SEL-157 | `unit_selection_bias_gate_null_bias_fails_closed_with_reason` | Undefined bias rejects with `34/50 cloud bias not available` | FR-334, A-31, S3-T14 | Automated |
+| TS-SEL-158 | `unit_selection_bias_gate_unknown_side_raises` | Side other than buy or sell raises ValueError | FR-334, S3-T14 | Automated |
+| TS-SEL-159 | `unit_selection_bias_gate_does_not_read_other_fields_or_mutate` | Verdict depends on `ripster.bias` only; no mutation | FR-334, S3-T14 | Automated |
 
 ### 10.8 Justification and narrative (TS-NAR)
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-NAR-001 | `unit_evidence_build_document_validates_against_committed_json_schema` | Evidence JSON schema | FR-5xx, S3-T08 | Deferred |
-| TS-NAR-002 | `unit_evidence_build_contributions_sum_to_composite` | `contribution = weight*score/100` | FR-5xx | Deferred |
-| TS-NAR-003 | `unit_evidence_build_includes_invalidation_level_and_rule` | Supertrend line and rule text | FR-5xx, US-007 | Deferred |
-| TS-NAR-004 | `unit_evidence_build_includes_levels_support_resistance_fib_next_target` | Levels block | FR-5xx | Deferred |
-| TS-NAR-005 | `unit_evidence_build_includes_adjustments_flags_and_config_hash` | Adjustments, flags, `config_hash` | FR-5xx | Deferred |
-| TS-NAR-006 | `unit_narrative_template_leads_with_supertrend_and_34_50_cloud_bias_then_top_two_then_opposing_then_invalidation` | Order: Supertrend state and the 34/50 cloud bias first | FR-5xx | Deferred |
-| TS-NAR-007 | `unit_narrative_template_every_number_appears_in_evidence_document` | Template passes its own guard | FR-5xx, S3-T08 | Deferred |
-| TS-NAR-008 | `unit_narrative_template_three_to_five_sentences` | Length | FR-5xx | Deferred |
-| TS-NAR-009 | `unit_narrative_template_no_opposing_factor_omits_line_without_inventing` | No factor argues against | FR-5xx | Deferred |
+| TS-NAR-001 | `unit_evidence_build_document_validates_against_committed_json_schema` | Evidence JSON schema | FR-5xx, S3-T08 | Automated |
+| TS-NAR-002 | `unit_evidence_build_contributions_sum_to_composite` | `contribution = weight*score/100` | FR-5xx | Automated |
+| TS-NAR-003 | `unit_evidence_build_includes_invalidation_level_and_rule` | Supertrend line and rule text | FR-5xx, US-007 | Automated |
+| TS-NAR-004 | `unit_evidence_build_includes_levels_support_resistance_fib_next_target` | Levels block | FR-5xx | Automated |
+| TS-NAR-005 | `unit_evidence_build_includes_adjustments_flags_and_config_hash` | Adjustments, flags, `config_hash` | FR-5xx | Automated |
+| TS-NAR-006 | `unit_narrative_template_leads_with_supertrend_and_34_50_cloud_bias_then_top_two_then_opposing_then_invalidation` | Order: Supertrend state and the 34/50 cloud bias first | FR-5xx | Automated |
+| TS-NAR-007 | `unit_narrative_template_every_number_appears_in_evidence_document` | Template passes its own guard | FR-5xx, S3-T08 | Automated |
+| TS-NAR-008 | `unit_narrative_template_three_to_five_sentences` | Length | FR-5xx | Automated |
+| TS-NAR-009 | `unit_narrative_template_no_opposing_factor_omits_line_without_inventing` | No factor argues against | FR-5xx | Automated |
 | TS-NAR-010 | `unit_narrative_prompt_token_budget_all_30_fixtures_at_most_900_tokens` | NFR-012 prompt side | NFR-012, S5-T01 | Deferred |
 | TS-NAR-011 | `unit_narrative_request_max_completion_tokens_220_enforced` | Completion cap in the request | NFR-012 | Deferred |
 | TS-NAR-012 | `unit_narrative_prompt_over_budget_fixture_fails_ci_check` | The check can fail | NFR-012 | Deferred |
@@ -1125,7 +1247,25 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-NAR-036 | `it_narrative_mock_endpoint_run_publishes_llm_narratives` | Sprint 5 checklist item | FR-5xx | Deferred |
 | TS-NAR-037 | `unit_narrative_prompt_versioned_in_prompts_directory_version_in_record` | Prompt versioning | FR-5xx | Deferred |
 | TS-NAR-038 | `unit_narrative_disclaimer_present_in_every_narrative_payload` | Disclaimer attached | FR-5xx, A§9 | Deferred |
-| TS-NAR-039 | `unit_evidence_build_includes_ripster_block_and_levels_cloud_34_50` | `ripster` block and `levels.cloud_34_50` validate against the committed schema | FR-5xx, S3-T14 | Deferred |
+| TS-NAR-039 | `unit_evidence_build_includes_ripster_block_and_levels_cloud_34_50` | `ripster` block and `levels.cloud_34_50` validate against the committed schema | FR-5xx, S3-T14 | Automated |
+| TS-NAR-101 | `unit_evidence_build_is_json_serializable_pure_and_deterministic` | Plain JSON, no NaN, no argument mutation, same input same bytes | FR-5xx, S3-T08 | Automated |
+| TS-NAR-102 | `unit_evidence_build_flags_event_risk_degraded_and_estimated_flow` | Flags from the card, factor qualities and data quality | FR-5xx, S3-T08 | Automated |
+| TS-NAR-103 | `unit_evidence_build_embeds_duplicates_from_also_qualified` | Guard-skipped candidates listed under the pick they duplicate; market regime passed through | FR-5xx, S3-T08 | Automated |
+| TS-NAR-104 | `unit_evidence_schema_rejects_missing_and_unknown_fields` | The schema can fail: missing key, extra key, bad side | FR-5xx, S3-T08 | Automated |
+| TS-NAR-105 | `unit_evidence_build_rejects_results_that_do_not_match_the_card` | Results must cover exactly the twelve factors | FR-5xx, S3-T08 | Automated |
+| TS-NAR-106 | `unit_narrative_template_sell_is_bearish_label_without_trade_advice` | Sell reads bearish; no shorting, sizing, options, leverage, "will" | FR-5xx, S3-T08 | Automated |
+| TS-NAR-107 | `unit_narrative_template_is_deterministic_and_reports_numbers` | Same document, same result; numbers and sentence count reported | FR-5xx, S3-T08 | Automated |
+| TS-NAR-108 | `unit_narrative_template_handles_missing_line_and_unknown_cloud_bias` | Nulls never print None or an invented number | FR-5xx, S3-T08 | Automated |
+| TS-NAR-109 | `unit_numeric_guard_number_not_in_evidence_rejects` | Template-side check of the guard (S5-T02 hardens it) | FR-5xx, S3-T08 | Automated |
+| TS-NAR-110 | `unit_numeric_guard_number_matching_within_rounding_accepts` | Match within the narrative number's own rounding | FR-5xx, S3-T08 | Automated |
+| TS-NAR-111 | `unit_numeric_guard_percent_and_decimal_formats_extracted` | Extraction of percent, thousands comma, signs, 34/50 | FR-5xx, S3-T08 | Automated |
+| TS-NAR-112 | `unit_numeric_guard_collects_numbers_from_values_and_reason_strings` | Evidence pool: numeric leaves and numbers inside strings | FR-5xx, S3-T08 | Automated |
+| TS-NAR-113 | `unit_evidence_schema_is_shipped_as_package_data_and_matches_the_committed_file` | `evidence_schema()` reads the packaged schema | FR-5xx, S3-T08 | Automated |
+| TS-NAR-150 | `unit_evidence_ripster_block_has_exactly_the_spec_keys_with_integer_signs` | `ripster_evidence` keys and int/float types match the spec example | FR-5xx, S3-T14 | Automated |
+| TS-NAR-151 | `unit_evidence_ripster_block_bearish_values` | Negative signs and zero stack | FR-5xx, S3-T14 | Automated |
+| TS-NAR-152 | `unit_evidence_ripster_block_null_fields_stay_null_never_zero` | Nulls stay None | FR-5xx, S3-T14 | Automated |
+| TS-NAR-153 | `unit_evidence_ripster_block_is_json_serializable_and_pure` | Plain JSON types, no aliasing or mutation | FR-5xx, S3-T14 | Automated |
+| TS-NAR-154 | `unit_evidence_ripster_block_from_computed_snapshot_matches_its_fields` | On a real snapshot every key equals the snapshot field | FR-5xx, S3-T14 | Automated |
 
 ### 10.9 Track record (TS-TRK)
 
@@ -1337,18 +1477,18 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 
 | ID | Scenario name | Description | Spec ref | Status |
 |---|---|---|---|---|
-| TS-OPS-001 | `it_runs_state_machine_transitions_queued_to_published_in_order` | Each state persisted | FR-9xx, A§8 | Deferred |
+| TS-OPS-001 | `it_runs_state_machine_transitions_queued_to_published_in_order` | Each state persisted | FR-9xx, A§8 | Automated |
 | TS-OPS-002 | `unit_runs_state_machine_illegal_transition_raises` | Cannot skip or reverse | FR-9xx, A§8 | Deferred |
-| TS-OPS-003 | `it_runs_publish_writes_recommendations_and_published_at_in_single_transaction` | Atomic publication | NFR-006, A§8 | Deferred |
-| TS-OPS-004 | `it_runs_publish_midrun_process_kill_previous_run_stays_latest` | Kill during narrating | NFR-006, S3-T07 | Deferred |
+| TS-OPS-003 | `it_runs_publish_writes_recommendations_and_published_at_in_single_transaction` | Atomic publication | NFR-006, A§8 | Automated |
+| TS-OPS-004 | `it_runs_publish_midrun_process_kill_previous_run_stays_latest` | Kill during narrating | NFR-006, S3-T07 | Automated |
 | TS-OPS-005 | `it_runs_publish_failure_during_commit_rolls_back_all_rows` | No partial publication | NFR-006, S9-T02 | Deferred |
-| TS-OPS-006 | `it_runs_failed_run_leaves_previous_published_run_as_latest` | Failed state | NFR-006 | Deferred |
-| TS-OPS-007 | `it_runs_two_simultaneous_triggers_one_run_one_already_running_response` | Advisory lock | FR-9xx, S3-T07 | Deferred |
-| TS-OPS-008 | `it_runs_rerun_same_date_new_row_supersedes_only_on_success_both_stored` | Supersession | FR-9xx, S3-T07 | Deferred |
-| TS-OPS-009 | `it_runs_rerun_same_date_failing_keeps_old_run_published` | Failed rerun | NFR-006 | Deferred |
-| TS-OPS-010 | `it_runs_summary_lists_stale_and_insufficient_history_exclusions_with_reasons` | Exclusions | FR-9xx, US-020 | Deferred |
+| TS-OPS-006 | `it_runs_failed_run_leaves_previous_published_run_as_latest` | Failed state | NFR-006 | Automated |
+| TS-OPS-007 | `it_runs_two_simultaneous_triggers_one_run_one_already_running_response` | Advisory lock | FR-9xx, S3-T07 | Automated |
+| TS-OPS-008 | `it_runs_rerun_same_date_new_row_supersedes_only_on_success_both_stored` | Supersession | FR-9xx, S3-T07 | Automated |
+| TS-OPS-009 | `it_runs_rerun_same_date_failing_keeps_old_run_published` | Failed rerun | NFR-006 | Automated |
+| TS-OPS-010 | `it_runs_summary_lists_stale_and_insufficient_history_exclusions_with_reasons` | Exclusions | FR-9xx, US-020 | Automated |
 | TS-OPS-011 | `unit_runs_daily_non_trading_day_exits_0_publishes_nothing` | Holiday | FR-9xx, S3-T10 | Deferred |
-| TS-OPS-012 | `it_runs_daily_twice_from_clean_databases_identical_picks` | Determinism (live path) | NFR-002, S3 checklist | Deferred |
+| TS-OPS-012 | `it_runs_daily_twice_from_clean_databases_identical_picks` | Determinism (live path) | NFR-002, S3 checklist | Automated |
 | TS-OPS-013 | `it_runs_fault_provider_429_storm_ends_in_correct_publish_or_clean_failure` | Resilience | S9-T02 | Deferred |
 | TS-OPS-014 | `it_runs_fault_provider_outage_midrun_clean_failure_previous_latest` | Resilience | S9-T02 | Deferred |
 | TS-OPS-015 | `it_runs_fault_database_restart_midrun_clean_failure_previous_latest` | Resilience | S9-T02 | Deferred |
@@ -1367,6 +1507,8 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-OPS-028 | `it_ops_full_daily_run_200_symbols_under_10_minutes_on_stoke` | NFR-001 end to end | NFR-001 | Skipped: requires the Stoke cluster; manual: time a staging run with the 200-symbol seed and record in `docs/PERFORMANCE.md` |
 | TS-OPS-029 | `it_ops_cronjob_template_sets_concurrency_forbid_and_time_zone_new_york` | CronJob | FR-9xx, S3-T10 | Deferred |
 | TS-OPS-030 | `it_ops_structured_logs_include_request_id_run_id_and_no_secret_values` | Logging | A§11, NFR-009 | Deferred |
+| TS-OPS-101 | `it_runs_publish_stores_full_evidence_and_template_narrative` | Every stored evidence document validates against the committed schema; each pick has a `template` narrative naming its ticker | FR-901, ADR-069 | Automated |
+| TS-OPS-102 | `it_runs_narrator_failure_falls_back_to_minimal_and_run_publishes` | A narrator that raises does not fail the run; picks keep the minimal evidence and the summary counts errors | ADR-069, A-37 | Automated |
 
 ### 10.16 Deployment and packaging (TS-DEP)
 
@@ -1490,7 +1632,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | Regime and weights | TS-REG | 33 |
 | Composite and confidence | TS-CMP | 33 |
 | Selection | TS-SEL | 45 |
-| Justification and narrative | TS-NAR | 39 |
+| Justification and narrative | TS-NAR | 57 |
 | Track record | TS-TRK | 23 |
 | Backtest | TS-BKT | 14 |
 | API | TS-API | 35 |
