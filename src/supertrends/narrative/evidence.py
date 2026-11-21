@@ -32,6 +32,7 @@ __all__ = [
     "RULE_SELL",
     "build_evidence",
     "evidence_schema",
+    "levels_block",
 ]
 
 EVIDENCE_SCHEMA_VERSION = 1
@@ -98,6 +99,32 @@ def _next_target(
     return max(below) if below else None
 
 
+def levels_block(snapshot: Mapping[str, Any], side: str) -> dict[str, Any]:
+    """The `levels` block of the evidence document (also used by the analysis endpoint).
+
+    Support below and resistance above the close (3 per side), Fibonacci prices, the 34/50
+    cloud edges (bottom, top) and the next target for `side`.
+    """
+    close = _sub(snapshot, "daily", "close")
+    sr = _sub(snapshot, "levels", "support_resistance") or {}
+    support = sorted(
+        (p for p in _prices(sr.get("supports")) if close is not None and p < close), reverse=True
+    )
+    resistance = sorted(
+        p for p in _prices(sr.get("resistances")) if close is not None and p > close
+    )
+    fib = _fib(snapshot)
+    target = _next_target(side, close, support, resistance, list(fib.values()))
+    ripster = ripster_evidence(snapshot)
+    return {
+        "support": [round(p, PRICE_DECIMALS) for p in support[:LEVELS_PER_SIDE]],
+        "resistance": [round(p, PRICE_DECIMALS) for p in resistance[:LEVELS_PER_SIDE]],
+        "fib": fib,
+        "cloud_34_50": [ripster["c3_bot"], ripster["c3_top"]],
+        "next_target": _r(target),
+    }
+
+
 def _flags(pick: Pick) -> list[str]:
     card = pick.entry.card
     flags: set[str] = set()
@@ -139,20 +166,10 @@ def build_evidence(  # noqa: PLR0913 - one pick's inputs, all keyword-only
         msg = f"results must cover exactly the factor ids; absent {missing}, unknown {unknown}"
         raise ValueError(msg)
     card = pick.entry.card
-    close = _sub(snapshot, "daily", "close")
     st = _sub(snapshot, "daily", "supertrend") or {}
     line = _r(st.get("line"))
-    sr = _sub(snapshot, "levels", "support_resistance") or {}
-    support = sorted(
-        (p for p in _prices(sr.get("supports")) if close is not None and p < close), reverse=True
-    )
-    resistance = sorted(
-        p for p in _prices(sr.get("resistances")) if close is not None and p > close
-    )
-    fib = _fib(snapshot)
-    target = _next_target(pick.side, close, support, resistance, list(fib.values()))
+    levels = levels_block(snapshot, pick.side)
     ripster = ripster_evidence(snapshot)
-    cloud = [ripster["c3_bot"], ripster["c3_top"]]
     factors = [
         {
             "id": fid,
@@ -203,13 +220,7 @@ def build_evidence(  # noqa: PLR0913 - one pick's inputs, all keyword-only
             "level": line,
             "rule": RULE_BUY if pick.side == "buy" else RULE_SELL,
         },
-        "levels": {
-            "support": [round(p, PRICE_DECIMALS) for p in support[:LEVELS_PER_SIDE]],
-            "resistance": [round(p, PRICE_DECIMALS) for p in resistance[:LEVELS_PER_SIDE]],
-            "fib": fib,
-            "cloud_34_50": cloud,
-            "next_target": _r(target),
-        },
+        "levels": levels,
         "factors": factors,
         "confidence_deductions": [
             {"code": d.code, "points": _r(d.points, 1), "reason": d.reason} for d in card.deductions
