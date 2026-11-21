@@ -9,6 +9,8 @@ to `create_app`.
 from __future__ import annotations
 
 from collections.abc import Iterator
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, Request
@@ -16,7 +18,10 @@ from sqlalchemy import Engine
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session
 
+from supertrends.api.store import ReadStore
 from supertrends.data import db
+from supertrends.runs.reads import PgStore
+from supertrends.scoring.config import ScoringConfig, load_scoring_config
 from supertrends.settings import Settings
 
 CONNECT_TIMEOUT_SECONDS = "3"
@@ -51,6 +56,32 @@ def get_session(engine: Annotated[Engine, Depends(get_engine)]) -> Iterator[Sess
         yield session
 
 
+def get_scoring_config(request: Request) -> ScoringConfig:
+    """The active scoring config, loaded once from `SUPERTRENDS_SCORING_CONFIG`."""
+    state = request.app.state
+    if getattr(state, "scoring_config", None) is None:
+        state.scoring_config = load_scoring_config(Path(state.settings.scoring_config))
+        state.config_loaded_at = datetime.now(UTC)
+    cfg: ScoringConfig = state.scoring_config
+    return cfg
+
+
+def get_clock() -> datetime:
+    """The current UTC time (tests override this to fix the clock)."""
+    return datetime.now(UTC)
+
+
+def get_store(
+    engine: Annotated[Engine, Depends(get_engine)],
+    config: Annotated[ScoringConfig, Depends(get_scoring_config)],
+) -> ReadStore:
+    """The Postgres-backed read store."""
+    return PgStore(engine, config)
+
+
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 EngineDep = Annotated[Engine, Depends(get_engine)]
 SessionDep = Annotated[Session, Depends(get_session)]
+ScoringConfigDep = Annotated[ScoringConfig, Depends(get_scoring_config)]
+ClockDep = Annotated[datetime, Depends(get_clock)]
+StoreDep = Annotated[ReadStore, Depends(get_store)]

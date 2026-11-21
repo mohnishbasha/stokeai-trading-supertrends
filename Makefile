@@ -83,7 +83,9 @@ run-daily: ## Trigger the daily run locally
 	@echo "make run-daily: not available until Sprint 3"
 
 openapi: ## Regenerate docs/openapi.json and the UI client
-	@echo "make openapi: not available until Sprint 3"
+	uv run supertrends config export-openapi --output docs/openapi.json
+	@if [ -f ui/scripts/generate-api-client.sh ]; then ./ui/scripts/generate-api-client.sh; \
+	else echo "make openapi: UI client generator not present, skipped"; fi
 
 version-sync: ## Write VERSION into the checked files
 	./scripts/version-sync.sh

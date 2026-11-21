@@ -12,7 +12,8 @@ including the as-of date, and returns a JSON-ready document:
   invalidation level;
 * `fib`: the last completed ZigZag leg with retracement and extension prices;
 * `divergences`: confirmed divergence records, daily and weekly;
-* `flow`: the order flow estimate and its data quality.
+* `flow`: the order flow estimate and its data quality;
+* `ripster`: the five EMA clouds, the stack, bias, pullback state and weekly direction (Factor 12).
 
 Every parameter comes from the config (ADR-056 lists where the registry defaults apply instead).
 The document is canonical: NaN is null (never 0), infinities are strings, floats are rounded to
@@ -39,6 +40,7 @@ from supertrends.indicators.meanrev import bollinger, pct_b, zscore
 from supertrends.indicators.momentum import hist_run, macd, macd_signal_cross, macd_weekly
 from supertrends.indicators.primitives import atr, obv, resample_weekly, rsi, sma
 from supertrends.indicators.registry import Bundle, canonical, round_significant
+from supertrends.indicators.ripster_clouds import ripster_clouds, ripster_weekly_direction
 from supertrends.indicators.supertrend import (
     bars_since_flip,
     distance_atr,
@@ -72,8 +74,13 @@ __all__ = [
     "snapshot_bytes",
 ]
 
-SCHEMA_VERSION = 1
+# Version 2 (S3-T01): added daily prev_close, high, low, close_lag_3, ret_5 and
+# avg_dollar_volume_20d, the `ripster` block, and made `daily.sma_cross` SMA50 against SMA200.
+SCHEMA_VERSION = 2
 YEAR_BARS = 252
+RET_BARS = 5
+LAG_BARS = 3
+DOLLAR_VOLUME_BARS = 20
 
 FloatArray = NDArray[np.float64]
 
@@ -90,6 +97,8 @@ SNAPSHOT_COVERS: dict[str, str] = {
     "bbw_rank": "daily.bbw_rank",
     "bollinger": "daily.bollinger",
     "cmf": "daily.cmf",
+    "bars_since_stack_flip": "ripster.bars_since_stack_flip",
+    "cloud_stack": "ripster.stack",
     "cross_events": "daily.sma_cross",
     "distance_atr": "daily.distance_atr",
     "divergence_series": "divergences",
@@ -103,6 +112,9 @@ SNAPSHOT_COVERS: dict[str, str] = {
     "obv_slope_sign": "daily.obv_slope_sign",
     "pct_b": "daily.pct_b",
     "relative_volume": "daily.relative_volume",
+    "ripster_clouds": "ripster.clouds",
+    "ripster_pullback": "ripster.pullback",
+    "ripster_weekly_direction": "ripster.dir_w",
     "rsi": "daily.rsi",
     "sma": "daily.sma_<period>",
     "sma_slope": "daily.sma_slope_<period>",
@@ -114,13 +126,8 @@ SNAPSHOT_COVERS: dict[str, str] = {
     "zscore": "daily.zscore",
 }
 NOT_SNAPSHOTTED: dict[str, str] = {
-    "bars_since_stack_flip": "Ripster field; joins the snapshot with the ripster block in S3-T14",
-    "cloud_stack": "Ripster field; joins the snapshot with the ripster block in S3-T14",
     "ema": "building block of MACD; not a decision input on its own",
     "ema_cloud": "building block of ripster_clouds",
-    "ripster_clouds": "Factor 12 clouds; join the snapshot with the ripster block in S3-T14",
-    "ripster_pullback": "Ripster field; joins the snapshot with the ripster block in S3-T14",
-    "ripster_weekly_direction": "Ripster evidence field; joins the snapshot in S3-T14",
     "linreg_slope": "building block of the OBV slope sign",
     "percentile_rank": "building block of the BBW and ATR% ranks",
     "pivot_masks": "building block of the divergence and level detectors",
@@ -136,6 +143,24 @@ def _last(values: NDArray[Any]) -> float:
     return float(values[-1])
 
 
+def _lagged(values: FloatArray, lag: int) -> float:
+    """The value `lag` bars before the last bar; NaN (null) when the history is shorter."""
+    return float(values[-1 - lag]) if len(values) > lag else float("nan")
+
+
+def _return(close: FloatArray, bars: int) -> float:
+    """`close[t] / close[t - bars] - 1`; NaN when there are fewer than `bars + 1` closes."""
+    base = _lagged(close, bars)
+    return float(close[-1] / base - 1.0) if base > 0 else float("nan")
+
+
+def _avg_dollar_volume(close: FloatArray, volume: FloatArray, bars: int) -> float:
+    """Mean of `close * volume` over the last `bars` sessions; NaN with fewer bars."""
+    if len(close) < bars:
+        return float("nan")
+    return float((close[-bars:] * volume[-bars:]).mean())
+
+
 def _daily(b: Bundle, cfg: ScoringConfig) -> dict[str, Any]:
     close, high, low, volume = b.close, b.high, b.low, b.volume
     vol = cfg.volatility
@@ -146,15 +171,24 @@ def _daily(b: Bundle, cfg: ScoringConfig) -> dict[str, Any]:
     days = accumulation_distribution_days(close, volume)
     bbw = bbw_rank(close, vol.bb_length, vol.bb_mult)
     bw = bandwidth(close, vol.bb_length, vol.bb_mult)
-    out: dict[str, Any] = {"close": _last(close), "volume": _last(volume)}
+    out: dict[str, Any] = {
+        "close": _last(close),
+        "high": _last(high),
+        "low": _last(low),
+        "volume": _last(volume),
+        "prev_close": _lagged(close, 1),
+        "close_lag_3": _lagged(close, LAG_BARS),
+        "ret_5": _return(close, RET_BARS),
+        "avg_dollar_volume_20d": _avg_dollar_volume(close, volume, DOLLAR_VOLUME_BARS),
+    }
     averages = {p: sma(close, p) for p in cfg.sma.periods}
     for p, values in averages.items():
         out[f"sma_{p}"] = _last(values)
         out[f"sma_slope_{p}"] = _last(sma_slope(values, cfg.sma.slope_bars))
-    if len(cfg.sma.periods) >= 2:
-        fast, mid = (averages[p] for p in cfg.sma.periods[:2])
-        out["sma_cross"] = last_cross(fast, mid, cfg.sma.cross_lookback)
-        out["sma_cross_events"] = int(cross_events(fast, mid)[-1])
+    if len(cfg.sma.periods) >= 3:
+        mid, slow = (averages[p] for p in cfg.sma.periods[1:3])
+        out["sma_cross"] = last_cross(mid, slow, cfg.sma.cross_lookback)
+        out["sma_cross_events"] = int(cross_events(mid, slow)[-1])
     out |= {
         "rsi": _last(rsi(close, cfg.mean_reversion.rsi_length)),
         "atr": _last(atr(high, low, close, vol.atr_length)),
@@ -229,6 +263,40 @@ def _weekly(b: Bundle, cfg: ScoringConfig) -> dict[str, Any]:
     for p in cfg.sma.periods:
         out[f"sma_{p}"] = _last(sma(weekly.close, p))
     return out
+
+
+def _ripster(b: Bundle, cfg: ScoringConfig) -> dict[str, Any]:
+    """The Factor 12 inputs at the last bar: five clouds, stack, bias, flip count, pullback."""
+    rc = cfg.ripster
+    res = ripster_clouds(
+        b.high, b.low, b.close, rc.clouds.pairs(), pullback_lookback=rc.pullback_lookback_bars
+    )
+    clouds = {
+        f"c{i}": {
+            "top": _last(c.top),
+            "bot": _last(c.bot),
+            "dir": _last(c.direction),
+            "pos": _last(c.pos),
+        }
+        for i, c in enumerate(res.clouds, start=1)
+    }
+    c2, c3 = res.clouds[1], res.clouds[2]
+    short, long = rc.clouds.c3
+    weekly_dir = ripster_weekly_direction(
+        b.dates, b.open, b.high, b.low, b.close, b.volume, short, long
+    )
+    return {
+        "bias": _last(c3.pos),
+        "stack": _last(res.stack),
+        "bars_since_stack_flip": _last(res.bars_since_stack_flip),
+        "pullback": _last(res.pullback),
+        "c2_dir": _last(c2.direction),
+        "c3_dir": _last(c3.direction),
+        "c3_top": _last(c3.top),
+        "c3_bot": _last(c3.bot),
+        "dir_w": _last(weekly_dir),
+        "clouds": clouds,
+    }
 
 
 def _levels(b: Bundle, cfg: ScoringConfig, st_line: float) -> dict[str, Any]:
@@ -362,6 +430,7 @@ def compute_snapshot(bundle: Bundle, cfg: ScoringConfig, as_of: date) -> dict[st
         "fib": _fib(b, cfg),
         "divergences": _divergences(b, cfg),
         "flow": _flow(b, cfg),
+        "ripster": _ripster(b, cfg),
     }
     result: dict[str, Any] = round_significant(canonical(doc))
     return result
