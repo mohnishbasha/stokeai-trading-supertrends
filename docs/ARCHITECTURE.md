@@ -607,6 +607,13 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** The integration and coverage jobs, which need Postgres, are not blocked. Needs passwordless sudo, which GitHub-hosted runners have; on a runner without it the proof step fails visibly and GD-017 stays open.
 - **Status:** Accepted.
 
+### ADR-074: Market closed is a non-error result of trade-date resolution (PRD A-42)
+- **Context:** The CronJob fires every weekday including holidays, and ADR-022 says the no-date command exits 0 with "market closed" and publishes nothing. The S3-T07 date resolver raised `not_a_trading_date` (exit 2) for that case, which would fail the Job on every holiday.
+- **Decision:** `resolve_trade_date(None)` on a non-session day raises `TradeDateError` with code `market_closed` and exit code 0. `supertrends run daily` catches it before opening the database, prints `market closed: <date> is not an XNYS session` (or `{"status": "market_closed", "trade_date", "run_id": null}` with `--json`), and returns 0. An explicit `--date` that is not a session keeps `not_a_trading_date`, exit 2. The clock is `runs.dates.utc_now`, replaced in tests. `make run-daily` runs `uv run supertrends run daily` when `SUPERTRENDS_DATABASE_URL` is set, else `docker compose run --rm app run daily` against the Compose Postgres, with an optional `DATE=`.
+- **Alternatives rejected:** Exit 0 for an explicit holiday date too (hides a typo in a manual or backfill call); a return value instead of an exception (every caller of the resolver would have to remember to check it).
+- **Consequences:** Holidays leave no `runs` row and no failed Job. The API trigger path (S3-T09) maps the same code to HTTP 200 `market_closed`.
+- **Status:** Accepted pending owner confirmation.
+
 ---
 
 ## 4. Data Flows

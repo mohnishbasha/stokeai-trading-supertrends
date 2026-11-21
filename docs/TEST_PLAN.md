@@ -1418,7 +1418,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-CLI-006 | `unit_cli_analyze_ticker_date_json_validates` | `analyze` | FR-8xx | Deferred |
 | TS-CLI-007 | `unit_cli_rank_top_n_limits_rows` | `rank --top` | FR-8xx | Deferred |
 | TS-CLI-008 | `unit_cli_watchlist_list_add_remove_roundtrip` | Watchlist | FR-8xx | Deferred |
-| TS-CLI-009 | `unit_cli_run_daily_non_trading_day_exits_0_market_closed` | Calendar | FR-8xx, S3-T10 | Deferred |
+| TS-CLI-009 | `unit_cli_run_daily_non_trading_day_exits_0_market_closed` | Calendar | FR-8xx, S3-T10 | Automated |
 | TS-CLI-010 | `unit_cli_run_daily_date_flag_runs_that_date` | `--date` | FR-8xx | Deferred |
 | TS-CLI-011 | `unit_cli_ingest_fixture_provider_fills_database` | `ingest` | FR-8xx | Deferred |
 | TS-CLI-012 | `unit_cli_backtest_prints_hypothetical_label` | Label | FR-6xx, FR-8xx | Deferred |
@@ -1494,6 +1494,16 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-OPS-028 | `it_ops_full_daily_run_200_symbols_under_10_minutes_on_stoke` | NFR-001 end to end | NFR-001 | Skipped: requires the Stoke cluster; manual: time a staging run with the 200-symbol seed and record in `docs/PERFORMANCE.md` |
 | TS-OPS-029 | `it_ops_cronjob_template_sets_concurrency_forbid_and_time_zone_new_york` | CronJob | FR-9xx, S3-T10 | Deferred |
 | TS-OPS-030 | `it_ops_structured_logs_include_request_id_run_id_and_no_secret_values` | Logging | A§11, NFR-009 | Deferred |
+| TS-OPS-131 | `unit_runs_trade_date_without_date_on_holiday_is_market_closed_exit_0` | No `--date` on a holiday is `market_closed` with exit code 0 (fake clock) | FR-905, ADR-022, A-42 | Automated |
+| TS-OPS-132 | `unit_runs_trade_date_without_date_on_weekend_is_market_closed_exit_0` | A weekend is also market closed | FR-905, ADR-022 | Automated |
+| TS-OPS-133 | `unit_runs_trade_date_clock_defaults_to_utc_now` | The default clock is `dates.utc_now`, which tests replace | S3-T10 | Automated |
+| TS-OPS-134 | `unit_runs_daily_market_closed_json_reports_no_run` | `--json` prints status `market_closed`, the date, and a null run id | FR-905, ADR-074 | Automated |
+| TS-OPS-135 | `unit_runs_daily_explicit_holiday_date_still_exits_2` | An explicit `--date` holiday stays `not_a_trading_date`, exit 2, nothing run | ADR-022, A-42 | Automated |
+| TS-OPS-136 | `unit_runs_daily_before_close_still_exits_3_not_market_closed` | A session day before close plus 30 minutes stays exit 3 | ADR-022 | Automated |
+| TS-OPS-137 | `it_runs_daily_on_a_holiday_exits_0_and_writes_no_run_row` | Real Postgres: holiday run exits 0, prints market closed, `runs` stays empty | FR-905, S3-T10 | Automated |
+| TS-OPS-138 | `chart_daily_run_cronjob_calls_the_no_date_command` | The CronJob runs `supertrends run daily` with no `--date` | FR-905, S3-T10 | Automated |
+| TS-OPS-139 | `unit_runs_make_run_daily_calls_the_cli_locally_or_in_compose` | `make run-daily` uses `uv run` with a database URL, else the Compose app | FR-905, S3-T10 | Automated |
+| TS-OPS-140 | `unit_runs_make_run_daily_passes_date` | `DATE=` becomes `--date` | FR-905, S3-T10 | Automated |
 
 ### 10.16 Deployment and packaging (TS-DEP)
 

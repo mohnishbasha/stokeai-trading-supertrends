@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Scheduled daily run (S3-T10): `supertrends run daily` with no `--date` exits 0 with "market closed" on holidays and weekends without touching the database, `make run-daily` (local env or Compose, optional `DATE=`), and the clock hook `runs.dates.utc_now`.
 - Selection (S3-T06): candidate rules with every failing reason in rule order and the Ripster 34/50 cloud gate on both sides, ranking with the full tie-breaker chain, `max_buys` and `max_sells` without padding, the 60-day return correlation guard per side with an also-qualified list, the nearest miss per side, and the days-on-list counter (ADR-065, PRD A-33).
 - Composite and confidence (S3-T05): `scoring.regime` (ADX regimes and the multiplier table), `scoring.weights` (base x regime x earnings x quality, missing factors dropped and renormalized to 100), `scoring.composite` (composite, contributions, display score, bands, and the frozen `ScoreCard` from `score_ticker`), and `scoring.confidence` (agreement and the five deductions, with reasons) (ADR-064).
 - Factor 12, Ripster EMA Clouds (S3-T14): the score rules (bias, trend, stacking, mid, long, pullback), and the pure helpers `confidence_stack_penalty`, `selection_bias_gate` and `ripster_evidence` in `scoring/ripster_rules.py` for the composite, selection and evidence tasks (ADR-063, PRD A-31).

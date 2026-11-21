@@ -88,8 +88,15 @@ demo-verify: ## Check every product function against the running demo, write dem
 demo-down: ## Stop the demo and remove its data
 	@echo "make demo-down: not available until Sprint 3"
 
-run-daily: ## Trigger the daily run locally
-	@echo "make run-daily: not available until Sprint 3"
+# Local daily run (FR-905). With SUPERTRENDS_DATABASE_URL set it runs in this environment
+# ("make dev"); otherwise in the Compose app image against the Compose Postgres ("make up").
+# DATE=YYYY-MM-DD picks the trade date; without it, a holiday prints "market closed" and exits 0.
+run-daily: ## Run the daily pipeline locally (DATE=YYYY-MM-DD optional)
+ifdef SUPERTRENDS_DATABASE_URL
+	uv run supertrends run daily $(if $(DATE),--date $(DATE))
+else
+	docker compose -f deploy/compose/docker-compose.local.yml run --rm app run daily $(if $(DATE),--date $(DATE))
+endif
 
 openapi: ## Regenerate docs/openapi.json and the UI client
 	@echo "make openapi: not available until Sprint 3"
