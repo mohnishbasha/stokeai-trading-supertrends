@@ -600,6 +600,20 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** S3-T07 calls `build_evidence` then `narrate` per pick and stores both. S5 reuses the guard and adds the banned-phrase and length checks (S5-T02); the document and its schema are the only input to the LLM prompt (S5-T01). Narrative code imports scoring and selection types but nothing under scoring or selection imports narrative.
 - **Status:** Accepted pending owner confirmation.
 
+### ADR-072: Read API, store port and read-time derivations (PRD A-40)
+- **Context:** FR-801 to FR-807 define the read endpoints, but the spec does not say where the pick ribbon, the expected 1-day move and the also-qualified scores come from (none is stored), what "latest" means when a date has several published runs, how a non-session day on `POST /runs` is reported, or how the API is tested without Postgres (the runs tables need Postgres features SQLite cannot host).
+- **Decision:** Routes depend on a `ReadStore` protocol (`api/store.py`); `runs.reads.PgStore` implements it over Postgres and unit tests use an in-memory fake. "Latest" is the current published run (`published_at IS NOT NULL AND superseded_by IS NULL`) with the greatest trade date; earlier published runs of the date are listed as `superseded_runs`. The ribbon (last 10 daily Supertrend directions as `U` and `D`) and bar overlays (Supertrend, SMAs, Ripster c2 and c3) are computed at read time from stored bars with the active config (`runs.overlays`); `expected_1d_move` is the snapshot's daily ATR. `picked` on rankings comes from the run's recommendations and the summary's also-qualified list. Unknown query parameters are rejected with 422. `POST /runs` only queues a run (ADR-020): 202 with `Location`, 409 `run-in-progress` with `active_run_id`, 409 `session-not-complete`, 422 `not-a-trading-date` or `date-in-future`, and 200 `{"run_id": null, "state": "market_closed"}` when no date is given on a non-session day. Every pick or score payload carries the disclaimer string from `runs.narrator`.
+- **Alternatives rejected:** Storing the ribbon and ATR in the evidence document (changes the S3-T08 schema and repeats data); SQLAlchemy queries inside the routes (forces Postgres into every contract test); returning 404 for a non-session `POST /runs` (the schedule treats a closed market as success).
+- **Consequences:** Bar overlays are recomputed per request (bounded by the 10-year range limit and the single-user scale). S3-T10 and the smoke suite rely on the `market_closed` body. The API never reads LLM text into a number; narratives are returned as stored.
+- **Status:** Accepted pending owner confirmation.
+
+### ADR-073: Committed OpenAPI document and drift check (PRD A-41)
+- **Context:** The UI client and MCP tools need a stable HTTP contract, and a contract that is not committed drifts silently.
+- **Decision:** `docs/openapi.json` is the FastAPI OpenAPI 3.1 document rendered by `supertrends.api.openapi.render_openapi` (sorted keys, two-space indent, trailing newline) and written by `supertrends config export-openapi --output`. `make openapi` regenerates it and runs the UI client generator only when `ui/scripts/generate-api-client.sh` exists. A unit test and a CI step (`OpenAPI drift` in the lint job) fail when the committed file differs from the generated one.
+- **Alternatives rejected:** Generating it only in CI (no reviewable contract diff in a PR); a hand-written document (second source of truth).
+- **Consequences:** Any route or model change needs `make openapi` and a commit of `docs/openapi.json`. Field names in `api/schemas/read.py` are the public contract.
+- **Status:** Accepted pending owner confirmation.
+
 ---
 
 ## 4. Data Flows

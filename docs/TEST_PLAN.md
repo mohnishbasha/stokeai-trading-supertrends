@@ -1322,26 +1322,26 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-API-002 | `contract_api_readyz_database_down_returns_503` | Readiness | FR-8xx, S1-T08 | Automated |
 | TS-API-003 | `contract_api_readyz_migrations_behind_head_returns_503` | Migration check | FR-8xx | Automated |
 | TS-API-004 | `contract_api_metrics_returns_prometheus_text` | `/metrics` | FR-8xx, A§11 | Automated |
-| TS-API-005 | `contract_api_recommendations_latest_shape_matches_openapi` | Schema | FR-8xx | Deferred |
-| TS-API-006 | `contract_api_recommendations_latest_includes_disclaimer_string` | Disclaimer | FR-8xx, A§9 | Deferred |
-| TS-API-007 | `contract_api_recommendations_by_date_returns_that_days_published_run` | Date browse | FR-8xx, US-012 | Deferred |
-| TS-API-008 | `contract_api_recommendations_by_date_non_trading_date_returns_422` | Validation | FR-8xx | Deferred |
-| TS-API-009 | `contract_api_recommendations_by_date_no_run_returns_404_problem` | Not found | FR-8xx | Deferred |
-| TS-API-010 | `contract_api_rankings_by_date_sorted_with_data_quality_and_exclusions` | Ranking | FR-8xx | Deferred |
-| TS-API-011 | `contract_api_ticker_analysis_returns_11_factors_or_stated_reason` | Analysis | FR-8xx, US-016 | Deferred |
-| TS-API-012 | `contract_api_ticker_analysis_unknown_symbol_returns_404` | Error | FR-8xx | Deferred |
-| TS-API-013 | `contract_api_ticker_analysis_invalid_symbol_returns_422` | Regex | FR-8xx, A§9 | Deferred |
-| TS-API-014 | `contract_api_ticker_bars_range_and_pagination_bounded` | Bars endpoint | FR-8xx, A§9 | Deferred |
-| TS-API-015 | `contract_api_runs_list_pagination_bounded` | Runs list | FR-8xx | Deferred |
-| TS-API-016 | `contract_api_runs_get_by_id_returns_state_history_and_exclusions` | Run detail | FR-8xx | Deferred |
-| TS-API-017 | `contract_api_post_runs_without_token_returns_401` | Auth | FR-8xx, A§9 | Deferred |
-| TS-API-018 | `contract_api_post_runs_wrong_token_returns_401_constant_time_compare` | Auth, compare function is `hmac.compare_digest` | FR-8xx, A§9 | Deferred |
-| TS-API-019 | `contract_api_post_runs_with_token_returns_202_and_run_id` | Accepted | FR-8xx | Deferred |
-| TS-API-020 | `contract_api_post_runs_while_running_returns_409_already_running` | Concurrency | FR-8xx, S3-T07 | Deferred |
-| TS-API-021 | `contract_api_config_scoring_returns_active_config_and_hash` | Config view | FR-8xx | Deferred |
+| TS-API-005 | `contract_api_recommendations_latest_shape_matches_openapi` | Schema | FR-8xx | Automated |
+| TS-API-006 | `contract_api_recommendations_latest_includes_disclaimer_string` | Disclaimer | FR-8xx, A§9 | Automated |
+| TS-API-007 | `contract_api_recommendations_by_date_returns_that_days_published_run` | Date browse | FR-8xx, US-012 | Automated |
+| TS-API-008 | `contract_api_recommendations_by_date_non_trading_date_returns_422` | Validation | FR-8xx | Automated |
+| TS-API-009 | `contract_api_recommendations_by_date_no_run_returns_404_problem` | Not found | FR-8xx | Automated |
+| TS-API-010 | `contract_api_rankings_by_date_sorted_with_data_quality_and_exclusions` | Ranking | FR-8xx | Automated |
+| TS-API-011 | `contract_api_ticker_analysis_returns_11_factors_or_stated_reason` | Analysis | FR-8xx, US-016 | Automated |
+| TS-API-012 | `contract_api_ticker_analysis_unknown_symbol_returns_404` | Error | FR-8xx | Automated |
+| TS-API-013 | `contract_api_ticker_analysis_invalid_symbol_returns_422` | Regex | FR-8xx, A§9 | Automated |
+| TS-API-014 | `contract_api_ticker_bars_range_and_pagination_bounded` | Bars endpoint | FR-8xx, A§9 | Automated |
+| TS-API-015 | `contract_api_runs_list_pagination_bounded` | Runs list | FR-8xx | Automated |
+| TS-API-016 | `contract_api_runs_get_by_id_returns_state_history_and_exclusions` | Run detail | FR-8xx | Automated |
+| TS-API-017 | `contract_api_post_runs_without_token_returns_401` | Auth | FR-8xx, A§9 | Automated |
+| TS-API-018 | `contract_api_post_runs_wrong_token_returns_401_constant_time_compare` | Auth, compare function is `hmac.compare_digest` | FR-8xx, A§9 | Automated |
+| TS-API-019 | `contract_api_post_runs_with_token_returns_202_and_run_id` | Accepted | FR-8xx | Automated |
+| TS-API-020 | `contract_api_post_runs_while_running_returns_409_already_running` | Concurrency | FR-8xx, S3-T07 | Automated |
+| TS-API-021 | `contract_api_config_scoring_returns_active_config_and_hash` | Config view | FR-8xx | Automated |
 | TS-API-022 | `contract_api_status_returns_version_commit_and_license_notice` | License notice | FR-8xx, A§9 | Deferred |
 | TS-API-023 | `contract_api_errors_use_rfc_9457_problem_json` | Error format | FR-8xx, S1-T08 | Automated |
-| TS-API-024 | `contract_api_openapi_document_matches_committed_docs_openapi_json` | Drift check | FR-8xx, S3-T09 | Deferred |
+| TS-API-024 | `contract_api_openapi_document_matches_committed_docs_openapi_json` | Drift check | FR-8xx, S3-T09 | Automated |
 | TS-API-025 | `contract_api_write_endpoints_rate_limited_returns_429` | Rate limit | FR-8xx, A§9 | Deferred |
 | TS-API-026 | `contract_api_unknown_host_header_rejected` | `SUPERTRENDS_ALLOWED_HOSTS` | FR-8xx, A§9 | Automated |
 | TS-API-027 | `contract_api_json_logs_valid_json_lines_with_request_id` | Log format | A§9, A§11 | Automated |
@@ -1352,7 +1352,7 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-API-032 | `it_api_spa_fallback_deep_link_returns_index_html` | Deep links | FR-8xx, S4-T07 | Deferred |
 | TS-API-033 | `contract_api_csp_header_present_no_inline_script_connect_src_self` | CSP | FR-8xx, A§9 | Deferred |
 | TS-API-034 | `contract_api_security_headers_nosniff_referrer_no_referrer_frame_ancestors_none` | Headers | A§9 | Deferred |
-| TS-API-035 | `contract_api_every_pick_payload_carries_disclaimer_on_all_endpoints` | Disclaimer on rankings, analysis, latest, by date | A§9 | Deferred |
+| TS-API-035 | `contract_api_every_pick_payload_carries_disclaimer_on_all_endpoints` | Disclaimer on rankings, analysis, latest, by date | A§9 | Automated |
 | TS-API-036 | `contract_api_request_id_echoed_when_safe_else_generated` | `X-Request-ID` accepted if safe, else replaced; always in the response header | A§6.0, S1-T08 | Automated |
 | TS-API-037 | `contract_api_host_allowlist_exempts_healthz_readyz_metrics_only` | 421 problem for foreign Host except the three probe paths | A§9, ADR-024, S1-T08 | Automated |
 | TS-API-038 | `contract_api_unhandled_error_returns_500_problem_without_stack_or_secret` | `internal` problem, request ID in body | A§6.1, S1-T08 | Automated |
@@ -1360,6 +1360,28 @@ Each rule line in the Signal Engine Specification has one table-driven row. Boun
 | TS-API-040 | `contract_api_metrics_http_series_use_route_template_not_raw_path` | No high-cardinality labels | A§11.1, S1-T08 | Automated |
 | TS-API-041 | `it_api_readyz_200_at_head_503_when_unmigrated_against_real_postgres` | Real database | A§6.1, S1-T08 | Automated |
 | TS-API-042 | `unit_api_write_token_dependency_401_with_www_authenticate_on_missing_or_wrong_token` | `require_write_token` | A§6.1, A§9, S1-T08 | Automated |
+| TS-API-101 | `contract_api_recommendations_latest_no_run_returns_404_problem` | `no-published-run` problem | FR-801, A§6.1, S3-T09 | Automated |
+| TS-API-102 | `contract_api_recommendations_by_date_future_returns_422_date_in_future` | `date-in-future` problem | FR-801, ADR-022, S3-T09 | Automated |
+| TS-API-103 | `contract_api_recommendations_by_date_missing_or_malformed_date_returns_422` | Required `date` | FR-801, S3-T09 | Automated |
+| TS-API-104 | `contract_api_unknown_query_parameter_returns_422` | Strict query, `errors[].loc` | A§6.1, ADR-072, S3-T09 | Automated |
+| TS-API-105 | `contract_api_rankings_validation_and_errors` | limit, offset, group, date errors | FR-802, S3-T09 | Automated |
+| TS-API-106 | `contract_api_ticker_analysis_not_scored_in_run_is_excluded_not_in_run` | `not_in_run` status | FR-803, A-40, S3-T09 | Automated |
+| TS-API-107 | `contract_api_ticker_bars_without_stored_bars_returns_empty_list` | Empty bars, null range | FR-804, S3-T09 | Automated |
+| TS-API-108 | `contract_api_post_runs_date_errors_and_market_closed` | Date and body validation | FR-806, ADR-022, S3-T09 | Automated |
+| TS-API-109 | `contract_api_post_runs_weekend_default_returns_200_market_closed` | Default date on a non-session day | FR-806, S3-T10, S3-T09 | Automated |
+| TS-API-110 | `contract_api_post_runs_market_closed_code_returns_200_market_closed` | `TradeDateError.code == market_closed` | FR-806, S3-T10, S3-T09 | Automated |
+| TS-API-111 | `contract_api_post_runs_session_not_complete_returns_409` | `session-not-complete` problem | FR-806, ADR-022, S3-T09 | Automated |
+| TS-API-112 | `contract_api_read_errors_use_problem_json_with_request_id` | Unknown route | A§6.1, S3-T09 | Automated |
+| TS-API-113 | `it_latest_recommendations_from_postgres` | `PgStore` picks, ribbon, ATR, superseded | FR-801, ADR-072, S3-T09 | Automated |
+| TS-API-114 | `it_rankings_groups_and_paging` | Group filter, picked, paging | FR-802, S3-T09 | Automated |
+| TS-API-115 | `it_ticker_analysis_scored_excluded_and_unknown` | Factor rows from Postgres | FR-803, S3-T09 | Automated |
+| TS-API-116 | `it_bars_daily_weekly_intraday_with_overlays` | Overlays over real bars | FR-804, S3-T09 | Automated |
+| TS-API-117 | `it_runs_list_detail_and_trigger` | Queued run and 409 | FR-805, FR-806, S3-T09 | Automated |
+| TS-API-118 | `it_config_scoring` | Active config | FR-807, S3-T09 | Automated |
+| TS-API-119 | `overlays_have_all_keys_and_no_nan` | Overlay keys, NaN-free | FR-804, S3-T09 | Automated |
+| TS-API-120 | `overlays_sma_warmup_points_are_omitted` | Warm-up omitted | FR-804, S3-T09 | Automated |
+| TS-API-121 | `overlays_weekly_series_labels_the_last_session_of_each_week` | Weekly resample | FR-804, ADR-033, S3-T09 | Automated |
+| TS-API-122 | `overlays_ribbon_is_last_ten_directions_oldest_first` | Ribbon string | FR-801, S3-T09 | Automated |
 
 ### 10.12 UI (TS-UI)
 

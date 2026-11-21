@@ -1,0 +1,3016 @@
+{
+  "components": {
+    "schemas": {
+      "AddItemRequest": {
+        "additionalProperties": false,
+        "description": "Body of POST /watchlist/items.",
+        "properties": {
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "symbol": {
+            "description": "^[A-Z][A-Z0-9.\\-]{0,9}$",
+            "title": "Symbol",
+            "type": "string"
+          }
+        },
+        "required": [
+          "symbol"
+        ],
+        "title": "AddItemRequest",
+        "type": "object"
+      },
+      "AlsoQualified": {
+        "description": "A ticker that qualified but duplicates a pick (ADR-007 correlation limit).",
+        "properties": {
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "correlation": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation"
+          },
+          "display_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Score"
+          },
+          "duplicates": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duplicates"
+          },
+          "side": {
+            "title": "Side",
+            "type": "string"
+          },
+          "ticker": {
+            "title": "Ticker",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticker",
+          "side"
+        ],
+        "title": "AlsoQualified",
+        "type": "object"
+      },
+      "AnalysisResponse": {
+        "description": "Full factor breakdown of one ticker in one run (FR-803).",
+        "properties": {
+          "adjustments": {
+            "items": {},
+            "title": "Adjustments",
+            "type": "array"
+          },
+          "band": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Band"
+          },
+          "candidate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate"
+          },
+          "composite": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Composite"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "config": {
+            "$ref": "#/components/schemas/ConfigRef"
+          },
+          "data_quality": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Quality"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "disclaimer": {
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "display_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Score"
+          },
+          "exclusion_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exclusion Reason"
+          },
+          "expected_1d_move": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected 1D Move"
+          },
+          "factors": {
+            "items": {
+              "$ref": "#/components/schemas/FactorOut"
+            },
+            "title": "Factors",
+            "type": "array"
+          },
+          "flags": {
+            "items": {},
+            "title": "Flags",
+            "type": "array"
+          },
+          "market_regime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market Regime"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "narrative": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NarrativeOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "picked": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PickedRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "regime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regime"
+          },
+          "ripster": {
+            "$ref": "#/components/schemas/RipsterBlock"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "scored",
+              "excluded"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "supertrend": {
+            "$ref": "#/components/schemas/SupertrendBlock"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/Thresholds"
+          },
+          "ticker": {
+            "title": "Ticker",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticker",
+          "name",
+          "date",
+          "run_id",
+          "market_regime",
+          "config",
+          "status",
+          "exclusion_reason",
+          "data_quality",
+          "display_score",
+          "band",
+          "confidence",
+          "composite",
+          "regime",
+          "candidate",
+          "thresholds",
+          "factors",
+          "adjustments",
+          "flags",
+          "supertrend",
+          "ripster",
+          "expected_1d_move",
+          "picked",
+          "narrative",
+          "disclaimer"
+        ],
+        "title": "AnalysisResponse",
+        "type": "object"
+      },
+      "BarOut": {
+        "description": "One OHLCV bar. `t` is a date (1d, 1w) or a UTC timestamp (5m).",
+        "properties": {
+          "c": {
+            "title": "C",
+            "type": "number"
+          },
+          "h": {
+            "title": "H",
+            "type": "number"
+          },
+          "l": {
+            "title": "L",
+            "type": "number"
+          },
+          "o": {
+            "title": "O",
+            "type": "number"
+          },
+          "t": {
+            "title": "T",
+            "type": "string"
+          },
+          "v": {
+            "title": "V",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "t",
+          "o",
+          "h",
+          "l",
+          "c",
+          "v"
+        ],
+        "title": "BarOut",
+        "type": "object"
+      },
+      "BarsResponse": {
+        "description": "Bars and chart overlays for a ticker (FR-804). Overlay points carry `t` plus value fields.",
+        "properties": {
+          "bars": {
+            "items": {
+              "$ref": "#/components/schemas/BarOut"
+            },
+            "title": "Bars",
+            "type": "array"
+          },
+          "from": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From"
+          },
+          "overlays": {
+            "additionalProperties": {
+              "items": {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "title": "Overlays",
+            "type": "object"
+          },
+          "tf": {
+            "enum": [
+              "1d",
+              "1w",
+              "5m"
+            ],
+            "title": "Tf",
+            "type": "string"
+          },
+          "ticker": {
+            "title": "Ticker",
+            "type": "string"
+          },
+          "to": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To"
+          }
+        },
+        "required": [
+          "ticker",
+          "tf",
+          "from",
+          "to",
+          "bars",
+          "overlays"
+        ],
+        "title": "BarsResponse",
+        "type": "object"
+      },
+      "ConfigRef": {
+        "description": "The scoring config a run used. `version` is null when it is not the active config.",
+        "properties": {
+          "hash": {
+            "title": "Hash",
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "version",
+          "hash"
+        ],
+        "title": "ConfigRef",
+        "type": "object"
+      },
+      "ConfigResponse": {
+        "description": "The active scoring config.",
+        "properties": {
+          "document": {
+            "additionalProperties": true,
+            "title": "Document",
+            "type": "object"
+          },
+          "hash": {
+            "title": "Hash",
+            "type": "string"
+          },
+          "loaded_at": {
+            "format": "date-time",
+            "title": "Loaded At",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "hash",
+          "document",
+          "loaded_at"
+        ],
+        "title": "ConfigResponse",
+        "type": "object"
+      },
+      "CreateGroupRequest": {
+        "additionalProperties": false,
+        "description": "Body of POST /watchlist/groups.",
+        "properties": {
+          "name": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "position": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Position",
+            "type": "integer"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name"
+        ],
+        "title": "CreateGroupRequest",
+        "type": "object"
+      },
+      "Excluded": {
+        "description": "A ticker left out of the run and why.",
+        "properties": {
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "ticker": {
+            "title": "Ticker",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticker",
+          "reason"
+        ],
+        "title": "Excluded",
+        "type": "object"
+      },
+      "FactorOut": {
+        "description": "One factor's score and its stated reasons.",
+        "properties": {
+          "base_weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Weight"
+          },
+          "contribution": {
+            "title": "Contribution",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "quality": {
+            "title": "Quality",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight"
+          }
+        },
+        "required": [
+          "id",
+          "score",
+          "base_weight",
+          "weight",
+          "contribution",
+          "quality",
+          "reasons"
+        ],
+        "title": "FactorOut",
+        "type": "object"
+      },
+      "GroupResponse": {
+        "description": "A watchlist group.",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "symbols": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Symbols",
+            "type": "array"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "position",
+          "symbols"
+        ],
+        "title": "GroupResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Invalidation": {
+        "description": "The level that invalidates the pick and the rule.",
+        "properties": {
+          "level": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "rule": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule"
+          }
+        },
+        "title": "Invalidation",
+        "type": "object"
+      },
+      "ItemResponse": {
+        "description": "A watchlist item.",
+        "properties": {
+          "added_at": {
+            "format": "date-time",
+            "title": "Added At",
+            "type": "string"
+          },
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "resolution": {
+            "title": "Resolution",
+            "type": "string"
+          },
+          "resolution_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Reason"
+          },
+          "scored": {
+            "title": "Scored",
+            "type": "boolean"
+          },
+          "symbol": {
+            "title": "Symbol",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "symbol",
+          "name",
+          "type",
+          "scored",
+          "resolution",
+          "resolution_reason",
+          "added_at",
+          "groups"
+        ],
+        "title": "ItemResponse",
+        "type": "object"
+      },
+      "MarketClosedResponse": {
+        "description": "No session to run today (200).",
+        "properties": {
+          "run_id": {
+            "title": "Run Id",
+            "type": "null"
+          },
+          "state": {
+            "const": "market_closed",
+            "default": "market_closed",
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "title": "MarketClosedResponse",
+        "type": "object"
+      },
+      "NarrativeCounts": {
+        "description": "Narratives by source.",
+        "properties": {
+          "llm": {
+            "default": 0,
+            "title": "Llm",
+            "type": "integer"
+          },
+          "template": {
+            "default": 0,
+            "title": "Template",
+            "type": "integer"
+          }
+        },
+        "title": "NarrativeCounts",
+        "type": "object"
+      },
+      "NarrativeOut": {
+        "description": "Stored narrative text and provenance.",
+        "properties": {
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "source"
+        ],
+        "title": "NarrativeOut",
+        "type": "object"
+      },
+      "NearestMiss": {
+        "description": "The closest ticker to a threshold when a side has no pick.",
+        "properties": {
+          "display_score": {
+            "title": "Display Score",
+            "type": "number"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "ticker": {
+            "title": "Ticker",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticker",
+          "display_score",
+          "reason"
+        ],
+        "title": "NearestMiss",
+        "type": "object"
+      },
+      "NearestMisses": {
+        "description": "Nearest miss per side.",
+        "properties": {
+          "buy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NearestMiss"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sell": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NearestMiss"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "NearestMisses",
+        "type": "object"
+      },
+      "Pick": {
+        "description": "A published pick (FR-801).",
+        "properties": {
+          "band": {
+            "title": "Band",
+            "type": "string"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "integer"
+          },
+          "days_on_list": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days On List"
+          },
+          "display_score": {
+            "title": "Display Score",
+            "type": "number"
+          },
+          "entry_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entry Date"
+          },
+          "entry_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entry Price"
+          },
+          "expected_1d_move": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected 1D Move"
+          },
+          "flags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Flags",
+            "type": "array"
+          },
+          "invalidation": {
+            "$ref": "#/components/schemas/Invalidation"
+          },
+          "levels": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Levels"
+          },
+          "narrative": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NarrativeOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rank": {
+            "title": "Rank",
+            "type": "integer"
+          },
+          "recommendation_id": {
+            "title": "Recommendation Id",
+            "type": "string"
+          },
+          "regime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regime"
+          },
+          "ribbon": {
+            "title": "Ribbon",
+            "type": "string"
+          },
+          "side": {
+            "enum": [
+              "buy",
+              "sell"
+            ],
+            "title": "Side",
+            "type": "string"
+          },
+          "supertrend": {
+            "$ref": "#/components/schemas/SupertrendBlock"
+          },
+          "ticker": {
+            "title": "Ticker",
+            "type": "string"
+          },
+          "top_factors": {
+            "items": {
+              "$ref": "#/components/schemas/TopFactor"
+            },
+            "title": "Top Factors",
+            "type": "array"
+          }
+        },
+        "required": [
+          "recommendation_id",
+          "side",
+          "rank",
+          "ticker",
+          "display_score",
+          "band",
+          "confidence",
+          "supertrend",
+          "invalidation",
+          "top_factors",
+          "ribbon",
+          "flags"
+        ],
+        "title": "Pick",
+        "type": "object"
+      },
+      "PickedRef": {
+        "description": "The pick the ticker became in this run.",
+        "properties": {
+          "rank": {
+            "title": "Rank",
+            "type": "integer"
+          },
+          "recommendation_id": {
+            "title": "Recommendation Id",
+            "type": "string"
+          },
+          "side": {
+            "enum": [
+              "buy",
+              "sell"
+            ],
+            "title": "Side",
+            "type": "string"
+          }
+        },
+        "required": [
+          "side",
+          "rank",
+          "recommendation_id"
+        ],
+        "title": "PickedRef",
+        "type": "object"
+      },
+      "RankingItem": {
+        "description": "One ranked ticker.",
+        "properties": {
+          "band": {
+            "title": "Band",
+            "type": "string"
+          },
+          "bars_since_flip": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bars Since Flip"
+          },
+          "candidate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate"
+          },
+          "composite": {
+            "title": "Composite",
+            "type": "number"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "integer"
+          },
+          "display_score": {
+            "title": "Display Score",
+            "type": "number"
+          },
+          "flags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Flags",
+            "type": "array"
+          },
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "picked": {
+            "anyOf": [
+              {
+                "enum": [
+                  "buy",
+                  "sell",
+                  "also_qualified"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Picked"
+          },
+          "rank": {
+            "title": "Rank",
+            "type": "integer"
+          },
+          "regime": {
+            "title": "Regime",
+            "type": "string"
+          },
+          "st_dir_d": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "St Dir D"
+          },
+          "st_dir_w": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "St Dir W"
+          },
+          "ticker": {
+            "title": "Ticker",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rank",
+          "ticker",
+          "display_score",
+          "band",
+          "confidence",
+          "composite",
+          "regime",
+          "st_dir_d",
+          "st_dir_w",
+          "bars_since_flip",
+          "candidate",
+          "flags",
+          "groups",
+          "picked"
+        ],
+        "title": "RankingItem",
+        "type": "object"
+      },
+      "RankingsResponse": {
+        "description": "A page of the run's ranking, with data-quality exclusions.",
+        "properties": {
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "disclaimer": {
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "excluded": {
+            "items": {
+              "$ref": "#/components/schemas/Excluded"
+            },
+            "title": "Excluded",
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RankingItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "run_id",
+          "total",
+          "limit",
+          "offset",
+          "items",
+          "excluded",
+          "disclaimer"
+        ],
+        "title": "RankingsResponse",
+        "type": "object"
+      },
+      "RecommendationsResponse": {
+        "description": "Picks of one trade date (`GET /recommendations/latest` and `GET /recommendations`).",
+        "properties": {
+          "also_qualified": {
+            "items": {
+              "$ref": "#/components/schemas/AlsoQualified"
+            },
+            "title": "Also Qualified",
+            "type": "array"
+          },
+          "buys": {
+            "items": {
+              "$ref": "#/components/schemas/Pick"
+            },
+            "title": "Buys",
+            "type": "array"
+          },
+          "config": {
+            "$ref": "#/components/schemas/ConfigRef"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "disclaimer": {
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "excluded": {
+            "items": {
+              "$ref": "#/components/schemas/Excluded"
+            },
+            "title": "Excluded",
+            "type": "array"
+          },
+          "market_regime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market Regime"
+          },
+          "nearest_miss": {
+            "$ref": "#/components/schemas/NearestMisses"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "sells": {
+            "items": {
+              "$ref": "#/components/schemas/Pick"
+            },
+            "title": "Sells",
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/SummaryCounts"
+          },
+          "superseded_runs": {
+            "items": {
+              "$ref": "#/components/schemas/SupersededOut"
+            },
+            "title": "Superseded Runs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "date",
+          "run_id",
+          "published_at",
+          "market_regime",
+          "config",
+          "buys",
+          "sells",
+          "also_qualified",
+          "nearest_miss",
+          "excluded",
+          "summary",
+          "superseded_runs",
+          "disclaimer"
+        ],
+        "title": "RecommendationsResponse",
+        "type": "object"
+      },
+      "RipsterBlock": {
+        "description": "Ripster EMA cloud state (Factor 12).",
+        "properties": {
+          "bars_since_stack_flip": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bars Since Stack Flip"
+          },
+          "bias": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bias"
+          },
+          "c2_dir": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "C2 Dir"
+          },
+          "c3_bot": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "C3 Bot"
+          },
+          "c3_dir": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "C3 Dir"
+          },
+          "c3_top": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "C3 Top"
+          },
+          "dir_w": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dir W"
+          },
+          "stack": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stack"
+          }
+        },
+        "title": "RipsterBlock",
+        "type": "object"
+      },
+      "RunDetail": {
+        "description": "One run with its state history.",
+        "properties": {
+          "code_version": {
+            "title": "Code Version",
+            "type": "string"
+          },
+          "config_hash": {
+            "title": "Config Hash",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Detail"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "market_regime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market Regime"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/RunSummaryOut"
+          },
+          "superseded_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Superseded By"
+          },
+          "trade_date": {
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          },
+          "transitions": {
+            "items": {
+              "$ref": "#/components/schemas/TransitionOut"
+            },
+            "title": "Transitions",
+            "type": "array"
+          },
+          "trigger": {
+            "title": "Trigger",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "trade_date",
+          "state",
+          "trigger",
+          "config_hash",
+          "code_version",
+          "market_regime",
+          "created_at",
+          "started_at",
+          "finished_at",
+          "published_at",
+          "superseded_by",
+          "error_code",
+          "error_detail",
+          "summary",
+          "transitions"
+        ],
+        "title": "RunDetail",
+        "type": "object"
+      },
+      "RunListItem": {
+        "description": "A run in the list view.",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Seconds"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "picks": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Picks",
+            "type": "object"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "superseded_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Superseded By"
+          },
+          "trade_date": {
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          },
+          "trigger": {
+            "title": "Trigger",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "trade_date",
+          "state",
+          "trigger",
+          "created_at",
+          "finished_at",
+          "published_at",
+          "superseded_by",
+          "error_code",
+          "picks",
+          "duration_seconds"
+        ],
+        "title": "RunListItem",
+        "type": "object"
+      },
+      "RunListResponse": {
+        "description": "Runs newest first; pass `next_before` as `before` for the next page.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RunListItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_before": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Before"
+          }
+        },
+        "required": [
+          "items",
+          "next_before"
+        ],
+        "title": "RunListResponse",
+        "type": "object"
+      },
+      "RunSummaryOut": {
+        "description": "The stored run summary (FR-906).",
+        "properties": {
+          "buys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Buys",
+            "type": "array"
+          },
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Seconds"
+          },
+          "excluded": {
+            "items": {
+              "$ref": "#/components/schemas/Excluded"
+            },
+            "title": "Excluded",
+            "type": "array"
+          },
+          "narrative": {
+            "$ref": "#/components/schemas/NarrativeCounts"
+          },
+          "sells": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sells",
+            "type": "array"
+          },
+          "tickers_excluded": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tickers Excluded"
+          },
+          "tickers_scored": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tickers Scored"
+          },
+          "tickers_total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tickers Total"
+          }
+        },
+        "title": "RunSummaryOut",
+        "type": "object"
+      },
+      "RunTriggerRequest": {
+        "additionalProperties": false,
+        "description": "Body of `POST /runs`; no date means today's completed session.",
+        "properties": {
+          "date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          }
+        },
+        "title": "RunTriggerRequest",
+        "type": "object"
+      },
+      "RunTriggerResponse": {
+        "description": "A queued run (202).",
+        "properties": {
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "state": {
+            "const": "queued",
+            "title": "State",
+            "type": "string"
+          },
+          "trade_date": {
+            "format": "date",
+            "title": "Trade Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "state",
+          "trade_date"
+        ],
+        "title": "RunTriggerResponse",
+        "type": "object"
+      },
+      "SetGroupsRequest": {
+        "additionalProperties": false,
+        "description": "Body of PUT /watchlist/items/{symbol}/groups.",
+        "properties": {
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Groups",
+            "type": "array"
+          }
+        },
+        "required": [
+          "groups"
+        ],
+        "title": "SetGroupsRequest",
+        "type": "object"
+      },
+      "SummaryCounts": {
+        "description": "Run counts shown with the picks.",
+        "properties": {
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Seconds"
+          },
+          "narrative_llm": {
+            "default": 0,
+            "title": "Narrative Llm",
+            "type": "integer"
+          },
+          "narrative_template": {
+            "default": 0,
+            "title": "Narrative Template",
+            "type": "integer"
+          },
+          "tickers_excluded": {
+            "default": 0,
+            "title": "Tickers Excluded",
+            "type": "integer"
+          },
+          "tickers_scored": {
+            "default": 0,
+            "title": "Tickers Scored",
+            "type": "integer"
+          },
+          "tickers_total": {
+            "default": 0,
+            "title": "Tickers Total",
+            "type": "integer"
+          }
+        },
+        "title": "SummaryCounts",
+        "type": "object"
+      },
+      "SupersededOut": {
+        "description": "An earlier published run of the same date.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "SupersededOut",
+        "type": "object"
+      },
+      "SupertrendBlock": {
+        "description": "Supertrend state of the pick or ticker.",
+        "properties": {
+          "bars_since_flip": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bars Since Flip"
+          },
+          "dir_d": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dir D"
+          },
+          "dir_w": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dir W"
+          },
+          "distance_atr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Atr"
+          },
+          "line": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line"
+          }
+        },
+        "title": "SupertrendBlock",
+        "type": "object"
+      },
+      "Thresholds": {
+        "description": "The buy and sell display-score thresholds applied to the ticker.",
+        "properties": {
+          "buy": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buy"
+          },
+          "sell": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sell"
+          }
+        },
+        "required": [
+          "buy",
+          "sell"
+        ],
+        "title": "Thresholds",
+        "type": "object"
+      },
+      "TopFactor": {
+        "description": "One of the factors that moved the score most.",
+        "properties": {
+          "contribution": {
+            "title": "Contribution",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "contribution"
+        ],
+        "title": "TopFactor",
+        "type": "object"
+      },
+      "TransitionOut": {
+        "description": "One state transition.",
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From"
+          },
+          "seq": {
+            "title": "Seq",
+            "type": "integer"
+          },
+          "to": {
+            "title": "To",
+            "type": "string"
+          }
+        },
+        "required": [
+          "seq",
+          "from",
+          "to",
+          "at"
+        ],
+        "title": "TransitionOut",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "WatchlistResponse": {
+        "description": "GET /watchlist.",
+        "properties": {
+          "benchmarks": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Benchmarks",
+            "type": "array"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/GroupResponse"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ItemResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "max": {
+            "title": "Max",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "count",
+          "max",
+          "groups",
+          "items",
+          "benchmarks"
+        ],
+        "title": "WatchlistResponse",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Super Trends Market Agent",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/config/scoring": {
+      "get": {
+        "description": "The validated scoring config and its hash.",
+        "operationId": "scoring_config_api_v1_config_scoring_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "The active scoring config"
+      }
+    },
+    "/api/v1/rankings": {
+      "get": {
+        "description": "Scored tickers by rank, optionally limited to a watchlist group.",
+        "operationId": "rankings_api_v1_rankings_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 100000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "group",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^[a-z0-9][a-z0-9-]{0,47}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Group"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RankingsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ranking of a run"
+      }
+    },
+    "/api/v1/recommendations": {
+      "get": {
+        "description": "The current published run of `date`.",
+        "operationId": "recommendations_by_date_api_v1_recommendations_get",
+        "parameters": [
+          {
+            "description": "Trade date (an XNYS session).",
+            "in": "query",
+            "name": "date",
+            "required": true,
+            "schema": {
+              "description": "Trade date (an XNYS session).",
+              "format": "date",
+              "title": "Date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Picks of a trade date"
+      }
+    },
+    "/api/v1/recommendations/latest": {
+      "get": {
+        "description": "Buys, sells, also-qualified, nearest miss and exclusions of the latest published run.",
+        "operationId": "recommendations_latest_api_v1_recommendations_latest_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Picks of the latest published run"
+      }
+    },
+    "/api/v1/runs": {
+      "get": {
+        "description": "A page of runs; `next_before` is the cursor for the next page.",
+        "operationId": "list_runs_api_v1_runs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Before"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Runs, newest first"
+      },
+      "post": {
+        "description": "Queue a run for `date` (default: today's completed session). A worker executes it.",
+        "operationId": "trigger_run_api_v1_runs_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/RunTriggerRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketClosedResponse"
+                }
+              }
+            },
+            "description": "No session to run."
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunTriggerResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Queue a run"
+      }
+    },
+    "/api/v1/runs/{run_id}": {
+      "get": {
+        "description": "State, summary, exclusions and transitions of one run.",
+        "operationId": "get_run_api_v1_runs__run_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "One run with its history"
+      }
+    },
+    "/api/v1/tickers/{symbol}/analysis": {
+      "get": {
+        "description": "Every factor's score, weight and reasons, or why the ticker was excluded.",
+        "operationId": "ticker_analysis_api_v1_tickers__symbol__analysis_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "title": "Symbol",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Factor breakdown of a ticker"
+      }
+    },
+    "/api/v1/tickers/{symbol}/bars": {
+      "get": {
+        "description": "OHLCV bars in `[from, to]` (default: the latest window) with chart overlays.",
+        "operationId": "ticker_bars_api_v1_tickers__symbol__bars_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "title": "Symbol",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tf",
+            "required": false,
+            "schema": {
+              "default": "1d",
+              "pattern": "^(1d|1w|5m)$",
+              "title": "Tf",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BarsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Bars and overlays of a ticker"
+      }
+    },
+    "/api/v1/watchlist": {
+      "get": {
+        "description": "The default watchlist with groups, items, and benchmarks. No token.",
+        "operationId": "get_watchlist_api_v1_watchlist_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchlistResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Watchlist",
+        "tags": [
+          "watchlist"
+        ]
+      }
+    },
+    "/api/v1/watchlist/groups": {
+      "post": {
+        "description": "Create a named group.",
+        "operationId": "create_group_api_v1_watchlist_groups_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Group",
+        "tags": [
+          "watchlist"
+        ]
+      }
+    },
+    "/api/v1/watchlist/groups/{slug}": {
+      "delete": {
+        "description": "Delete a group and its memberships, never its items.",
+        "operationId": "delete_group_api_v1_watchlist_groups__slug__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Group",
+        "tags": [
+          "watchlist"
+        ]
+      }
+    },
+    "/api/v1/watchlist/items": {
+      "post": {
+        "description": "Add a symbol, optionally to existing groups.",
+        "operationId": "add_item_api_v1_watchlist_items_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddItemRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Item",
+        "tags": [
+          "watchlist"
+        ]
+      }
+    },
+    "/api/v1/watchlist/items/{symbol}": {
+      "delete": {
+        "description": "Remove an item and its memberships; history is kept.",
+        "operationId": "remove_item_api_v1_watchlist_items__symbol__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "title": "Symbol",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Remove Item",
+        "tags": [
+          "watchlist"
+        ]
+      }
+    },
+    "/api/v1/watchlist/items/{symbol}/groups": {
+      "put": {
+        "description": "Replace an item's group memberships.",
+        "operationId": "put_item_groups_api_v1_watchlist_items__symbol__groups_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "title": "Symbol",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetGroupsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Item Groups",
+        "tags": [
+          "watchlist"
+        ]
+      }
+    },
+    "/healthz": {
+      "get": {
+        "description": "Liveness. No database access.",
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Healthz Healthz Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Healthz"
+      }
+    },
+    "/readyz": {
+      "get": {
+        "description": "Readiness: the database answers and migrations are at head, else 503.",
+        "operationId": "readyz_readyz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Readyz Readyz Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Readyz"
+      }
+    }
+  }
+}
