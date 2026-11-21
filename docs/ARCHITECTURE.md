@@ -614,6 +614,20 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Consequences:** S5 adds an `LlmNarrator` behind the same protocol with its own template fallback; the disclaimer is attached by `runs.service` views, not stored.
 - **Status:** Accepted pending owner confirmation.
 
+### ADR-070: Minimal chart with a bundled Postgres for kind and a migration hook (PRD A-39)
+- **Context:** Sprint 3 needs a deployable loop (`kind-up image kind-load helm-install helm-test smoke`) before the full Sprint 8 chart (NetworkPolicy, ingress, signing). The run orchestrator and recommendations API ship in parallel tasks.
+- **Decision:** `deploy/helm/stokeai-supertrends` holds the API Deployment and Service, the daily-run CronJob (`30 17 * * 1-5`, `America/New_York`, `concurrencyPolicy: Forbid`, `supertrends run daily`), a migration Job as a pre-install/pre-upgrade hook, and a Helm test Pod. Default values expect an existing Secret and an external database; `values-kind.yaml` turns on a bundled Postgres StatefulSet (pinned by digest, the same as CI and Compose) whose Secret and Service are hooks ordered before the migration. The kind profile uses the fixture provider and template narratives, a kind-loaded image, and NodePort 30080 mapped to the host by `deploy/kind/cluster.yaml`. The smoke check on `/api/v1/recommendations/latest` skips until S3-T07 and S3-T09 land.
+- **Alternatives rejected:** A subchart for Postgres (a new dependency and image for a test-only database); Compose in CI instead of kind (does not exercise the chart).
+- **Consequences:** Sprint 8 extends this chart rather than replacing it; production never bundles Postgres.
+- **Status:** Accepted.
+
+### ADR-071: OS-level outbound network block for unit tests in CI (GD-003, GD-017)
+- **Context:** pytest-socket blocks sockets only inside the Python process; a dependency that spawns a subprocess could still reach the network.
+- **Decision:** The CI unit-test job proves, then uses, a network namespace (`sudo unshare --net`) that has loopback up and no route out: a loopback connection works and `1.1.1.1:443` fails, then `make test` runs inside it as the runner user (`runuser -u $SUDO_USER -p`, environment preserved). Unprivileged `unshare --user` was tried and rejected: ubuntu-24.04 restricts unprivileged user namespaces (AppArmor), so the uid_map write fails.
+- **Alternatives rejected:** iptables with an owner-match group (`sudo -g nonet` is not permitted by the runner sudoers, which allows runas users only); a container with `--network none` (the job needs the host toolchain).
+- **Consequences:** The integration and coverage jobs, which need Postgres, are not blocked. Needs passwordless sudo, which GitHub-hosted runners have; on a runner without it the proof step fails visibly and GD-017 stays open.
+- **Status:** Accepted.
+
 ### ADR-072: Read API, store port and read-time derivations (PRD A-40)
 - **Context:** FR-801 to FR-807 define the read endpoints, but the spec does not say where the pick ribbon, the expected 1-day move and the also-qualified scores come from (none is stored), what "latest" means when a date has several published runs, how a non-session day on `POST /runs` is reported, or how the API is tested without Postgres (the runs tables need Postgres features SQLite cannot host).
 - **Decision:** Routes depend on a `ReadStore` protocol (`api/store.py`); `runs.reads.PgStore` implements it over Postgres and unit tests use an in-memory fake. "Latest" is the current published run (`published_at IS NOT NULL AND superseded_by IS NULL`) with the greatest trade date; earlier published runs of the date are listed as `superseded_runs`. The ribbon (last 10 daily Supertrend directions as `U` and `D`) and bar overlays (Supertrend, SMAs, Ripster c2 and c3) are computed at read time from stored bars with the active config (`runs.overlays`); `expected_1d_move` is the snapshot's daily ATR. `picked` on rankings comes from the run's recommendations and the summary's also-qualified list. Unknown query parameters are rejected with 422. `POST /runs` only queues a run (ADR-020): 202 with `Location`, 409 `run-in-progress` with `active_run_id`, 409 `session-not-complete`, 422 `not-a-trading-date` or `date-in-future`, and 200 `{"run_id": null, "state": "market_closed"}` when no date is given on a non-session day. Every pick or score payload carries the disclaimer string from `runs.narrator`.
@@ -626,6 +640,13 @@ ADRs are numbered and never renumbered. A superseded ADR stays in the log with s
 - **Decision:** `docs/openapi.json` is the FastAPI OpenAPI 3.1 document rendered by `supertrends.api.openapi.render_openapi` (sorted keys, two-space indent, trailing newline) and written by `supertrends config export-openapi --output`. `make openapi` regenerates it and runs the UI client generator only when `ui/scripts/generate-api-client.sh` exists. A unit test and a CI step (`OpenAPI drift` in the lint job) fail when the committed file differs from the generated one.
 - **Alternatives rejected:** Generating it only in CI (no reviewable contract diff in a PR); a hand-written document (second source of truth).
 - **Consequences:** Any route or model change needs `make openapi` and a commit of `docs/openapi.json`. Field names in `api/schemas/read.py` are the public contract.
+- **Status:** Accepted pending owner confirmation.
+
+### ADR-074: Market closed is a non-error result of trade-date resolution (PRD A-42)
+- **Context:** The CronJob fires every weekday including holidays, and ADR-022 says the no-date command exits 0 with "market closed" and publishes nothing. The S3-T07 date resolver raised `not_a_trading_date` (exit 2) for that case, which would fail the Job on every holiday.
+- **Decision:** `resolve_trade_date(None)` on a non-session day raises `TradeDateError` with code `market_closed` and exit code 0. `supertrends run daily` catches it before opening the database, prints `market closed: <date> is not an XNYS session` (or `{"status": "market_closed", "trade_date", "run_id": null}` with `--json`), and returns 0. An explicit `--date` that is not a session keeps `not_a_trading_date`, exit 2. The clock is `runs.dates.utc_now`, replaced in tests. `make run-daily` runs `uv run supertrends run daily` when `SUPERTRENDS_DATABASE_URL` is set, else `docker compose run --rm app run daily` against the Compose Postgres, with an optional `DATE=`.
+- **Alternatives rejected:** Exit 0 for an explicit holiday date too (hides a typo in a manual or backfill call); a return value instead of an exception (every caller of the resolver would have to remember to check it).
+- **Consequences:** Holidays leave no `runs` row and no failed Job. The API trigger path (S3-T09) maps the same code to HTTP 200 `market_closed`.
 - **Status:** Accepted pending owner confirmation.
 
 ---

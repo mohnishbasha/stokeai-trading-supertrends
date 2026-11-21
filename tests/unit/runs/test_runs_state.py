@@ -11,6 +11,7 @@ import pytest
 
 from supertrends.runs.dates import (
     DATE_IN_FUTURE,
+    MARKET_CLOSED,
     NOT_A_TRADING_DATE,
     SESSION_NOT_COMPLETE,
     TradeDateError,
@@ -101,7 +102,7 @@ def test_unit_runs_trade_date_explicit_must_be_a_completed_session() -> None:
     assert before_close.value.code == DATE_IN_FUTURE
 
 
-def test_unit_runs_trade_date_default_on_weekend_is_not_a_trading_date() -> None:
+def test_unit_runs_trade_date_default_on_weekend_is_market_closed() -> None:
     with pytest.raises(TradeDateError) as err:
         resolve_trade_date(None, datetime(2026, 11, 14, 23, 0, tzinfo=UTC))
-    assert err.value.code == NOT_A_TRADING_DATE
+    assert err.value.code == MARKET_CLOSED

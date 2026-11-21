@@ -1453,7 +1453,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-CLI-006 | `unit_cli_analyze_ticker_date_json_validates` | `analyze` | FR-8xx | Deferred |
 | TS-CLI-007 | `unit_cli_rank_top_n_limits_rows` | `rank --top` | FR-8xx | Deferred |
 | TS-CLI-008 | `unit_cli_watchlist_list_add_remove_roundtrip` | Watchlist | FR-8xx | Deferred |
-| TS-CLI-009 | `unit_cli_run_daily_non_trading_day_exits_0_market_closed` | Calendar | FR-8xx, S3-T10 | Deferred |
+| TS-CLI-009 | `unit_cli_run_daily_non_trading_day_exits_0_market_closed` | Calendar | FR-8xx, S3-T10 | Automated |
 | TS-CLI-010 | `unit_cli_run_daily_date_flag_runs_that_date` | `--date` | FR-8xx | Deferred |
 | TS-CLI-011 | `unit_cli_ingest_fixture_provider_fills_database` | `ingest` | FR-8xx | Deferred |
 | TS-CLI-012 | `unit_cli_backtest_prints_hypothetical_label` | Label | FR-6xx, FR-8xx | Deferred |
@@ -1531,6 +1531,16 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-OPS-030 | `it_ops_structured_logs_include_request_id_run_id_and_no_secret_values` | Logging | A§11, NFR-009 | Deferred |
 | TS-OPS-101 | `it_runs_publish_stores_full_evidence_and_template_narrative` | Every stored evidence document validates against the committed schema; each pick has a `template` narrative naming its ticker | FR-901, ADR-069 | Automated |
 | TS-OPS-102 | `it_runs_narrator_failure_falls_back_to_minimal_and_run_publishes` | A narrator that raises does not fail the run; picks keep the minimal evidence and the summary counts errors | ADR-069, A-37 | Automated |
+| TS-OPS-131 | `unit_runs_trade_date_without_date_on_holiday_is_market_closed_exit_0` | No `--date` on a holiday is `market_closed` with exit code 0 (fake clock) | FR-905, ADR-022, A-42 | Automated |
+| TS-OPS-132 | `unit_runs_trade_date_without_date_on_weekend_is_market_closed_exit_0` | A weekend is also market closed | FR-905, ADR-022 | Automated |
+| TS-OPS-133 | `unit_runs_trade_date_clock_defaults_to_utc_now` | The default clock is `dates.utc_now`, which tests replace | S3-T10 | Automated |
+| TS-OPS-134 | `unit_runs_daily_market_closed_json_reports_no_run` | `--json` prints status `market_closed`, the date, and a null run id | FR-905, ADR-074 | Automated |
+| TS-OPS-135 | `unit_runs_daily_explicit_holiday_date_still_exits_2` | An explicit `--date` holiday stays `not_a_trading_date`, exit 2, nothing run | ADR-022, A-42 | Automated |
+| TS-OPS-136 | `unit_runs_daily_before_close_still_exits_3_not_market_closed` | A session day before close plus 30 minutes stays exit 3 | ADR-022 | Automated |
+| TS-OPS-137 | `it_runs_daily_on_a_holiday_exits_0_and_writes_no_run_row` | Real Postgres: holiday run exits 0, prints market closed, `runs` stays empty | FR-905, S3-T10 | Automated |
+| TS-OPS-138 | `chart_daily_run_cronjob_calls_the_no_date_command` | The CronJob runs `supertrends run daily` with no `--date` | FR-905, S3-T10 | Automated |
+| TS-OPS-139 | `unit_runs_make_run_daily_calls_the_cli_locally_or_in_compose` | `make run-daily` uses `uv run` with a database URL, else the Compose app | FR-905, S3-T10 | Automated |
+| TS-OPS-140 | `unit_runs_make_run_daily_passes_date` | `DATE=` becomes `--date` | FR-905, S3-T10 | Automated |
 
 ### 10.16 Deployment and packaging (TS-DEP)
 
@@ -1554,7 +1564,7 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-DEP-016 | `it_chart_security_context_probes_pdb_networkpolicy_hpa_present_in_render` | Template checks | A§9, S8-T01 | Deferred |
 | TS-DEP-017 | `it_chart_every_container_has_requests_and_limits` | Resources | A§9 | Deferred |
 | TS-DEP-018 | `it_chart_automount_service_account_token_false` | Least privilege | A§9 | Deferred |
-| TS-DEP-019 | `it_kind_install_helm_test_and_smoke_pass` | `make kind-up image kind-load helm-install helm-test smoke` | A§10, S3-T11 | Deferred |
+| TS-DEP-019 | `it_kind_install_helm_test_and_smoke_pass` | `make kind-up image kind-load helm-install helm-test smoke` (CI job `kind-e2e`; the run trigger lands after S3-T07/T09) | A§10, S3-T11 | Automated |
 | TS-DEP-020 | `it_kind_migration_job_runs_before_api_and_completes` | Migration hook | A§10 | Deferred |
 | TS-DEP-021 | `it_kind_upgrade_previous_chart_to_current_with_migration_then_rollback_smoke_green` | Upgrade and rollback | A§10, S8-T06 | Deferred |
 | TS-DEP-022 | `it_kind_air_gap_install_from_local_registry_with_global_image_registry` | Air gap | A§10, S8-T06 | Deferred |
@@ -1581,7 +1591,37 @@ Exit codes: 0 ok, 1 error, 2 usage, 3 not ready.
 | TS-DEP-043 | `it_ci_lint_error_in_pr_fails_lint_and_typecheck_job` | CI guard | S0-T05 | Automated |
 | TS-DEP-044 | `it_ci_workflows_use_pull_request_not_pull_request_target_and_pinned_actions` | Workflow lint | A§9 | Automated |
 | TS-DEP-045 | `it_ci_openapi_drift_fails_when_docs_openapi_json_stale` | Drift | S3-T09 | Deferred |
-| TS-DEP-046 | `it_ci_test_step_runs_with_outbound_network_blocked` | No network in tests | S1 checklist | Deferred |
+| TS-DEP-046 | `it_ci_test_step_runs_with_outbound_network_blocked` | No network in tests (network namespace, ADR-071) | S1 checklist, S3-T11 | Automated |
+| TS-DEP-101 | `unit_chart_version_equals_version_file` | Chart version and appVersion | S3-T11 | Automated |
+| TS-DEP-102 | `unit_chart_daily_run_cronjob_schedule_timezone_forbid` | `30 17 * * 1-5` America/New_York, Forbid, `supertrends run daily` | S3-T11 | Automated |
+| TS-DEP-103 | `unit_chart_daily_run_suspend_and_disable` | dailyRun.suspend and enabled | S3-T11 | Automated |
+| TS-DEP-104 | `unit_chart_every_workload_hardened` | uid 10001, read-only root, no caps, seccomp | S3-T11 | Automated |
+| TS-DEP-105 | `unit_chart_postgres_pod_hardened` | Bundled Postgres pod hardening | S3-T11 | Automated |
+| TS-DEP-106 | `unit_chart_api_probes_tmp_rolling_update` | Probes, /tmp emptyDir, rollout | S3-T11 | Automated |
+| TS-DEP-107 | `unit_chart_service_and_allowed_hosts` | Service 8080, allowed hosts | S3-T11 | Automated |
+| TS-DEP-108 | `unit_chart_migration_job_hook` | pre-install/pre-upgrade hook, waits for Postgres | S3-T11 | Automated |
+| TS-DEP-109 | `unit_chart_postgres_hooks_ordered_before_migration` | Hook weights | S3-T11 | Automated |
+| TS-DEP-110 | `unit_chart_bundled_postgres_only_in_kind` | Default values render no Postgres | S3-T11 | Automated |
+| TS-DEP-111 | `unit_chart_postgres_digest_matches_ci_and_compose` | One Postgres digest everywhere | S3-T11 | Automated |
+| TS-DEP-112 | `unit_chart_generated_secret_only_with_bundled_postgres` | Secret generation | S3-T11 | Automated |
+| TS-DEP-113 | `unit_chart_default_values_use_existing_secret` | No literal credentials by default | S3-T11 | Automated |
+| TS-DEP-114 | `unit_chart_values_hold_no_secret_data` | Values files are secret-free | S3-T11 | Automated |
+| TS-DEP-115 | `unit_chart_kind_profile_fixture_provider_local_image` | kind profile | S3-T11 | Automated |
+| TS-DEP-116 | `unit_chart_kind_nodeport_matches_cluster_config` | NodePort 30080 and extraPortMappings | S3-T11 | Automated |
+| TS-DEP-117 | `unit_chart_kind_node_image_pinned_by_digest` | Node image digest | S3-T11 | Automated |
+| TS-DEP-118 | `unit_chart_helm_test_pod_checks_readyz` | helm test Pod | S3-T11 | Automated |
+| TS-DEP-119 | `unit_chart_helm_lint_default_and_kind` | helm lint | S3-T11 | Automated |
+| TS-DEP-120 | `unit_chart_requests_no_gpu` | CPU only (kind and default profiles) | S3-T11 | Automated |
+| TS-DEP-121 | `unit_make_kind_up_config_and_host_port` | kind-up recipe | S3-T11 | Automated |
+| TS-DEP-122 | `unit_make_kind_load_install_test_down` | Recipes implemented | S3-T11 | Automated |
+| TS-DEP-123 | `unit_make_helm_install_profile` | PROFILE selects values file | S3-T11 | Automated |
+| TS-DEP-124 | `unit_make_smoke_base_url_from_host_port` | SUPERTRENDS_HOST_PORT | S3-T11 | Automated |
+| TS-DEP-125 | `unit_dockerfile_serve_uid_10001` | Dockerfile entrypoint and user | S3-T11 | Automated |
+| TS-DEP-126 | `unit_ci_kind_e2e_runs_whole_loop` | CI job `kind-e2e` | S3-T11 | Automated |
+| TS-DEP-127 | `unit_ci_kind_e2e_actions_pinned` | SHA-pinned actions, tool versions | S3-T11 | Automated |
+| TS-DEP-128 | `unit_ci_kind_e2e_diagnostics_on_failure` | Diagnostics step | S3-T11 | Automated |
+| TS-DEP-129 | `unit_ci_unit_tests_run_network_blocked` | Network namespace ordering and proof (see TS-DEP-046) | S3-T11 | Automated |
+| TS-DEP-130 | `smoke_latest_recommendations_bounded_with_evidence` | At most 3 buys and 2 sells with evidence; skips on 404 or no run until S3-T07/T09 | S3-T11 | Automated (skips until the API exists) |
 
 ### 10.17 Security (TS-SEC)
 

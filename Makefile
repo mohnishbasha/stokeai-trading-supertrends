@@ -13,9 +13,18 @@ IMAGE    ?= ghcr.io/$(GH_OWNER)/stokeai-supertrends
 CHART    := deploy/helm/stokeai-supertrends
 CHART_REPO ?= oci://ghcr.io/$(GH_OWNER)/charts
 KIND_CLUSTER ?= supertrends
+RELEASE  ?= supertrends
 NAMESPACE ?= supertrends
 PROFILE  ?= kind
-SMOKE_BASE_URL ?= http://localhost:8080
+# Host port that reaches the API: Compose publishes it, and kind maps NodePort 30080 to it
+# (deploy/kind/cluster.yaml). 8080 is the Compose default; the kind default is 18080.
+KIND_HOST_PORT := $(or $(SUPERTRENDS_HOST_PORT),18080)
+# Optional: override the pinned node image (for a local kind older than the pinned image needs).
+KIND_NODE_IMAGE ?=
+# helm and kubectl must never act on a cluster other than the one kind-up created.
+KUBE_CONTEXT ?= $(if $(filter kind,$(PROFILE)),kind-$(KIND_CLUSTER))
+HELM_CTX := $(if $(KUBE_CONTEXT),--kube-context $(KUBE_CONTEXT))
+SMOKE_BASE_URL ?= http://localhost:$(or $(SUPERTRENDS_HOST_PORT),8080)
 PLATFORMS ?= linux/amd64,linux/arm64
 BUILD_ARGS := --build-arg VERSION=$(VERSION) --build-arg COMMIT=$(COMMIT) --build-arg CREATED=$(CREATED)
 
@@ -79,8 +88,15 @@ demo-verify: ## Check every product function against the running demo, write dem
 demo-down: ## Stop the demo and remove its data
 	@echo "make demo-down: not available until Sprint 3"
 
-run-daily: ## Trigger the daily run locally
-	@echo "make run-daily: not available until Sprint 3"
+# Local daily run (FR-905). With SUPERTRENDS_DATABASE_URL set it runs in this environment
+# ("make dev"); otherwise in the Compose app image against the Compose Postgres ("make up").
+# DATE=YYYY-MM-DD picks the trade date; without it, a holiday prints "market closed" and exits 0.
+run-daily: ## Run the daily pipeline locally (DATE=YYYY-MM-DD optional)
+ifdef SUPERTRENDS_DATABASE_URL
+	uv run supertrends run daily $(if $(DATE),--date $(DATE))
+else
+	docker compose -f deploy/compose/docker-compose.local.yml run --rm app run daily $(if $(DATE),--date $(DATE))
+endif
 
 openapi: ## Regenerate docs/openapi.json and the UI client
 	uv run supertrends config export-openapi --output docs/openapi.json
@@ -105,8 +121,14 @@ image-scan: ## Vulnerability scan, fails on HIGH or CRITICAL
 image-verify: ## Verify the image signature
 	@echo "make image-verify: not available until Sprint 8"
 
-helm-lint: ## Lint and template every profile
-	@echo "make helm-lint: not available until Sprint 8"
+helm-lint: ## Lint and template every profile (values.yaml and each values-<profile>.yaml)
+	helm lint $(CHART)
+	helm template $(RELEASE) $(CHART) > /dev/null
+	@for f in $(CHART)/values-*.yaml; do \
+	  echo "== $$f"; \
+	  helm lint $(CHART) -f $$f || exit 1; \
+	  helm template $(RELEASE) $(CHART) -f $$f > /dev/null || exit 1; \
+	done
 
 helm-package: ## Package the chart at the current version
 	@echo "make helm-package: not available until Sprint 8"
@@ -114,20 +136,25 @@ helm-package: ## Package the chart at the current version
 helm-push: ## Push the chart to the OCI registry
 	@echo "make helm-push: not available until Sprint 8"
 
-kind-up: ## Create the local kind cluster
-	@echo "make kind-up: not available until Sprint 3"
+kind-up: ## Create the local kind cluster (host port from SUPERTRENDS_HOST_PORT, default 18080)
+	sed -e "s/hostPort: 18080/hostPort: $(KIND_HOST_PORT)/" \
+	  $(if $(KIND_NODE_IMAGE),-e "s#image: kindest/node:.*#image: $(KIND_NODE_IMAGE)#") deploy/kind/cluster.yaml \
+	  | kind create cluster --name $(KIND_CLUSTER) --config -
 
 kind-load: ## Load the local image into kind
-	@echo "make kind-load: not available until Sprint 3"
+	kind load docker-image $(IMAGE):$(VERSION) --name $(KIND_CLUSTER)
 
 helm-install: ## Install or upgrade the chart with PROFILE (default kind)
-	@echo "make helm-install: not available until Sprint 3"
+	helm upgrade --install $(RELEASE) $(CHART) -n $(NAMESPACE) --create-namespace $(HELM_CTX) \
+	  -f $(CHART)/values-$(PROFILE).yaml \
+	  --set image.repository=$(IMAGE) --set image.tag=$(VERSION) \
+	  --wait --timeout 5m
 
 helm-test: ## Run Helm tests
-	@echo "make helm-test: not available until Sprint 3"
+	helm test $(RELEASE) -n $(NAMESPACE) $(HELM_CTX) --logs
 
 helm-uninstall: ## Uninstall the release
 	@echo "make helm-uninstall: not available until Sprint 8"
 
 kind-down: ## Delete the kind cluster
-	@echo "make kind-down: not available until Sprint 3"
+	kind delete cluster --name $(KIND_CLUSTER)

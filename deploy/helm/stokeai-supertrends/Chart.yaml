@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright 2026 Serverless Ventures LLC
+apiVersion: v2
+name: stokeai-supertrends
+description: Super Trends Market Agent (API, daily run CronJob, migrations). General market analysis, not investment advice.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.29.0-0"
+home: https://github.com/mohnishbasha/stokeai-trading-supertrends
+sources:
+  - https://github.com/mohnishbasha/stokeai-trading-supertrends

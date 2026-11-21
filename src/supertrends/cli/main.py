@@ -27,6 +27,7 @@ from supertrends.version import LICENSE_NOTICE, get_commit, get_version, source_
 if TYPE_CHECKING:
     from datetime import date
 
+    from supertrends.runs.dates import TradeDateError
     from supertrends.runs.orchestrator import RunOutcome
 
 DEFAULT_HEALTHCHECK_TIMEOUT_SECONDS = 3.0
@@ -442,6 +443,26 @@ def _report_run(
     typer.echo(DISCLAIMER)
 
 
+def _report_trade_date_error(exc: "TradeDateError", *, as_json: bool) -> None:
+    """Report a trade-date error and exit with its code; market closed returns (ADR-022, ADR-074).
+
+    The CronJob fires on holidays, so a market-closed result is printed, publishes nothing, and
+    lets the command exit 0.
+    """
+    if exc.exit_code != 0:
+        typer.echo(f"{exc.code}: {exc}", err=True)
+        raise typer.Exit(exc.exit_code) from exc
+    if as_json:
+        closed = {
+            "status": exc.code,
+            "trade_date": None if exc.day is None else exc.day.isoformat(),
+            "run_id": None,
+        }
+        typer.echo(json.dumps(closed, sort_keys=True))
+    else:
+        typer.echo(f"market closed: {exc}")
+
+
 @run_app.command("daily")
 def run_daily(
     date_: Annotated[
@@ -452,9 +473,10 @@ def run_daily(
 ) -> None:
     """Run the daily pipeline inline and publish atomically (FR-901 to FR-906).
 
-    Prints one line per state transition, then the summary. Exit 0 published or already
-    running for the same date, 1 failed, 2 invalid date, 3 session not complete, another
-    date's run active, or the database unreachable.
+    Prints one line per state transition, then the summary. Exit 0 published, market closed
+    (no `--date` and today is not a session), or already running for the same date; 1 failed;
+    2 invalid date; 3 session not complete, another date's run active, or the database
+    unreachable.
     """
     import signal  # noqa: PLC0415
     from datetime import date  # noqa: PLC0415
@@ -479,8 +501,8 @@ def run_daily(
     try:
         trade_date = resolve_trade_date(requested)
     except TradeDateError as exc:
-        typer.echo(f"{exc.code}: {exc}", err=True)
-        raise typer.Exit(exc.exit_code) from exc
+        _report_trade_date_error(exc, as_json=as_json)
+        return
     settings = load_settings()
     try:
         cfg = load_scoring_config(Path(settings.scoring_config))
